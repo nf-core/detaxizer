@@ -4,5 +4,3 @@ test_minigut_forward_reverse_hg38host,https://github.com/nf-core/test-datasets/r
 test_minigut_forward_hg38host,https://github.com/nf-core/test-datasets/raw/mag/test_data/test_minigut_sample2_hg38host_R1.fastq.gz,,
 test_minigut_long_hg38host,,,https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/pacbio/fastq/test_hifi.fastq.gz
 test_minigut_forward_long_hg38host,https://github.com/nf-core/test-datasets/raw/mag/test_data/test_minigut_sample2_hg38host_R1.fastq.gz,,https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/pacbio/fastq/test_hifi.fastq.gz
-test_human_covid,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_test_1.fastq.gz,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_test_2.fastq.gz,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_long_read_pacbio_nanopore_mix.fastq.gz
-test_human_covid_long,,,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_long_read_pacbio_nanopore_mix.fastq.gz

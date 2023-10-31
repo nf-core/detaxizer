@@ -1,2 +1,4 @@
 sample,fastq_1,fastq_2,fastq_3
 test_simulated_data,https://zenodo.org/record/8339791/files/metagenome_R1.illumina.fq.gz,https://zenodo.org/record/8339791/files/metagenome_R2.illumina.fq.gz,https://zenodo.org/record/8339789/files/metagenome.ont.fq.gz
+test_human_covid,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_test_1.fastq.gz,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_test_2.fastq.gz,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_long_read_pacbio_nanopore_mix.fastq.gz
+test_human_covid_long,,,https://github.com/jannikseidelQBiC/detaxizer/raw/dev/testdata/human_covid_long_read_pacbio_nanopore_mix.fastq.gz
