@@ -175,14 +175,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -206,7 +204,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -221,7 +218,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -260,7 +256,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
@@ -268,7 +263,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
                 },
@@ -276,7 +270,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters in lenient more.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
@@ -299,5 +292,81 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "saveReference": {
+            "type": "boolean",
+            "default": true
+        },
+        "single_end": {
+            "type": "boolean"
+        },
+        "long_read": {
+            "type": "boolean"
+        },
+        "enable_filter": {
+            "type": "boolean"
+        },
+        "filter_trimmed": {
+            "type": "boolean"
+        },
+        "skip_blastn": {
+            "type": "boolean"
+        },
+        "filter_with_kraken2": {
+            "type": "boolean"
+        },
+        "reads_minlength": {
+            "type": "integer",
+            "default": 0
+        },
+        "fastp_save_trimmed_fail": {
+            "type": "boolean"
+        },
+        "fastp_qualified_quality": {
+            "type": "integer",
+            "default": 0
+        },
+        "fastp_cut_mean_quality": {
+            "type": "integer",
+            "default": 15
+        },
+        "save_clipped_reads": {
+            "type": "boolean"
+        },
+        "tax2filter": {
+            "type": "string",
+            "default": "Mammalia"
+        },
+        "kraken2db": {
+            "type": "string",
+            "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20230605.tar.gz"
+        },
+        "save_output_fastqs": {
+            "type": "boolean"
+        },
+        "save_reads_assignment": {
+            "type": "boolean",
+            "default": true
+        },
+        "kraken2confidence": {
+            "type": "number",
+            "default": 0.05
+        },
+        "blastn_db": {
+            "type": "string"
+        },
+        "blast_coverage": {
+            "type": "number",
+            "default": 90.0
+        },
+        "blast_similarity": {
+            "type": "number",
+            "default": 90.0
+        },
+        "blast_outformat": {
+            "type": "string",
+            "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp"
+        }
+    }
 }
