@@ -18,13 +18,17 @@
                     "type": "number",
                     "default": 90
                 },
-                "blast_similarity": {
-                    "type": "number",
-                    "default": 90
-                },
                 "blast_outformat": {
                     "type": "string",
                     "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp"
+                },
+                "blast_evalue": {
+                    "type": "number",
+                    "default": 0.1
+                },
+                "blast_identity": {
+                    "type": "number",
+                    "default": 90
                 }
             }
         },

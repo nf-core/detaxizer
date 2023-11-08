@@ -24,7 +24,7 @@ process FILTER_BLASTN_IDENTCOV {
             end = int(parts[7])
             coverage_per_subject = float(parts[12])
             coverage_per_hsp = float(parts[13])
-            if identity >= $params.blast_similarity and coverage_per_subject > $params.blast_coverage and coverage_per_hsp > $params.blast_coverage:
+            if identity >= $params.blast_identity and coverage_per_subject > $params.blast_coverage and coverage_per_hsp > $params.blast_coverage:
                 out.write(f"{query_id}\\t{identity:.2f}\\t{coverage_per_subject:.2f}\\t{coverage_per_hsp:.2f}\\n")
 
     import subprocess
