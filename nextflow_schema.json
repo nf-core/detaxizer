@@ -16,7 +16,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 90
+                    "default": 90.0
                 },
                 "blast_outformat": {
                     "type": "string",
@@ -28,11 +28,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 90
-                },
-                "blast_max_target_seqs": {
-                    "type": "integer",
-                    "default": 1
+                    "default": 90.0
                 },
                 "blast_max_hsps": {
                     "type": "integer",
