@@ -16,7 +16,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 90.0
+                    "default": 90
                 },
                 "blast_outformat": {
                     "type": "string",
@@ -28,7 +28,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 90.0
+                    "default": 90
                 },
                 "blast_max_hsps": {
                     "type": "integer",
@@ -183,7 +183,6 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to FASTA genome file.",
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"

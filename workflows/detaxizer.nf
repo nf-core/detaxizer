@@ -73,6 +73,18 @@ include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb'
 // Info required for completion email and summary
 def multiqc_report = []
 
+// speficy the fasta parameter if it is not provided via --fasta 
+def fasta = false
+
+if (!params.fasta) {
+    // If params.fasta is false and params.genome is present
+    if (params.genome) {
+        fasta = params.genomes[params.genome]?.fasta ?: false
+    }
+} else {
+    // If params.fasta is there, use it
+    fasta = params.fasta
+}
 
 
 
@@ -271,7 +283,7 @@ workflow DETAXIZER {
     ch_reference_fasta = Channel.empty()
     
     if (!params.skip_blastn) {  // If skip_blastn is false, then execute the process
-        ch_reference_fasta =  file( params.fasta )
+        ch_reference_fasta =  file( fasta )
     }
     
     BLAST_MAKEBLASTDB (
