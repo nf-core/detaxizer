@@ -33,6 +33,10 @@
                 "blast_max_hsps": {
                     "type": "integer",
                     "default": 1
+                },
+                "blast_max_target_seqs": {
+                    "type": "integer",
+                    "default": 1
                 }
             }
         },
