@@ -1,6 +1,8 @@
 process PREPARE_FASTA4BLASTN {
 
-    container = "https://depot.galaxyproject.org/singularity/seqtk%3A1.4--he4a0461_1"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/seqtk%3A1.4--he4a0461_1':
+        'biocontainers/seqtk:1.3--ha92aebf_0' }" 
 
     input:
         tuple val(meta), path(trimmedreads), path(kraken2results)
