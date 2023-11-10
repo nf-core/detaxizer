@@ -122,7 +122,12 @@ kraken_dict = kraken_taxonomy2hierarchy(kraken_list)
 list_kraken = get_all_keys(kraken_dict)
 result = remove_incomplete_taxa(list_kraken)
 result = generate_dict_for_lookup(result)
-result_to_filter = result["$params.tax2filter"] + ["$params.tax2filter"]
+try:
+    result_to_filter = result["$params.tax2filter"] + ["$params.tax2filter"]
+except KeyError:
+    # Handle the error or raise it again
+    raise KeyError("The taxaomic group/taxon you want to check for/filter out is not in the kraken database. Use a database that includes the taxonomic group or taxon or change the tax2filter parameter to something that is in the database.")
+
 result = get_keys_with_ids(kraken_dict)
 result_tax_name_id = []
 for entry in result_to_filter:
