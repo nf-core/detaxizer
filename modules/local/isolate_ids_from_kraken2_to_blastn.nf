@@ -1,12 +1,17 @@
 process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
 
+    conda "conda-forge::sed=4.7"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+        'nf-core/ubuntu:20.04' }"
+
     input:
-        tuple val(meta), path(kraken2results), path(tax2filter)
+    tuple val(meta), path(kraken2results), path(tax2filter)
 
 
     output:
-        tuple val(meta), path('*classified.txt'), emit: classified
-        path "versions.yml", emit: versions
+    tuple val(meta), path('*classified.txt'), emit: classified
+    path "versions.yml", emit: versions
 
     script:
     """
@@ -22,9 +27,8 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     fi
     done < $tax2filter
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        grep: \$(grep --version | grep -oP 'grep \\(GNU grep\\) \\K\\d+(\\.\\d+)*')
-    END_VERSIONS
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    grep: \$(grep --version  | sed -n 1p  | sed 's/grep (GNU grep) //')
     """
 }

@@ -5,12 +5,12 @@ process PREPARE_FASTA4BLASTN {
         'biocontainers/seqtk:1.3--ha92aebf_0' }"
 
     input:
-        tuple val(meta), path(trimmedreads), path(kraken2results)
+    tuple val(meta), path(trimmedreads), path(kraken2results)
 
     output:
-        tuple val(meta), path("*.fasta"), emit: fasta
-        tuple val(meta), path("ids*.txt"), emit: ids
-        path("versions.yml"), emit: versions
+    tuple val(meta), path("*.fasta"), emit: fasta
+    tuple val(meta), path("ids*.txt"), emit: ids
+    path("versions.yml"), emit: versions
 
     script:
     """

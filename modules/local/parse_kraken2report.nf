@@ -5,11 +5,11 @@ process PARSE_KRAKEN2REPORT {
         'biocontainers/python:3.10.4' }"
 
     input:
-        tuple val(meta), path(kraken2report)
+    tuple val(meta), path(kraken2report)
 
     output:
-        path "versions.yml", emit: versions
-        path "*.txt", emit: txt
+    path "versions.yml", emit: versions
+    path "*.txt", emit: txt
 
     script:
     """

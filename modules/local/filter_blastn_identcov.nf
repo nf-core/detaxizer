@@ -4,11 +4,11 @@ process FILTER_BLASTN_IDENTCOV {
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
         'biocontainers/python:3.10.4' }"
     input:
-        tuple val(meta), path(blast_output)
+    tuple val(meta), path(blast_output)
 
     output:
-        tuple val(meta), path('*identcov.txt'), emit: classified
-        path "versions.yml", emit: versions
+    tuple val(meta), path('*identcov.txt'), emit: classified
+    path "versions.yml", emit: versions
 
     script:
     """

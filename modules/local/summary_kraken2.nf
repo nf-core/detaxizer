@@ -4,17 +4,17 @@ process SUMMARY_KRAKEN2 {
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'biocontainers/pandas:1.5.2' }"
     input:
-        tuple val(meta),path(kraken2)
+    tuple val(meta),path(kraken2)
 
 
     output:
-        tuple val(meta), path("*.kraken2_summary.tsv"), emit: summary
-        //path("versions.yml"), emit: versions
+    tuple val(meta), path("*.kraken2_summary.tsv"), emit: summary
+    path("versions.yml"), emit: versions
 
     script:
     """
     #!/usr/bin/env python
-
+    import subprocess
     import pandas as pd
 
     def sort_list_of_files_by_pattern(kraken2_complete_list):
@@ -72,5 +72,14 @@ process SUMMARY_KRAKEN2 {
         df.index = ["${meta.id}"]
 
         df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
+
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        return version_output.split()[1]
+
+    # Generate the version.yaml for MultiQC
+    with open('versions.yml', 'w') as f:
+        f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
+        f.write(f'    python: {get_version()}\\n')
     """
 }

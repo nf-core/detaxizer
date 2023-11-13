@@ -4,17 +4,18 @@ process SUMMARY_BLASTN {
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'biocontainers/pandas:1.5.2' }"
     input:
-        tuple val(meta), path(blastn_1), path(blastn_2), path(blastn_3), path(filteredblastn_1), path(filteredblastn_2), path(filteredblastn_3)
+    tuple val(meta), path(blastn_1), path(blastn_2), path(blastn_3), path(filteredblastn_1), path(filteredblastn_2), path(filteredblastn_3)
 
 
     output:
-        tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
-        //path("versions.yml"), emit: versions
+    tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
+    path("versions.yml"), emit: versions
 
     script:
     """
     #!/usr/bin/env python
     import pandas as pd
+    import subprocess
 
     def get_lines_in_file(filename):
         line_counter = 0
@@ -123,5 +124,13 @@ process SUMMARY_BLASTN {
 
     df.to_csv("${meta.id}.blastn_summary.tsv", sep="\\t")
 
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        return version_output.split()[1]
+
+    # Generate the version.yaml for MultiQC
+    with open('versions.yml', 'w') as f:
+        f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
+        f.write(f'    python: {get_version()}\\n')
     """
 }
