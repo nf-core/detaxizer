@@ -1,14 +1,16 @@
 process PREPARE_FASTA4BLASTN {
 
-    container = "https://depot.galaxyproject.org/singularity/seqtk%3A1.4--he4a0461_1"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/seqtk%3A1.4--he4a0461_1':
+        'biocontainers/seqtk:1.3--ha92aebf_0' }"
 
     input:
-        tuple val(meta), path(trimmedreads), path(kraken2results)
+    tuple val(meta), path(trimmedreads), path(kraken2results)
 
     output:
-        tuple val(meta), path("*.fasta"), emit: fasta
-        tuple val(meta), path("ids*.txt"), emit: ids
-        path("versions.yml"), emit: versions
+    tuple val(meta), path("*.fasta"), emit: fasta
+    tuple val(meta), path("ids*.txt"), emit: ids
+    path("versions.yml"), emit: versions
 
     script:
     """
@@ -21,7 +23,7 @@ process PREPARE_FASTA4BLASTN {
     if [ "$meta.single_end" == "true" ]; then
 
         awk -F'\t' '{print \$2}' ${kraken2results} > ids.txt
-        seqtk subseq ${trimmedreads} ids.txt | seqtk seq -A - > ${meta.id}.fasta    
+        seqtk subseq ${trimmedreads} ids.txt | seqtk seq -A - > ${meta.id}.fasta
 
     else
         awk -F'\t' '{print \$2"/1"}' ${kraken2results} > ids_R1.txt

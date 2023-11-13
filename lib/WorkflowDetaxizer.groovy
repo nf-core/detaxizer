@@ -15,8 +15,8 @@ class WorkflowDetaxizer {
         genomeExistsError(params, log)
 
 
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.fasta && !params.genome) {
+            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file. If no fasta is specified a genome has to be specified, e.g. '--genome GRCh38' "
         }
     }
 

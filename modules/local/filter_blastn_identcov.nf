@@ -4,11 +4,11 @@ process FILTER_BLASTN_IDENTCOV {
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
         'biocontainers/python:3.10.4' }"
     input:
-        tuple val(meta), path(blast_output)
+    tuple val(meta), path(blast_output)
 
     output:
-        tuple val(meta), path('*identcov.txt'), emit: classified
-        path "versions.yml", emit: versions
+    tuple val(meta), path('*identcov.txt'), emit: classified
+    path "versions.yml", emit: versions
 
     script:
     """
@@ -24,7 +24,7 @@ process FILTER_BLASTN_IDENTCOV {
             end = int(parts[7])
             coverage_per_subject = float(parts[12])
             coverage_per_hsp = float(parts[13])
-            if identity >= $params.blast_similarity and coverage_per_subject > $params.blast_coverage and coverage_per_hsp > $params.blast_coverage:
+            if identity >= $params.blast_identity and coverage_per_subject > $params.blast_coverage and coverage_per_hsp > $params.blast_coverage:
                 out.write(f"{query_id}\\t{identity:.2f}\\t{coverage_per_subject:.2f}\\t{coverage_per_hsp:.2f}\\n")
 
     import subprocess
@@ -37,5 +37,4 @@ process FILTER_BLASTN_IDENTCOV {
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
     """
-
 }

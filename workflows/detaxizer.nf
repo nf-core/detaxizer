@@ -73,6 +73,18 @@ include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb'
 // Info required for completion email and summary
 def multiqc_report = []
 
+// speficy the fasta parameter if it is not provided via --fasta 
+def fasta = false
+
+if (!params.fasta) {
+    // If params.fasta is false and params.genome is present
+    if (params.genome) {
+        fasta = params.genomes[params.genome]?.fasta ?: false
+    }
+} else {
+    // If params.fasta is there, use it
+    fasta = params.fasta
+}
 
 
 
@@ -168,7 +180,7 @@ workflow DETAXIZER {
         params.fastp_save_trimmed_fail,
         []
     )
-    ch_versions = ch_versions.mix(FASTP.out.versions)
+    ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
     //
     // MODULE: Prepare Kraken2 Database
@@ -189,7 +201,7 @@ workflow DETAXIZER {
         params.save_output_fastqs,
         params.save_reads_assignment
     )
-    ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions)
+    ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
     //
     // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
@@ -210,7 +222,7 @@ workflow DETAXIZER {
         ch_combined
     )
 
-    ch_versions = ch_versions.mix(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.versions)
+    ch_versions = ch_versions.mix(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.versions.first())
 
     //
     // MODULE: Summarize the kraken2 results and the isolated kraken2 hits
@@ -247,7 +259,12 @@ workflow DETAXIZER {
     // run of the process
     ch_kraken2_summary = SUMMARY_KRAKEN2(
         ch_combined_kraken2
-        ).map {
+        )
+
+    // Get Software version and prepare it for multiqc
+    ch_versions = ch_versions.mix(ch_kraken2_summary.versions.first())
+
+    ch_kraken2_summary = ch_kraken2_summary.summary.map {
             meta, path -> [path]
         }
     //
@@ -262,7 +279,7 @@ workflow DETAXIZER {
     PREPARE_FASTA4BLASTN (
         ch_combined
     )
-    ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions)    
+    ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())    
 
     // 
     // MODULE: Run BLASTN if --skip_blastn = false
@@ -271,7 +288,7 @@ workflow DETAXIZER {
     ch_reference_fasta = Channel.empty()
     
     if (!params.skip_blastn) {  // If skip_blastn is false, then execute the process
-        ch_reference_fasta =  file( params.fasta )
+        ch_reference_fasta =  file( fasta )
     }
     
     BLAST_MAKEBLASTDB (
@@ -302,7 +319,7 @@ workflow DETAXIZER {
         BLAST_MAKEBLASTDB.out.db
     )
     
-    ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions)
+    ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
     
     ch_combined_blast = BLAST_BLASTN.out.txt
                                 .map { meta, path -> 
@@ -317,7 +334,7 @@ workflow DETAXIZER {
     FILTER_BLASTN_IDENTCOV (
         BLAST_BLASTN.out.txt
     )
-    ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions)
+    ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
     
     ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map { 
         meta, path -> 
@@ -356,23 +373,26 @@ workflow DETAXIZER {
             return [meta, blastn[0], blastn[1], blastn[2], filteredblastn[0], filteredblastn[1], filteredblastn[2]]
         }
 
-    // TODO: Get Software version and prepare it for multiqc
+    // Get Software version and prepare it for multiqc
     ch_blastn_summary = SUMMARY_BLASTN (
         ch_blastn_combined
     )
+    ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
 
+    ch_blastn_summary = ch_blastn_summary.summary.map {
+            meta, path -> [path]
+        }
     //
     // MODULE: Summarize the classification process
     //
 
     //ch_kraken2_summary = ch_kraken2_summary.map { meta, paths -> [paths] }
-    ch_blastn_summary = ch_blastn_summary.map { meta, paths -> [paths]}
-
     ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect()
 
-    SUMMARIZER (
+    ch_summary = SUMMARIZER (
         ch_summary
     )
+    ch_versions = ch_versions.mix(ch_summary.versions)
 
     
 
