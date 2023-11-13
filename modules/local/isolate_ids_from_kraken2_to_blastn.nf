@@ -22,9 +22,9 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     fi
     done < $tax2filter
 
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-    grep: \$(grep --version | grep -oP 'grep \\(GNU grep\\) \\K\\d+(\\.\\d+)*')
-END_VERSIONS
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        grep: \$(grep --version | grep -oP 'grep \\(GNU grep\\) \\K\\d+(\\.\\d+)*')
+    END_VERSIONS
     """
 }

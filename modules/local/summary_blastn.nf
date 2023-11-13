@@ -5,7 +5,7 @@ process SUMMARY_BLASTN {
         'biocontainers/pandas:1.5.2' }"
     input:
         tuple val(meta), path(blastn_1), path(blastn_2), path(blastn_3), path(filteredblastn_1), path(filteredblastn_2), path(filteredblastn_3)
-        
+
 
     output:
         tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
@@ -47,7 +47,7 @@ process SUMMARY_BLASTN {
                 blastn.sort()
                 filteredblastn.remove("NO")
                 filteredblastn.sort()
-            
+
             for entry in blastn:
                 if "_R1" in entry:
                     blastnsummary_dict["blastn_1"] = entry
@@ -55,7 +55,7 @@ process SUMMARY_BLASTN {
                     blastnsummary_dict["blastn_2"] = entry
                 elif "_R3" in entry:
                     blastnsummary_dict["blastn_3"] = entry
-            
+
             for entry in filteredblastn:
                 if "_R1" in entry:
                     blastnsummary_dict["filteredblastn_1"] = entry
@@ -63,7 +63,7 @@ process SUMMARY_BLASTN {
                     blastnsummary_dict["filteredblastn_2"] = entry
                 elif "_R3" in entry:
                     blastnsummary_dict["filteredblastn_3"] = entry
-            
+
             summary_keys = blastnsummary_dict.keys()
             if "blastn_1" not in summary_keys and "filteredblastn_1" not in summary_keys:
                 blastnsummary_dict["blastn_1"] = "NA"
@@ -106,7 +106,7 @@ process SUMMARY_BLASTN {
         else:
             lines_blastn += get_lines_in_file(blastnsummary_dict[key])
             unique_ids_blastn.update(get_unique_read_ids(blastnsummary_dict[key]))
-    
+
     final_summary_blastnfilteredblastn = {}
     if counter_NA == 6:
         final_summary_blastnfilteredblastn["blastn_unique_ids"] = pd.NA
@@ -124,6 +124,4 @@ process SUMMARY_BLASTN {
     df.to_csv("${meta.id}.blastn_summary.tsv", sep="\\t")
 
     """
-    
-    
 }

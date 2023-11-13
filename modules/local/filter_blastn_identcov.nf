@@ -37,5 +37,4 @@ process FILTER_BLASTN_IDENTCOV {
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
     """
-
 }

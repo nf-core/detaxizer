@@ -5,7 +5,7 @@ process SUMMARY_KRAKEN2 {
         'biocontainers/pandas:1.5.2' }"
     input:
         tuple val(meta),path(kraken2)
-        
+
 
     output:
         tuple val(meta), path("*.kraken2_summary.tsv"), emit: summary
@@ -27,7 +27,7 @@ process SUMMARY_KRAKEN2 {
                 kraken2_dict["kraken2"].append(entry)
             else:
                 kraken2_dict["isolatedkraken2"].append(entry)
-        
+
         return kraken2_dict
 
     def calculate_lines_of_file(path):
@@ -56,7 +56,6 @@ process SUMMARY_KRAKEN2 {
         df.index = ["${meta.id}"]
 
         df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
-  
     else:
         list_files = "${kraken2}".split(" ")
         kraken2_dict = sort_list_of_files_by_pattern(list_files)

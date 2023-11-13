@@ -1,7 +1,7 @@
 process KRAKEN2PREPARATION {
-    
+
     input:
-    path db 
+    path db
 
     output:
     path( "database/" ), emit: db
@@ -13,7 +13,7 @@ process KRAKEN2PREPARATION {
     tar -xf "${db}" -C db_tmp
     mkdir database
     mv `find db_tmp/ -name "*.k2d"` database/
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         tar: \$(tar --version | grep -oP 'tar \\(GNU tar\\) \\K\\d+(\\.\\d+)*')
