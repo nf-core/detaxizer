@@ -28,6 +28,6 @@ process SUMMARIZER {
         df_blastn = pd.concat([df_blastn,df_local])
 
     df = pd.concat([df_kraken2, df_blastn.reindex(df_kraken2.index)],axis=1)
-    df.to_csv("summary.tsv",sep="\\t")        
+    df.to_csv("summary.tsv",sep="\\t")
     """
 }
