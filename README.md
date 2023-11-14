@@ -13,7 +13,7 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that ...
+**nf-core/detaxizer** is a bioinformatics pipeline that initially checks for the presence of a specific taxon in fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing using fastp and quality assessment via FastQC, followed by taxon classification with kraken2, and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -26,7 +26,12 @@
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
+3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
+4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
+5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the processed reads)
+6. Summary of the processes
+7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
@@ -44,11 +49,11 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_1,fastq_2,fastq_3
+CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,AEG588A1_S1_L002_R3_001.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project.
 
 -->
 
@@ -83,6 +88,7 @@ nf-core/detaxizer was originally written by Jannik Seidel.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
+Daniel Straub
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## Contributions and Support
