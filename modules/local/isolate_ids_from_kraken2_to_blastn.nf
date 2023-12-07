@@ -11,6 +11,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
 
     output:
     tuple val(meta), path('*classified.txt'), emit: classified
+    tuple val(meta), path('*ids.txt'), emit: classified_ids
     path "versions.yml", emit: versions
 
     script:
@@ -20,6 +21,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     line=\$(echo -n "\$line" | tr -d '\n')
     if [ \$(grep -c "\$line" $kraken2results) -gt 0 ]; then
         grep "\$line" $kraken2results >> ${meta.id}.classified.txt
+        awk -F'\t' '{print \$2}' ${kraken2results} > ${meta.id}.ids.txt
     else
         if [ ! -f "${meta.id}.classified.txt" ]; then
             touch ${meta.id}.classified.txt

@@ -33,6 +33,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+include { RENAME_FASTQ_HEADERS } from '../modules/local/rename_fastq_headers'
 include { KRAKEN2PREPARATION } from '../modules/local/kraken2preparation'
 include { PARSE_KRAKEN2REPORT } from '../modules/local/parse_kraken2report'
 include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN } from '../modules/local/isolate_ids_from_kraken2_to_blastn'
@@ -73,7 +75,7 @@ include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb'
 // Info required for completion email and summary
 def multiqc_report = []
 
-// speficy the fasta parameter if it is not provided via --fasta 
+// speficy the fasta parameter if it is not provided via --fasta
 def fasta = false
 
 if (!params.fasta) {
@@ -101,11 +103,11 @@ workflow DETAXIZER {
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
-    // TODO: Make the map for single ended 
+    // TODO: Make the map for single ended
     ch_input = Channel.fromSamplesheet('input')
 
 
-    // check whether the sample sheet is correctly formated    
+    // check whether the sample sheet is correctly formated
     ch_input.map {
         meta, fastq_1, fastq_2, fastq_3 ->
         if (!fastq_1 && !fastq_3){
@@ -115,12 +117,12 @@ workflow DETAXIZER {
         }
     }
 
-  
 
-    ch_input.branch { 
+
+    ch_input.branch {
 	    shortReads: it[1]
-	    }.set { 
-            ch_short 
+	    }.set {
+            ch_short
         }
 
     ch_short.shortReads.map{
@@ -143,7 +145,7 @@ workflow DETAXIZER {
 
     ch_input.branch {
         longReads: it[3]
-    }.set { 
+    }.set {
         ch_long
     }
 
@@ -161,12 +163,17 @@ workflow DETAXIZER {
 
     ch_combined_short_long = ch_short.mix(ch_long)
 
+    //
+    // MODULE: Rename Fastq headers
+    //
+
+    RENAME_FASTQ_HEADERS(ch_combined_short_long)
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        ch_combined_short_long
+        RENAME_FASTQ_HEADERS.out.fastq
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
@@ -175,7 +182,7 @@ workflow DETAXIZER {
     //
 
     FASTP (
-        ch_combined_short_long,
+        RENAME_FASTQ_HEADERS.out.fastq,
         [],
         params.fastp_save_trimmed_fail,
         []
@@ -191,7 +198,7 @@ workflow DETAXIZER {
     )
     ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions)
 
-    // 
+    //
     // MODULE: Run Kraken2
     //
 
@@ -211,11 +218,11 @@ workflow DETAXIZER {
         KRAKEN2_KRAKEN2.out.report.take(1)
     )
     ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
-    
-    //    
-    // MODULE: Isolate the hits for a certain taxa and subclasses 
+
     //
-    
+    // MODULE: Isolate the hits for a certain taxa and subclasses
+    //
+
     KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(PARSE_KRAKEN2REPORT.out.txt).set{ ch_combined }
 
     ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN (
@@ -230,13 +237,13 @@ workflow DETAXIZER {
 
     // preparation of the channels
     ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified)
-    ch_prepare_summary_kraken2 = ch_prepare_summary_kraken2.map { 
-        meta, path1, path2 -> 
-        [ ['id': meta.id ], [ path1, path2 ] ] 
+    ch_prepare_summary_kraken2 = ch_prepare_summary_kraken2.map {
+        meta, path1, path2 ->
+        [ ['id': meta.id ], [ path1, path2 ] ]
     }
 
     ch_combined_kraken2 = ch_prepare_summary_kraken2
-        .map { meta, path -> 
+        .map { meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
         }
         .groupTuple(by: [0])
@@ -273,24 +280,24 @@ workflow DETAXIZER {
     // TODO: skip from here onward if isolate from kraken2 is empyty using .branch
     ch_combined = FASTP.out.reads
         .join(
-            ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified, by: [0]
-        ) 
+            ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
+        )
     // TODO: REPLACE awk AND seqtk WITH TOOLS THAT CAN DISPLAY THEIR VERSION NUMBER
     PREPARE_FASTA4BLASTN (
         ch_combined
     )
-    ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())    
+    ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
-    // 
+    //
     // MODULE: Run BLASTN if --skip_blastn = false
     //
-    
+
     ch_reference_fasta = Channel.empty()
-    
+
     if (!params.skip_blastn) {  // If skip_blastn is false, then execute the process
         ch_reference_fasta =  file( fasta )
     }
-    
+
     BLAST_MAKEBLASTDB (
             ch_reference_fasta
     )
@@ -309,20 +316,20 @@ workflow DETAXIZER {
         } else {
         // Handle single-end FASTA files
         return [ [ [ 'id': "${meta.id}", 'single_end': true], fastaList ] ]
-        } 
-      
+        }
+
         }
     //ch_fasta4blastn.dump(tag: "ch_fasta4blastn")
-    
+
     BLAST_BLASTN (
         ch_fasta4blastn,
         BLAST_MAKEBLASTDB.out.db
     )
-    
+
     ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
-    
+
     ch_combined_blast = BLAST_BLASTN.out.txt
-                                .map { meta, path -> 
+                                .map { meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
     }
 
@@ -335,23 +342,23 @@ workflow DETAXIZER {
         BLAST_BLASTN.out.txt
     )
     ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
-    
-    ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map { 
-        meta, path -> 
+
+    ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
+        meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
     }
     ch_filtered_combined = ch_filtered_combined
         .groupTuple ()
         .map {
-            meta, paths -> 
+            meta, paths ->
             paths = paths.flatten()
-            return [meta, paths] 
+            return [meta, paths]
         }
-    
+
     ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true)
     //ch_blastn_combined.dump()
-    ch_blastn_combined = ch_blastn_combined.map { 
-        meta, blastn, filteredblastn -> 
+    ch_blastn_combined = ch_blastn_combined.map {
+        meta, blastn, filteredblastn ->
             if (blastn[0] == null){
                 blastn[0] = "${projectDir}/assets/NO_FILE1"
             }
@@ -394,7 +401,7 @@ workflow DETAXIZER {
     )
     ch_versions = ch_versions.mix(ch_summary.versions)
 
-    
+
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
@@ -423,7 +430,7 @@ workflow DETAXIZER {
     )
     multiqc_report = MULTIQC.out.report.toList()
 
-    
+
 }
 
 /*
