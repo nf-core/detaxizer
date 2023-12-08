@@ -285,9 +285,11 @@ workflow DETAXIZER {
             ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
         )
     // TODO: REPLACE awk AND seqtk WITH TOOLS THAT CAN DISPLAY THEIR VERSION NUMBER
+    if (!params.skip_blastn) {
     PREPARE_FASTA4BLASTN (
         ch_combined
     )
+    
     ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
     //
@@ -296,9 +298,8 @@ workflow DETAXIZER {
 
     ch_reference_fasta = Channel.empty()
 
-    if (!params.skip_blastn) {  // If skip_blastn is false, then execute the process
-        ch_reference_fasta =  file( fasta )
-    }
+    ch_reference_fasta =  file( fasta )
+    
 
     BLAST_MAKEBLASTDB (
             ch_reference_fasta
@@ -391,7 +392,7 @@ workflow DETAXIZER {
     ch_blastn_summary = ch_blastn_summary.summary.map {
             meta, path -> [path]
         }
-
+    }
     //
     // MODULE: Filter out the classified or validated reads
     //
@@ -419,26 +420,37 @@ workflow DETAXIZER {
         ch_blastnfilter
     )
     }
-
+ 
+ 
     //
     // MODULE: Rename headers after filtering
     //
+    if ( params.enable_filter ) {
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
     }
-    ch_rename_filtered = FILTER.out.filtered.join(ch_headers, by:[0])
-
+    ch_headers.dump()
+    ch_filtered2rename = FILTER.out.filtered.map {
+        meta, path ->
+        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+    }
+    ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
+    ch_rename_filtered.dump()
     RENAME_FASTQ_HEADERS_AFTER(
         ch_rename_filtered
     )
-
+    }
     //
     // MODULE: Summarize the classification process
     //
 
     //ch_kraken2_summary = ch_kraken2_summary.map { meta, paths -> [paths] }
+    if (!params.skip_blastn){
     ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect()
+    } else {
+        ch_summary = ch_kraken2_summary
+    }
 
     ch_summary = SUMMARIZER (
         ch_summary
