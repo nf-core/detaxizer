@@ -276,123 +276,125 @@ workflow DETAXIZER {
     ch_kraken2_summary = ch_kraken2_summary.summary.map {
             meta, path -> [path]
         }
-    //
-    // MODULE: Extract the hits to fasta format
-    //
-    // TODO: skip from here onward if isolate from kraken2 is empyty using .branch
-    ch_combined = FASTP.out.reads
+
+    if (!params.skip_blastn) {
+        //
+        // MODULE: Extract the hits to fasta format
+        //
+
+        ch_combined = FASTP.out.reads
         .join(
             ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
         )
-    // TODO: REPLACE awk AND seqtk WITH TOOLS THAT CAN DISPLAY THEIR VERSION NUMBER
-    if (!params.skip_blastn) {
-    PREPARE_FASTA4BLASTN (
-        ch_combined
-    )
-    
-    ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
-    //
-    // MODULE: Run BLASTN if --skip_blastn = false
-    //
 
-    ch_reference_fasta = Channel.empty()
+        PREPARE_FASTA4BLASTN (
+            ch_combined
+        )
+        
+        ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
-    ch_reference_fasta =  file( fasta )
-    
+        //
+        // MODULE: Run BLASTN 
+        //
 
-    BLAST_MAKEBLASTDB (
-            ch_reference_fasta
-    )
-    ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+        ch_reference_fasta = Channel.empty()
 
-    //PREPARE_FASTA4BLASTN.out.fasta.dump(tag: "PREPARE_FASTA4BLASTN")
-    ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
-        .flatMap { meta, fastaList ->
-            if (fastaList.size() == 2) {
-        // Handle paired-end FASTA files
-            return [
-                [['id': "${meta.id}_R1", 'single_end': false], fastaList[0]],
-                [['id': "${meta.id}_R2", 'single_end': false], fastaList[1]]
-            ]
+        ch_reference_fasta =  file( fasta )
+        
 
-        } else {
-        // Handle single-end FASTA files
-        return [ [ [ 'id': "${meta.id}", 'single_end': true], fastaList ] ]
+        BLAST_MAKEBLASTDB (
+                ch_reference_fasta
+        )
+        ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
+
+        //PREPARE_FASTA4BLASTN.out.fasta.dump(tag: "PREPARE_FASTA4BLASTN")
+        ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
+            .flatMap { meta, fastaList ->
+                if (fastaList.size() == 2) {
+            // Handle paired-end FASTA files
+                return [
+                    [['id': "${meta.id}_R1", 'single_end': false], fastaList[0]],
+                    [['id': "${meta.id}_R2", 'single_end': false], fastaList[1]]
+                ]
+
+            } else {
+            // Handle single-end FASTA files
+            return [ [ [ 'id': "${meta.id}", 'single_end': true], fastaList ] ]
+            }
+
+            }
+        //ch_fasta4blastn.dump(tag: "ch_fasta4blastn")
+
+        BLAST_BLASTN (
+            ch_fasta4blastn,
+            BLAST_MAKEBLASTDB.out.db
+        )
+
+        ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
+
+        ch_combined_blast = BLAST_BLASTN.out.txt
+                                    .map { meta, path ->
+            [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
         }
 
+
+        ch_combined_blast = ch_combined_blast
+                                .groupTuple(by: [0])
+                                .map { meta, paths -> [ meta, paths.flatten() ] }
+
+        FILTER_BLASTN_IDENTCOV (
+            BLAST_BLASTN.out.txt
+        )
+        ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
+
+        ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
+            meta, path ->
+            [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
         }
-    //ch_fasta4blastn.dump(tag: "ch_fasta4blastn")
+        ch_filtered_combined = ch_filtered_combined
+            .groupTuple ()
+            .map {
+                meta, paths ->
+                paths = paths.flatten()
+                return [meta, paths]
+            }
 
-    BLAST_BLASTN (
-        ch_fasta4blastn,
-        BLAST_MAKEBLASTDB.out.db
-    )
+        ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true)
 
-    ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
+        ch_blastn_combined = ch_blastn_combined.map {
+            meta, blastn, filteredblastn ->
+                if (blastn[0] == null){
+                    blastn[0] = "${projectDir}/assets/NO_FILE1"
+                }
+                if (blastn[1] == null){
+                    blastn[1] = "${projectDir}/assets/NO_FILE2"
+                }
+                if (blastn[2] == null){
+                    blastn[2] = "${projectDir}/assets/NO_FILE3"
+                }
+                if (filteredblastn[0] == null){
+                    filteredblastn[0] = "${projectDir}/assets/NO_FILE4"
+                }
+                if (filteredblastn[1] == null){
+                    filteredblastn[1] = "${projectDir}/assets/NO_FILE5"
+                }
+                if (filteredblastn[2] == null){
+                    filteredblastn[2] = "${projectDir}/assets/NO_FILE6"
+                }
+                return [meta, blastn[0], blastn[1], blastn[2], filteredblastn[0], filteredblastn[1], filteredblastn[2]]
+            }
 
-    ch_combined_blast = BLAST_BLASTN.out.txt
-                                .map { meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
-    }
+        // Get Software version and prepare it for multiqc
+        ch_blastn_summary = SUMMARY_BLASTN (
+            ch_blastn_combined
+        )
+        ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
 
-
-    ch_combined_blast = ch_combined_blast
-                               .groupTuple(by: [0])
-                               .map { meta, paths -> [ meta, paths.flatten() ] }
-
-    FILTER_BLASTN_IDENTCOV (
-        BLAST_BLASTN.out.txt
-    )
-    ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
-
-    ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
-        meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
-    }
-    ch_filtered_combined = ch_filtered_combined
-        .groupTuple ()
-        .map {
-            meta, paths ->
-            paths = paths.flatten()
-            return [meta, paths]
+        ch_blastn_summary = ch_blastn_summary.summary.map {
+                meta, path -> [path]
+            }
         }
-
-    ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true)
-
-    ch_blastn_combined = ch_blastn_combined.map {
-        meta, blastn, filteredblastn ->
-            if (blastn[0] == null){
-                blastn[0] = "${projectDir}/assets/NO_FILE1"
-            }
-            if (blastn[1] == null){
-                blastn[1] = "${projectDir}/assets/NO_FILE2"
-            }
-            if (blastn[2] == null){
-                blastn[2] = "${projectDir}/assets/NO_FILE3"
-            }
-            if (filteredblastn[0] == null){
-                filteredblastn[0] = "${projectDir}/assets/NO_FILE4"
-            }
-            if (filteredblastn[1] == null){
-                filteredblastn[1] = "${projectDir}/assets/NO_FILE5"
-            }
-            if (filteredblastn[2] == null){
-                filteredblastn[2] = "${projectDir}/assets/NO_FILE6"
-            }
-            return [meta, blastn[0], blastn[1], blastn[2], filteredblastn[0], filteredblastn[1], filteredblastn[2]]
-        }
-
-    // Get Software version and prepare it for multiqc
-    ch_blastn_summary = SUMMARY_BLASTN (
-        ch_blastn_combined
-    )
-    ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
-
-    ch_blastn_summary = ch_blastn_summary.summary.map {
-            meta, path -> [path]
-        }
-    }
     //
     // MODULE: Filter out the classified or validated reads
     //
