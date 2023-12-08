@@ -1,4 +1,4 @@
-process RENAME_FASTQ_HEADERS {
+process RENAME_FASTQ_HEADERS_PRE {
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81' :
@@ -18,7 +18,8 @@ process RENAME_FASTQ_HEADERS {
     import gzip
     import sys
     import json
-    import re
+    import subprocess
+
 
     def renameReadsPaired(reads):
         read_fw = reads[0]
@@ -67,7 +68,6 @@ process RENAME_FASTQ_HEADERS {
             read_renamed = [read_fw_stripped]
         elif "/1" in read and " " in read:
             read_fw_stripped = read.strip("1").strip("/").split(" ")[0]
-            read_dict[read_fw_stripped] = [read, read_rv]
             read_dict[read_fw_stripped] = [read]
             read_fw_stripped = read_fw_stripped + " 1:N:10:"
             read_renamed = [read_fw_stripped]
@@ -83,55 +83,99 @@ process RENAME_FASTQ_HEADERS {
 
     fastq = "${inputfastq}".split(" ")
     if len(fastq) == 2:
-        with gzip.open(fastq[0], "rt") as handle:
-            reads_fw = list(SeqIO.parse(handle, "fastq"))
-        with gzip.open(fastq[1], "rt") as handle:
-            reads_rv = list(SeqIO.parse(handle, "fastq"))
-        reads = zip(reads_fw,reads_rv)
         renamed = {}
-        new_reads = []
-        for read_fw_rv in reads:
-            header_fw = read_fw_rv[0].description
-            header_rv = read_fw_rv[1].description
-            headers = (header_fw,header_rv)
-            headers = renameReadsPaired(headers)
-            renamed.update(headers[0])
-            read_fw_rv[0].description = headers[1][0]
-            read_fw_rv[0].id = headers[1][0].split(" ")[0]
-            read_fw_rv[1].description = headers[1][1]
-            read_fw_rv[1].id = headers[1][1].split(" ")[0]
-            new_reads.append(read_fw_rv)
-        del reads
+        with gzip.open(fastq[0], "rt") as handle1, gzip.open(fastq[1], "rt") as handle2:
+            with bgzf.BgzfWriter("${meta.id}_R1_renamed.fastq.gz", "wb") as outgz1, bgzf.BgzfWriter("${meta.id}_R2_renamed.fastq.gz", "wb") as outgz2:
+                for i,j in zip(SeqIO.parse(handle1, "fastq"),SeqIO.parse(handle2, "fastq")):
+                    header_fw = i.description
+                    header_rv = j.description
+                    headers = (header_fw,header_rv)
+                    headers = renameReadsPaired(headers)
+                    renamed.update(headers[0])
+                    i.description = headers[1][0]
+                    i.id = headers[1][0].split(" ")[0]
+                    j.description = headers[1][1]
+                    j.id = headers[1][1].split(" ")[0]
+                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
+                    SeqIO.write(sequences=j, handle=outgz2, format="fastq")
         with open("${meta.id}_headers.json", "w") as outfile:
             json.dump(renamed, outfile)
-        del renamed
-        reads_fw_renamed,reads_rv_renamed = zip(*new_reads)
-        with bgzf.BgzfWriter("${meta.id}_R1_renamed.fastq.gz", "wb") as outgz:
-            SeqIO.write(sequences=reads_fw_renamed, handle=outgz, format="fastq")
-        del reads_fw_renamed
-        with bgzf.BgzfWriter("${meta.id}_R2_renamed.fastq.gz", "wb") as outgz:
-            SeqIO.write(sequences=reads_rv_renamed, handle=outgz, format="fastq")
-        del reads_rv_renamed
     else:
-        with gzip.open(fastq[0], "rt") as handle:
-            reads_fw = list(SeqIO.parse(handle, "fastq"))
         renamed = {}
-        new_reads = []
-        for read_fw in reads_fw:
-            header_fw = read_fw.description
-            headers = renameReadSingle(header_fw)
-            renamed.update(headers[0])
-            read_fw.description = headers[1][0]
-            read_fw.id = headers[1][0].split(" ")[0]
-            new_reads.append(read_fw)
-        del reads_fw
+        with gzip.open(fastq[0], "rt") as handle1:
+            with bgzf.BgzfWriter("${meta.id}_renamed.fastq.gz", "wb") as outgz1:
+                for i in SeqIO.parse(handle1, "fastq"):
+                    header_fw = i.description
+                    headers = renameReadSingle(header_fw)
+                    renamed.update(headers[0])
+                    i.description = headers[1][0]
+                    i.id = headers[1][0].split(" ")[0]
+                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
         with open("${meta.id}_headers.json", "w") as outfile:
             json.dump(renamed, outfile)
-        del renamed
-        with bgzf.BgzfWriter("${meta.id}_renamed.fastq.gz", "wb") as outgz:
-            SeqIO.write(sequences=new_reads, handle=outgz, format="fastq")
-        del new_reads
+
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        version = version_output.split()[1]
+        return version
+
+    with open('versions.yml', 'w') as f:
+        f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
+        f.write(f'    python: {get_version()}\\n')
+    """
+}
+
+process RENAME_FASTQ_HEADERS_AFTER {
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/biopython:1.81' :
+        'biocontainers/biopython:1.81' }"
+    input:
+    tuple val(meta), path(fastqfiltered), path(dict)
+
+    output:
+    tuple val(meta), path('*.fastq.gz'), emit: fastq
+    path "versions.yml", emit: versions
+
+    script:
+    """
+    #!/usr/bin/env python
+    from Bio import SeqIO, bgzf
+    import gzip
+    import sys
+    import json
     import subprocess
+
+    with open("${dict}", 'r') as file:
+        headerDict = json.load(file)
+
+    fastq = "${fastqfiltered}".split(" ")
+    if len(fastq) == 2:
+        with gzip.open(fastq[0], "rt") as handle1, gzip.open(fastq[1], "rt") as handle2:
+            with bgzf.BgzfWriter("${meta.id}_R1_filtered.fastq.gz", "wb") as outgz1, bgzf.BgzfWriter("${meta.id}_R2_filtered.fastq.gz", "wb") as outgz2:
+                for i,j in zip(SeqIO.parse(handle1, "fastq"),SeqIO.parse(handle2, "fastq")):
+                    id_fw = i.id
+                    id_rv = j.id
+                    if id_fw != id_rv:
+                        sys.exit("The IDs did not match. The provided fastq files are either not sorted or a sequence is missing.")
+                    lookupHeaders = headerDict[id_fw]
+                    i.id = lookupHeaders[0]
+                    i.description = ""
+                    j.id = lookupHeaders[1]
+                    j.description = ""
+                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
+                    SeqIO.write(sequences=j, handle=outgz2, format="fastq")
+
+    else:
+        with gzip.open(fastq[0], "rt") as handle1:
+            with bgzf.BgzfWriter("${meta.id}_filtered.fastq.gz", "wb") as outgz1:
+                for i in SeqIO.parse(handle1, "fastq"):
+                    id_fw = i.id
+                    lookupHeaders = headerDict[id_fw]
+                    i.id = lookupHeaders[0]
+                    i.description = ""
+                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
+
     def get_version():
         version_output = subprocess.getoutput('python --version')
         version = version_output.split()[1]

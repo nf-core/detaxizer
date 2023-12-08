@@ -21,10 +21,10 @@ process FILTER {
         for element in "\${array[@]}"
         do
             COUNTER=\$((COUNTER+1))
-            seqkit grep -v -f \${array2[\$(COUNTER-1)]} \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_filtered.fastq.gz
+            seqkit grep -v -f \${array2[\$(COUNTER-1)]} \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_filtered_renamed.fastq.gz
         done
     else
-        seqkit grep -v -f ${ids_to_remove} ${fastq} -o ${meta.id}_filtered.fastq.gz
+        seqkit grep -v -f ${ids_to_remove} ${fastq} -o ${meta.id}_filtered_renamed.fastq.gz
     fi
 
     # TODO Replace version number by expression that changes if the container version changes

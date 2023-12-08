@@ -34,12 +34,14 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { RENAME_FASTQ_HEADERS } from '../modules/local/rename_fastq_headers'
+include { RENAME_FASTQ_HEADERS_PRE } from '../modules/local/rename_fastq_headers'
 include { KRAKEN2PREPARATION } from '../modules/local/kraken2preparation'
 include { PARSE_KRAKEN2REPORT } from '../modules/local/parse_kraken2report'
 include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN } from '../modules/local/isolate_ids_from_kraken2_to_blastn'
 include { PREPARE_FASTA4BLASTN } from '../modules/local/prepare_fasta4blastn'
 include { FILTER_BLASTN_IDENTCOV } from '../modules/local/filter_blastn_identcov'
+include { FILTER } from '../modules/local/filter'
+include { RENAME_FASTQ_HEADERS_AFTER } from '../modules/local/rename_fastq_headers'
 include { SUMMARY_KRAKEN2 } from '../modules/local/summary_kraken2'
 include { SUMMARY_BLASTN } from '../modules/local/summary_blastn'
 include { SUMMARIZER } from '../modules/local/summarizer'
@@ -167,13 +169,13 @@ workflow DETAXIZER {
     // MODULE: Rename Fastq headers
     //
 
-    RENAME_FASTQ_HEADERS(ch_combined_short_long)
+    RENAME_FASTQ_HEADERS_PRE(ch_combined_short_long)
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        RENAME_FASTQ_HEADERS.out.fastq
+        RENAME_FASTQ_HEADERS_PRE.out.fastq
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
@@ -182,7 +184,7 @@ workflow DETAXIZER {
     //
 
     FASTP (
-        RENAME_FASTQ_HEADERS.out.fastq,
+        RENAME_FASTQ_HEADERS_PRE.out.fastq,
         [],
         params.fastp_save_trimmed_fail,
         []
@@ -356,7 +358,7 @@ workflow DETAXIZER {
         }
 
     ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true)
-    //ch_blastn_combined.dump()
+
     ch_blastn_combined = ch_blastn_combined.map {
         meta, blastn, filteredblastn ->
             if (blastn[0] == null){
@@ -389,6 +391,48 @@ workflow DETAXIZER {
     ch_blastn_summary = ch_blastn_summary.summary.map {
             meta, path -> [path]
         }
+
+    //
+    // MODULE: Filter out the classified or validated reads
+    //
+    
+    if ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2) {
+    ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
+        .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+    FILTER(
+        ch_kraken2filter
+    )
+    } else if ( params.enable_filter ) {
+    ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
+    meta, path ->
+        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+    }
+    .groupTuple(by:[0])
+    ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
+        meta, path ->
+        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+    }
+    ch_blastnfilter = ch_combined_short_long_id.join(
+        ch_blastn2filter, by:[0]
+    )
+    FILTER(
+        ch_blastnfilter
+    )
+    }
+
+    //
+    // MODULE: Rename headers after filtering
+    //
+    ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
+        meta, path ->
+        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+    }
+    ch_rename_filtered = FILTER.out.filtered.join(ch_headers, by:[0])
+
+    RENAME_FASTQ_HEADERS_AFTER(
+        ch_rename_filtered
+    )
+
     //
     // MODULE: Summarize the classification process
     //
