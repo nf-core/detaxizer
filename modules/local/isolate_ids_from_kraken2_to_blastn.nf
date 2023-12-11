@@ -29,7 +29,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
             for line in file:
                 line = line.split("\\t")
                 for entry in tax2filter:
-                    if entry in line[2] or entry in line[3]:
+                    if entry in line[4]:
                         filterList.append(line[1])
                         outfile.write("\\t".join(line))
 
