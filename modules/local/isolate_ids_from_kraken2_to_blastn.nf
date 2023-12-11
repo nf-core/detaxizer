@@ -16,6 +16,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     """
     #!/usr/bin/env python
     import subprocess
+    import re
     tax2filter = []
     with open('${tax2filter}','r') as file:
         for line in file:
@@ -29,7 +30,8 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
             for line in file:
                 line = line.split("\\t")
                 for entry in tax2filter:
-                    if entry in line[4]:
+                    entry = "(^" + entry + ":|" + " " + entry + ":)"
+                    if re.search(entry,line[4]) != None:
                         filterList.append(line[1])
                         outfile.write("\\t".join(line))
 
