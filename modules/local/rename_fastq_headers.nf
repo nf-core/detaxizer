@@ -71,7 +71,7 @@ process RENAME_FASTQ_HEADERS_PRE {
             read_dict[read_fw_stripped] = [read]
             read_fw_stripped = read_fw_stripped + " 1:N:10:"
             read_renamed = [read_fw_stripped]
-        elif " 1:" in read_fw and " 2:" in read_rv:
+        elif " 1:" in read:
             read_fw_stripped = read.split(" ")[0]
             read_dict[read_fw_stripped] = [read]
             read_fw_stripped = read_fw_stripped + " 1:N:10:"
