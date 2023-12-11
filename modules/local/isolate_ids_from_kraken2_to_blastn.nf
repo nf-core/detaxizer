@@ -1,10 +1,8 @@
 process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
 
-    conda "conda-forge::sed=4.7"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-        'nf-core/ubuntu:20.04' }"
-
+        container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/python:3.10.4' :
+        'biocontainers/python:3.10.4' }"
     input:
     tuple val(meta), path(kraken2results), path(tax2filter)
 
@@ -16,21 +14,36 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
 
     script:
     """
-    while IFS= read -r line
-    do
-    line=\$(echo -n "\$line" | tr -d '\n')
-    if [ \$(grep -c "\$line" $kraken2results) -gt 0 ]; then
-        grep "\$line" $kraken2results >> ${meta.id}.classified.txt
-        awk -F'\t' '{print \$2}' ${kraken2results} > ${meta.id}.ids.txt
-    else
-        if [ ! -f "${meta.id}.classified.txt" ]; then
-            touch ${meta.id}.classified.txt
-        fi
-    fi
-    done < $tax2filter
+    #!/usr/bin/env python
+    import subprocess
+    tax2filter = []
+    with open('${tax2filter}','r') as file:
+        for line in file:
+            line = line.strip('\\n')
+            print(line)
+            tax2filter.append(line)
 
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-    grep: \$(grep --version  | sed -n 1p  | sed 's/grep (GNU grep) //')
+    filterList = []
+    with open('${kraken2results}', 'r') as file:
+        with open('${meta.id}.classified.txt', 'w') as outfile:
+            for line in file:
+                line = line.split("\\t")
+                for entry in tax2filter:
+                    if entry in line[2] or entry in line[3]:
+                        filterList.append(line[1])
+                        outfile.write("\\t".join(line))
+
+    with open('${meta.id}.ids.txt', 'w') as outfile:
+        for entry in filterList:
+            outfile.write(entry+"\\n")
+
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        version = version_output.split()[1]
+        return version
+
+    with open('versions.yml', 'w') as f:
+        f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
+        f.write(f'    python: {get_version()}\\n')
     """
 }
