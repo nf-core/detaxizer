@@ -76,6 +76,11 @@ process RENAME_FASTQ_HEADERS_PRE {
             read_dict[read_fw_stripped] = [read]
             read_fw_stripped = read_fw_stripped + " 1:N:10:"
             read_renamed = [read_fw_stripped]
+        elif " " in read:
+            read_fw_stripped = read.split(" ")[0]
+            read_dict[read_fw_stripped] = [read]
+            read_fw_stripped = read_fw_stripped + " 1:N:10:"
+            read_renamed = [read_fw_stripped]
         else:
             sys.exit("The headers were not matching the patterns!")
         return (read_dict,read_renamed)
