@@ -72,6 +72,14 @@
             "description": "",
             "default": "",
             "properties": {
+                "cutoff_tax2filter": {
+                    "type": "integer",
+                    "default": 2
+                },
+                "cutoff_unclassified": {
+                    "type": "number",
+                    "default": 0
+                },
                 "tax2filter": {
                     "type": "string",
                     "default": "Mammalia"

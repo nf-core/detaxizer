@@ -4,7 +4,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
         'biocontainers/python:3.10.4' }"
     input:
-    tuple val(meta), path(kraken2results), path(tax2filter)
+    tuple val(meta), path(kraken2results), path(tax2filter), path(tax2keep)
 
 
     output:
@@ -17,23 +17,44 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     #!/usr/bin/env python
     import subprocess
     import re
+    from collections import defaultdict
+
+    # taken from compagnon of cogdat https://github.com/ckaipf/compagnon/blob/main/compagnon/service_layer/executions/cogdat/contamination.py
+    def parse_kraken_lca_mapping(string: str) -> defaultdict[int, int]:
+        d: defaultdict[int, int] = defaultdict(int)
+        for kmer in string.strip().split(" "):
+            splitted = kmer.strip().split(":")
+            if all(x not in ["A", "|"] for x in splitted):
+                ncbi_id, kmer_count = (int(x) for x in splitted)
+                d[ncbi_id] += kmer_count
+        return d
+
+    tax2keep = []
+    with open('${tax2keep}','r') as file:
+        for line in file:
+            line = int(line.strip('\\n'))
+            tax2keep.append(line)
+
     tax2filter = []
     with open('${tax2filter}','r') as file:
         for line in file:
-            line = line.strip('\\n')
-            print(line)
+            line = int(line.strip('\\n'))
             tax2filter.append(line)
+
+
 
     filterList = []
     with open('${kraken2results}', 'r') as file:
         with open('${meta.id}.classified.txt', 'w') as outfile:
             for line in file:
                 line = line.split("\\t")
-                for entry in tax2filter:
-                    entry = "(^" + entry + ":|" + " " + entry + ":)"
-                    if re.search(entry,line[4]) != None:
-                        filterList.append(line[1])
-                        outfile.write("\\t".join(line))
+                lca_mapping = parse_kraken_lca_mapping(line[4])
+                sum_to_keep = sum([lca_mapping[id_] for id_ in tax2keep])
+                sum_to_filter = sum([lca_mapping[id_] for id_ in tax2filter])
+                unclassified = lca_mapping[0]
+                if sum_to_filter > sum_to_keep and sum_to_filter > $params.cutoff_tax2filter and sum_to_filter/unclassified > $params.cutoff_unclassified:
+                    filterList.append(line[1])
+                    outfile.write("\\t".join(line))
 
     with open('${meta.id}.ids.txt', 'w') as outfile:
         for entry in filterList:

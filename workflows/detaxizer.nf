@@ -225,7 +225,7 @@ workflow DETAXIZER {
     // MODULE: Isolate the hits for a certain taxa and subclasses
     //
 
-    KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(PARSE_KRAKEN2REPORT.out.txt).set{ ch_combined }
+    KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(PARSE_KRAKEN2REPORT.out.to_filter).combine(PARSE_KRAKEN2REPORT.out.to_keep).set{ ch_combined }
 
     ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN (
         ch_combined
@@ -291,17 +291,17 @@ workflow DETAXIZER {
         PREPARE_FASTA4BLASTN (
             ch_combined
         )
-        
+
         ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
         //
-        // MODULE: Run BLASTN 
+        // MODULE: Run BLASTN
         //
 
         ch_reference_fasta = Channel.empty()
 
         ch_reference_fasta =  file( fasta )
-        
+
 
         BLAST_MAKEBLASTDB (
                 ch_reference_fasta
@@ -398,7 +398,7 @@ workflow DETAXIZER {
     //
     // MODULE: Filter out the classified or validated reads
     //
-    
+
     if ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2) {
     ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
         .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
@@ -422,8 +422,8 @@ workflow DETAXIZER {
         ch_blastnfilter
     )
     }
- 
- 
+
+
     //
     // MODULE: Rename headers after filtering
     //
