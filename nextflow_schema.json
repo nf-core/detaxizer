@@ -72,6 +72,10 @@
             "description": "",
             "default": "",
             "properties": {
+                "threshold_filter_to_keep": {
+                    "type": "number",
+                    "default": 1
+                },
                 "cutoff_tax2filter": {
                     "type": "integer",
                     "default": 2
@@ -82,7 +86,7 @@
                 },
                 "tax2filter": {
                     "type": "string",
-                    "default": "Mammalia"
+                    "default": "Homo"
                 }
             }
         },

@@ -52,9 +52,17 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 sum_to_keep = sum([lca_mapping[id_] for id_ in tax2keep])
                 sum_to_filter = sum([lca_mapping[id_] for id_ in tax2filter])
                 unclassified = lca_mapping[0]
-                if sum_to_filter > sum_to_keep and sum_to_filter > $params.cutoff_tax2filter and sum_to_filter/unclassified > $params.cutoff_unclassified:
+                if sum_to_keep != 0 and sum_to_filter/sum_to_keep > $params.threshold_filter_to_keep and sum_to_filter > $params.cutoff_tax2filter and unclassified != 0 and sum_to_filter/unclassified > $params.cutoff_unclassified:
                     filterList.append(line[1])
                     outfile.write("\\t".join(line))
+                elif sum_to_keep == 0 and sum_to_filter > $params.cutoff_tax2filter and unclassified != 0 and sum_to_filter/unclassified > $params.cutoff_unclassified:
+                    filterList.append(line[1])
+                    outfile.write("\\t".join(line))
+                elif sum_to_filter > $params.cutoff_tax2filter and unclassified == 0:
+                    filterList.append(line[1])
+                    outfile.write("\\t".join(line))
+                else:
+                    continue
 
     with open('${meta.id}.ids.txt', 'w') as outfile:
         for entry in filterList:
