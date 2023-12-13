@@ -29,12 +29,6 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 d[ncbi_id] += kmer_count
         return d
 
-    tax2keep = []
-    with open('${tax2keep}','r') as file:
-        for line in file:
-            line = int(line.strip('\\n'))
-            tax2keep.append(line)
-
     tax2filter = []
     with open('${tax2filter}','r') as file:
         for line in file:
@@ -49,7 +43,11 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
             for line in file:
                 line = line.split("\\t")
                 lca_mapping = parse_kraken_lca_mapping(line[4])
-                sum_to_keep = sum([lca_mapping[id_] for id_ in tax2keep])
+                tax2keep_in_this_line = []
+                for key in lca_mapping.keys():
+                    if key not in tax2filter:
+                        tax2keep_in_this_line.append(key)
+                sum_to_keep = sum([lca_mapping[id_] for id_ in tax2keep_in_this_line])
                 sum_to_filter = sum([lca_mapping[id_] for id_ in tax2filter])
                 unclassified = lca_mapping[0]
                 if sum_to_keep != 0 and sum_to_filter/sum_to_keep > $params.threshold_filter_to_keep and sum_to_filter > $params.cutoff_tax2filter and unclassified != 0 and sum_to_filter/unclassified > $params.cutoff_unclassified:
