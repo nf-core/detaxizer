@@ -45,7 +45,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 lca_mapping = parse_kraken_lca_mapping(line[4])
                 tax2keep_in_this_line = []
                 for key in lca_mapping.keys():
-                    if key not in tax2filter:
+                    if key not in tax2filter and key != 0:
                         tax2keep_in_this_line.append(key)
                 sum_to_keep = sum([lca_mapping[id_] for id_ in tax2keep_in_this_line])
                 sum_to_filter = sum([lca_mapping[id_] for id_ in tax2filter])
