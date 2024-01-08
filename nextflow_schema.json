@@ -5,6 +5,133 @@
     "description": "A pipline to idenitfy (and remove) certain sequences from metagenomes using kraken2 and blast. Default organism to identify (and remove) is human. Removal is optional (and will be implemented in the future).",
     "type": "object",
     "definitions": {
+        "blastn": {
+            "title": "blastn",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "blastn_db": {
+                    "type": "string"
+                },
+                "blast_coverage": {
+                    "type": "number",
+                    "default": 90
+                },
+                "blast_outformat": {
+                    "type": "string",
+                    "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp"
+                },
+                "blast_evalue": {
+                    "type": "number",
+                    "default": 0.1
+                },
+                "blast_identity": {
+                    "type": "number",
+                    "default": 90
+                },
+                "blast_max_hsps": {
+                    "type": "integer",
+                    "default": 1
+                },
+                "blast_max_target_seqs": {
+                    "type": "integer",
+                    "default": 1
+                }
+            }
+        },
+        "workflow_parameters": {
+            "title": "Workflow parameters",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "single_end": {
+                    "type": "boolean"
+                },
+                "long_read": {
+                    "type": "boolean"
+                },
+                "enable_filter": {
+                    "type": "boolean"
+                },
+                "filter_trimmed": {
+                    "type": "boolean"
+                },
+                "skip_blastn": {
+                    "type": "boolean"
+                },
+                "filter_with_kraken2": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "kraken2taxa": {
+            "title": "kraken2taxa",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "tax2filter": {
+                    "type": "string",
+                    "default": "Mammalia"
+                }
+            }
+        },
+        "kraken2": {
+            "title": "kraken2",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "kraken2db": {
+                    "type": "string",
+                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20230605.tar.gz"
+                },
+                "save_output_fastqs": {
+                    "type": "boolean"
+                },
+                "save_reads_assignment": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "kraken2confidence": {
+                    "type": "number",
+                    "default": 0.05
+                }
+            }
+        },
+        "fastp_options": {
+            "title": "fastp options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "reads_minlength": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "fastp option defining the minimum readlength of a read"
+                },
+                "fastp_save_trimmed_fail": {
+                    "type": "boolean",
+                    "description": "fastp option defining if the reads which failed to be trimmed should be saved"
+                },
+                "fastp_qualified_quality": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "fastp option to define the threshold of quality of an individual base"
+                },
+                "fastp_cut_mean_quality": {
+                    "type": "integer",
+                    "default": 15,
+                    "description": "fastp option to define the mean quality for trimming"
+                },
+                "save_clipped_reads": {
+                    "type": "boolean",
+                    "description": "fastp option to define if the clipped reads should be saved"
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -20,7 +147,8 @@
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/detaxizer/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-file-csv",
+                    "schema": "assets/schema_input.json"
                 },
                 "outdir": {
                     "type": "string",
@@ -59,7 +187,6 @@
                     "format": "file-path",
                     "exists": true,
                     "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to FASTA genome file.",
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
@@ -70,6 +197,17 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "saveReference": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "description": "Directory / URL base for iGenomes references.",
+                    "default": "s3://ngi-igenomes/igenomes",
+                    "format": "directory-path",
+                    "fa_icon": "fas fa-cloud-download-alt"
                 }
             }
         },
@@ -269,6 +407,21 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/blastn"
+        },
+        {
+            "$ref": "#/definitions/workflow_parameters"
+        },
+        {
+            "$ref": "#/definitions/kraken2taxa"
+        },
+        {
+            "$ref": "#/definitions/kraken2"
+        },
+        {
+            "$ref": "#/definitions/fastp_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },

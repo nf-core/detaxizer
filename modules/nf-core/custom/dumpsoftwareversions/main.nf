@@ -7,6 +7,7 @@ process CUSTOM_DUMPSOFTWAREVERSIONS {
         'https://depot.galaxyproject.org/singularity/multiqc:1.17--pyhdfd78af_0' :
         'biocontainers/multiqc:1.17--pyhdfd78af_0' }"
 
+
     input:
     path versions
 
