@@ -16,7 +16,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 90
+                    "default": 90.0
                 },
                 "blast_outformat": {
                     "type": "string",
@@ -28,7 +28,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 90
+                    "default": 90.0
                 },
                 "blast_max_hsps": {
                     "type": "integer",
@@ -72,17 +72,13 @@
             "description": "",
             "default": "",
             "properties": {
-                "threshold_filter_to_keep": {
-                    "type": "number",
-                    "default": 1
-                },
                 "cutoff_tax2filter": {
                     "type": "integer",
                     "default": 2
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0
+                    "default": 0.0
                 },
                 "tax2filter": {
                     "type": "string",
