@@ -84,6 +84,7 @@ nf-core/detaxizer was originally written by Jannik Seidel.
 We thank the following people for their extensive assistance in the development of this pipeline:
 
 Daniel Straub
+
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## Contributions and Support
