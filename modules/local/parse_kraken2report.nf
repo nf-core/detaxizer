@@ -10,7 +10,6 @@ process PARSE_KRAKEN2REPORT {
     output:
     path "versions.yml", emit: versions
     path "taxa_to_filter.txt", emit: to_filter
-    path "taxa_to_keep.txt", emit: to_keep
 
 
     script:
@@ -126,10 +125,6 @@ process PARSE_KRAKEN2REPORT {
     result = generate_dict_for_lookup(result)
     try:
         result_to_filter = result["$params.tax2filter"] + ["$params.tax2filter"]
-        result_to_keep = result["root"] + ["root"]
-        for entry in result_to_filter:
-            if entry in result_to_keep:
-                result_to_keep.remove(entry)
     except KeyError:
         # Handle the error or raise it again
         raise KeyError("The taxaomic group/taxon you want to check for/filter out is not in the kraken database. Use a database that includes the taxonomic group or taxon or change the tax2filter parameter to something that is in the database.")
@@ -142,16 +137,6 @@ process PARSE_KRAKEN2REPORT {
         result_tax_name_id.append(tax_id)
 
     with open('taxa_to_filter.txt', "w") as f:
-        for entry in result_tax_name_id:
-            f.write(entry+'\\n')
-
-    result_tax_name_id = []
-    for entry in result_to_keep:
-        tax_name = entry
-        tax_id = str(result[tax_name])
-        result_tax_name_id.append(tax_id)
-
-    with open('taxa_to_keep.txt', "w") as f:
         for entry in result_tax_name_id:
             f.write(entry+'\\n')
 

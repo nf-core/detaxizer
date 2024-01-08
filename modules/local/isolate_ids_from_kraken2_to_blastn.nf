@@ -4,7 +4,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
         'biocontainers/python:3.10.4' }"
     input:
-    tuple val(meta), path(kraken2results), path(tax2filter), path(tax2keep)
+    tuple val(meta), path(kraken2results), path(tax2filter)
 
 
     output:
