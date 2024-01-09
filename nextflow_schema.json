@@ -16,7 +16,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 90.0
+                    "default": 40
                 },
                 "blast_outformat": {
                     "type": "string",
@@ -24,11 +24,11 @@
                 },
                 "blast_evalue": {
                     "type": "number",
-                    "default": 0.1
+                    "default": 0.01
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 90.0
+                    "default": 40
                 },
                 "blast_max_hsps": {
                     "type": "integer",
@@ -46,12 +46,6 @@
             "description": "",
             "default": "",
             "properties": {
-                "single_end": {
-                    "type": "boolean"
-                },
-                "long_read": {
-                    "type": "boolean"
-                },
                 "enable_filter": {
                     "type": "boolean"
                 },
@@ -78,7 +72,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0.0
+                    "default": 0
                 },
                 "tax2filter": {
                     "type": "string",
@@ -162,7 +156,8 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "results"
                 },
                 "email": {
                     "type": "string",
@@ -188,7 +183,8 @@
                     "type": "string",
                     "description": "Name of iGenomes reference.",
                     "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details.",
+                    "default": "GRCh38"
                 },
                 "fasta": {
                     "type": "string",
@@ -213,7 +209,7 @@
                 "igenomes_base": {
                     "type": "string",
                     "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes",
+                    "default": "s3://ngi-igenomes/igenomes/",
                     "format": "directory-path",
                     "fa_icon": "fas fa-cloud-download-alt"
                 }
