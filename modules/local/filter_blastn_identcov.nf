@@ -27,7 +27,7 @@ process FILTER_BLASTN_IDENTCOV {
             coverage_per_hsp = float(parts[13])
             if identity >= $params.blast_identity and coverage_per_subject > $params.blast_coverage and coverage_per_hsp > $params.blast_coverage:
                 # leading tab is needed to be compatible with the kraken2 output
-                out.write(f"\\t{query_id}\\t{identity:.2f}\\t{coverage_per_subject:.2f}\\t{coverage_per_hsp:.2f}\\n")
+                out.write(f"{query_id}\\t{identity:.2f}\\t{coverage_per_subject:.2f}\\t{coverage_per_hsp:.2f}\\n")
                 out_ids.write(f"{query_id}\\n")
 
     import subprocess
