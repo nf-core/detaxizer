@@ -399,28 +399,55 @@ workflow DETAXIZER {
     // MODULE: Filter out the classified or validated reads
     //
 
-    if ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2) {
-    ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
-        .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
-    FILTER(
-        ch_kraken2filter
-    )
-    } else if ( params.enable_filter ) {
-    ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-    meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
-    }
-    .groupTuple(by:[0])
-    ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
+    if ( ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2 ) && !params.filter_trimmed ) {
+        ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
+            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+        FILTER(
+            ch_kraken2filter
+        )
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+
+    } else if ( params.enable_filter && !params.filter_trimmed ) {
+        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
         meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
-    }
-    ch_blastnfilter = ch_combined_short_long_id.join(
-        ch_blastn2filter, by:[0]
-    )
-    FILTER(
-        ch_blastnfilter
-    )
+            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        }
+        .groupTuple(by:[0])
+        ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
+            meta, path ->
+            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        }
+        ch_blastnfilter = ch_combined_short_long_id.join(
+            ch_blastn2filter, by:[0]
+        )
+        FILTER(
+            ch_blastnfilter
+        )
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+    } else if ( ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2 ) && params.filter_trimmed ){
+        ch_kraken2filter = FASTP.out.reads
+            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+        FILTER(
+            ch_kraken2filter
+        )
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+    } else if ( params.enable_filter && params.filter_trimmed ){
+        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
+        meta, path ->
+            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        }
+        .groupTuple(by:[0])
+        ch_combined_short_long_id = FASTP.out.reads.map {
+            meta, path ->
+            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        }
+        ch_blastnfilter = ch_combined_short_long_id.join(
+            ch_blastn2filter, by:[0]
+        )
+        FILTER(
+            ch_blastnfilter
+        )
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
     }
 
 
