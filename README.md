@@ -15,7 +15,7 @@
 
 **nf-core/detaxizer** is a bioinformatics pipeline that initially checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing using fastp and quality assessment via FastQC, followed by taxon classification with kraken2 (the kraken2 database can be changed), and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
 
-![detaxizer metro workflow](docs/images/detaxizer_metro_workflow.png)
+![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
