@@ -21,7 +21,7 @@
 2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
 3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
-5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the processed reads)
+5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from kraken2 or blastn)
 6. Summary of the processes
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
