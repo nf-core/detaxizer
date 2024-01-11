@@ -6,26 +6,72 @@ This document describes the output produced by the pipeline. Most of the plots a
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
+<details markdown="1">
+<summary>Output files of the whole pipeline</summary>
+
+Below there is a potential directory and file tree shown for a single paired-end sample (`sample1`), which can give you a first guidance where to look in the results directory.
+
+- `results/`
+  - `blast/`
+    - `filteredIdentCov/`
+      - `sample1_R1.identcov.txt`
+      - `sample1_R2.identcov.txt`
+    - `summary/`
+      - `sample1.blastn_summary.tsv`
+  - `fastp/`
+    - `sample1/`
+      - `...`
+  - `filter/`
+    - `sample1_R1_filtered.fastq.gz`
+    - `sample1_R2_filtered.fastq.gz`
+  - `kraken2/`
+    - `isolated/`
+      - `sample1.classified.txt`
+      - `sample1.ids.txt`
+    - `summary/`
+      - `sample1.kraken2_summary.tsv`
+    - `taxonomy/`
+      - `taxa_to_filter.txt`
+    - `sample1.classifiedreads.txt`
+    - `sample1.kraken2.report.txt`
+  - `MultiQC/`
+    - `multiqc_data/`
+      - `...`
+    - `multiqc_plots/`
+      - `.../`
+    - `multiqc_report.html`
+  - `pipeline_info/`
+    - `execution_report_1970-01-01_00-00-00.html`
+    - `execution_timeline_1970-01-01_00-00-00.html`
+    - `execution_trace_1970-01-01_00-00-00.html`
+    - `params_1970-01-01_00-00-00.html`
+    - `pipeline_dag_1970-01-01_00-00-00.html`
+    - `software_versions.yml`
+  - `summary/`
+    - `summary.tsv`
+
+</details>
+
 <!-- TODO nf-core: Write this documentation describing your workflow's output -->
 
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [FastQC](#fastqc) - Raw read QC
+- [Renaming](#renaming) - Renaming the read headers before and after the pipeline run to avoid difficulties with different header formats
+- [FastQC](#fastqc) - Raw read QC - Output not in the results directory
+- [fastp](#fastp) - Preprocessing of raw reads
+- [kraken2](#kraken2) - Classification of the preprocessed reads and extracting the searched taxa from the results
+- [blastn](#blastn) - Validation of the reads classified as the searched taxa and extracting ids of validated reads
+- [filter](#filter) - (Optional) filtering of the raw or preprocessed reads using either the read ids from kraken2 output or blastn output
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
+### Renaming
+
+Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. As stated above, this step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the read ids are shown in the results.
+
 ### FastQC
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `fastqc/`
-  - `*_fastqc.html`: FastQC report containing quality metrics.
-  - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
-
-</details>
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
@@ -38,6 +84,14 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 :::note
 The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
 :::
+
+### fastp
+
+### kraken2
+
+### blastn
+
+### filter
 
 ### MultiQC
 
