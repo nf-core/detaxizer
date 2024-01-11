@@ -1,4 +1,5 @@
 process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
+    label 'process_single'
 
         container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
