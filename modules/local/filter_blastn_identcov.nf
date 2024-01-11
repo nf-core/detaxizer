@@ -11,6 +11,9 @@ process FILTER_BLASTN_IDENTCOV {
     tuple val(meta), path('*blastn_classified.txt'), emit: classified_ids
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     #!/usr/bin/env python

@@ -11,6 +11,9 @@ process SUMMARY_BLASTN {
     tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
     path("versions.yml"), emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     #!/usr/bin/env python

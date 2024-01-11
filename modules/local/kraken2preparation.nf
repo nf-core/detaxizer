@@ -11,6 +11,9 @@ process KRAKEN2PREPARATION {
     path( "database/" ), emit: db
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     mkdir db_tmp

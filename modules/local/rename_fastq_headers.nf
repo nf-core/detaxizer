@@ -11,6 +11,9 @@ process RENAME_FASTQ_HEADERS_PRE {
     tuple val(meta), path('*.fastq.gz'), emit: fastq
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     #!/usr/bin/env python
@@ -141,6 +144,9 @@ process RENAME_FASTQ_HEADERS_AFTER {
     output:
     tuple val(meta), path('*.fastq.gz'), emit: fastq
     path "versions.yml", emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """

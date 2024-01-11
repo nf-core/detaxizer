@@ -11,6 +11,8 @@ process PARSE_KRAKEN2REPORT {
     path "versions.yml", emit: versions
     path "taxa_to_filter.txt", emit: to_filter
 
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """

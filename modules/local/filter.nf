@@ -11,6 +11,9 @@ process FILTER {
     tuple val(meta), path('*.fastq.gz'), emit: filtered
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     # Extract the sequences from the fastq.gz files

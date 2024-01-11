@@ -12,6 +12,9 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     tuple val(meta), path('*ids.txt'), emit: classified_ids
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     """
     #!/usr/bin/env python
