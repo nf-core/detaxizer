@@ -225,9 +225,9 @@ workflow DETAXIZER {
     // MODULE: Isolate the hits for a certain taxa and subclasses
     //
 
+    ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
 
-
-    KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(PARSE_KRAKEN2REPORT.out.to_filter, by: [0]).set{ ch_combined }
+    KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
 
     ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN (
         ch_combined
