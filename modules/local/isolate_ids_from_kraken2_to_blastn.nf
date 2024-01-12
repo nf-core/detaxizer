@@ -58,8 +58,6 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 # Add pseudo count
                 if unclassified == 0:
                     unclassified = 1
-                if sum_to_keep == 0:
-                    sum_to_keep = 1
 
                 if (
                     sum_to_filter > sum_to_keep
