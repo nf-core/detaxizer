@@ -6,7 +6,7 @@
 
 ## Introduction
 
-nf-core/detaxizer is a pipeline to asses raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination.
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are `Homo` and `Homo sapiens`.
 
 ## Samplesheet input
 
