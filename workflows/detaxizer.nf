@@ -297,18 +297,17 @@ workflow DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
+        ch_reference_fasta = Channel.fromPath( fasta )
 
-        ch_reference_fasta = Channel.empty()
-
-        ch_reference_fasta =  file( fasta )
-
+        ch_reference_fasta_with_meta = ch_reference_fasta.map {
+            item -> [['id': "id-fasta-for-makeblastdb"], item]
+            }
 
         BLAST_MAKEBLASTDB (
-                ch_reference_fasta
+                ch_reference_fasta_with_meta
         )
         ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
-        //PREPARE_FASTA4BLASTN.out.fasta.dump(tag: "PREPARE_FASTA4BLASTN")
         ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
             .flatMap { meta, fastaList ->
                 if (fastaList.size() == 2) {
@@ -324,7 +323,6 @@ workflow DETAXIZER {
             }
 
             }
-        //ch_fasta4blastn.dump(tag: "ch_fasta4blastn")
 
         BLAST_BLASTN (
             ch_fasta4blastn,
@@ -459,13 +457,13 @@ workflow DETAXIZER {
         meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
     }
-    ch_headers.dump()
+
     ch_filtered2rename = FILTER.out.filtered.map {
         meta, path ->
         [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
     }
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
-    ch_rename_filtered.dump()
+
     RENAME_FASTQ_HEADERS_AFTER(
         ch_rename_filtered
     )
