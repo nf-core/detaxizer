@@ -42,7 +42,7 @@ PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fa
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
 ## Databases
-The databases used by detaxizer have an influence on the amount of false positives (classified as contamination although not originating from that taxon/taxa) and false negatives (not classified as the taxon/taxa defined as contamination).
+The databases used by detaxizer have an influence on the amount of false positives (classified as contamination although not originating from that taxon/taxa) and false negatives (not classified as the taxon/taxa defined as contamination although of such origin).
 
 The task of decontamination has to be balanced out between false positives and false negatives depending on what is needed in your use case.
 
