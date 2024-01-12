@@ -39,8 +39,7 @@ sample,fastq_1,fastq_2,fastq_3
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,AEG588A1_S1_L002_R3_001.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project.
-
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. If you only have long reads put the reference to your file(s) in the forth column, leaving column 2 and 3 empty.
 
 Now, you can run the pipeline using:
 
