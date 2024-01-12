@@ -325,10 +325,11 @@ workflow DETAXIZER {
             }
 
             }
-
+        ch_blastn_db = ch_fasta4blastn.combine(BLAST_MAKEBLASTDB.out.db).map{ it -> [it[2], it[3]]}
+        ch_blastn_db.dump()
         BLAST_BLASTN (
             ch_fasta4blastn,
-            BLAST_MAKEBLASTDB.out.db
+            ch_blastn_db
         )
 
         ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
