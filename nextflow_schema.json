@@ -2,108 +2,130 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from metagenomes using kraken2 and blast. Default organism to identify (and remove) is human. Removal is optional (and will be implemented in the future).",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data using kraken2 and blast. Default taxon to identify (and remove) is Homo. Removal is optional.",
     "type": "object",
     "definitions": {
-        "blastn": {
-            "title": "blastn",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "blast_coverage": {
-                    "type": "number",
-                    "default": 40.0
-                },
-                "blast_outformat": {
-                    "type": "string",
-                    "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp"
-                },
-                "blast_evalue": {
-                    "type": "number",
-                    "default": 0.01
-                },
-                "blast_identity": {
-                    "type": "number",
-                    "default": 40.0
-                },
-                "blast_max_hsps": {
-                    "type": "integer",
-                    "default": 1
-                },
-                "blast_max_target_seqs": {
-                    "type": "integer",
-                    "default": 1
-                }
-            }
-        },
         "workflow_parameters": {
             "title": "Workflow parameters",
             "type": "object",
-            "description": "",
+            "description": "Parameters which control the workflow.",
             "default": "",
             "properties": {
                 "enable_filter": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "If set to True the filter is used. Otherwise only assessing is performed."
                 },
                 "filter_trimmed": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "If set to True the the preproccesed reads are used for filtering. Else the raw reads are used"
                 },
                 "skip_blastn": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Defines if blastn should be used or not. By default blastn is used in the workflow. If also the filter is enabled the reads are filtered using the output from blastn."
                 },
                 "filter_with_kraken2": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "kraken2taxa": {
-            "title": "kraken2taxa",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "cutoff_tax2filter": {
-                    "type": "integer",
-                    "default": 2
-                },
-                "cutoff_unclassified": {
-                    "type": "number",
-                    "default": 0.0
-                },
-                "tax2filter": {
-                    "type": "string",
-                    "default": "Homo"
+                    "type": "boolean",
+                    "description": "If this is set to True the kraken2 ouput is used for filtering."
                 }
             }
         },
         "kraken2": {
             "title": "kraken2",
             "type": "object",
-            "description": "",
+            "description": "Parameters used by kraken2 to classify all reads provided.",
             "default": "",
             "properties": {
                 "kraken2db": {
                     "type": "string",
-                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20230605.tar.gz"
+                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz",
+                    "description": "The database which is used in the classification step. For input how to use this parameter to fine-tune the step refer to usage/Databases/kraken2"
                 },
                 "save_output_fastqs": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "If the unclassified and classified reads should be saved to different files. The default false should be used",
+                    "hidden": true
                 },
                 "save_reads_assignment": {
                     "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "hidden": true,
+                    "description": "If the read assignments should be saved. Leave this to be true"
                 },
                 "kraken2confidence": {
                     "type": "number",
-                    "default": 0.05
+                    "default": 0.05,
+                    "description": "Confidence in the classification of a read as a certain taxon. Refere to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
+                }
+            }
+        },
+        "kraken2taxa": {
+            "title": "kraken2taxa",
+            "type": "object",
+            "description": "Used for fine-tuning the isolation step of kraken2 output. Also here the taxon/taxa to be assessed/to be filtered can be set.",
+            "default": "",
+            "properties": {
+                "cutoff_tax2filter": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
+                },
+                "cutoff_unclassified": {
+                    "type": "number",
+                    "default": 0.0,
+                    "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to unclassified is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "tax2filter": {
+                    "type": "string",
+                    "default": "Homo",
+                    "description": "The taxon or taxonomic group to be assessed or filtered by the pipeline."
+                }
+            }
+        },
+        "blastn": {
+            "title": "blastn",
+            "type": "object",
+            "description": "Parameters to fine-tune the output of blastn.",
+            "default": "",
+            "properties": {
+                "blast_coverage": {
+                    "type": "number",
+                    "default": 40.0,
+                    "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
+                },
+                "blast_outformat": {
+                    "type": "string",
+                    "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp",
+                    "hidden": true,
+                    "description": "Output format of blastn. Should not be changed!"
+                },
+                "blast_evalue": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "The expected(e)-value contains information on how many hits of the same score can be found in a database of the size used in the query by chance. The parameter can be used to fine-tune the validation step."
+                },
+                "blast_identity": {
+                    "type": "number",
+                    "default": 40.0,
+                    "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
+                },
+                "blast_max_hsps": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "The maximum amount of HSPs returned by blastn per query. To reduce computational burden it is set to 1. Only the best HSP is shown, judged by the e-value."
+                },
+                "blast_max_target_seqs": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Number of aligned sequences to keep by blastn. Is set to 1 to reduce computational burden."
                 }
             }
         },
         "fastp_options": {
             "title": "fastp options",
             "type": "object",
-            "description": "",
+            "description": "Options to control the behavior of fastp",
             "default": "",
             "properties": {
                 "reads_minlength": {
