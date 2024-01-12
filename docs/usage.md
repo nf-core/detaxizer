@@ -59,7 +59,7 @@ The blastn database is built from a fasta file. Default is the `GRCh38` human re
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
