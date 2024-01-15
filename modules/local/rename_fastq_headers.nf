@@ -1,7 +1,6 @@
 process RENAME_FASTQ_HEADERS_PRE {
     tag "$meta.id"
     label 'process_medium'
-    errorStrategy 'retry'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81' :
@@ -139,7 +138,6 @@ process RENAME_FASTQ_HEADERS_PRE {
 process RENAME_FASTQ_HEADERS_AFTER {
     tag "$meta.id"
     label 'process_medium'
-    errorStrategy 'retry'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81' :

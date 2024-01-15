@@ -1,7 +1,6 @@
 process PREPARE_FASTA4BLASTN {
     tag "$meta.id"
     label 'process_single'
-    errorStrategy 'retry'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
