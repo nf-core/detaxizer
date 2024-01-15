@@ -1,11 +1,12 @@
 process SUMMARIZER {
+    tag "$meta.id"
     label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'biocontainers/pandas:1.5.2' }"
     input:
-    path(tosummarize)
+    tuple val(meta), path(tosummarize)
 
     output:
     path("summary.tsv"), emit: summary

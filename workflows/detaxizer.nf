@@ -478,12 +478,18 @@ workflow DETAXIZER {
     //ch_kraken2_summary = ch_kraken2_summary.map { meta, paths -> [paths] }
     if (!params.skip_blastn){
     ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect()
+    ch_summary_with_meta = ch_summary.map {
+            item -> [['id': "summary_of_kraken2_and_blastn"], item]
+            }
     } else {
         ch_summary = ch_kraken2_summary
+        ch_summary_with_meta = ch_summary.map {
+            item -> [['id': "summary_of_kraken2"], item]
+            }
     }
 
     ch_summary = SUMMARIZER (
-        ch_summary
+        ch_summary_with_meta
     )
     ch_versions = ch_versions.mix(ch_summary.versions)
 

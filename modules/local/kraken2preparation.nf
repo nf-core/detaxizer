@@ -1,4 +1,5 @@
 process KRAKEN2PREPARATION {
+    tag "$meta.id"
     label 'process_high'
 
     conda "conda-forge::sed=4.7"

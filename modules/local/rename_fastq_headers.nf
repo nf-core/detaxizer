@@ -135,6 +135,7 @@ process RENAME_FASTQ_HEADERS_PRE {
 }
 
 process RENAME_FASTQ_HEADERS_AFTER {
+    tag "$meta.id"
     label 'process_high'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
