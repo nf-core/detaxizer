@@ -43,8 +43,6 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
 nextflow run nf-core/detaxizer \
    -profile <docker/singularity/.../institute> \
@@ -66,11 +64,11 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/detaxizer was originally written by Jannik Seidel.
+nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/jannikseidelQBiC) at the [Quantitative Biology Center(QBiC)](http://qbic.life/).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-Daniel Straub
+[Daniel Straub](https://github.com/d4straub)
 
 ## Contributions and Support
 
