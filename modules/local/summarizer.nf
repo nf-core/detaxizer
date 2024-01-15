@@ -1,6 +1,7 @@
 process SUMMARIZER {
     tag "$meta.id"
     label 'process_single'
+    errorStrategy 'retry'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :

@@ -1,6 +1,7 @@
 process PARSE_KRAKEN2REPORT {
     tag "$meta.id"
     label 'process_single'
+    errorStrategy 'retry'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/python:3.10.4' :
