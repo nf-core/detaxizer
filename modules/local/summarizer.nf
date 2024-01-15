@@ -9,7 +9,7 @@ process SUMMARIZER {
     tuple val(meta), path(tosummarize)
 
     output:
-    path("summary.tsv"), emit: summary
+    tuple val(meta), path("summary.tsv"), emit: summary
     path("versions.yml"), emit: versions
 
     when:
