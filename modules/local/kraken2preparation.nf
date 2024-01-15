@@ -7,10 +7,10 @@ process KRAKEN2PREPARATION {
         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
         'nf-core/ubuntu:20.04' }"
     input:
-    path db
+    tuple val(meta), path(db)
 
     output:
-    path( "database/" ), emit: db
+    tuple val(meta), path( "database/" ), emit: db
     path "versions.yml", emit: versions
 
     when:

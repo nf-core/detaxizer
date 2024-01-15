@@ -194,19 +194,22 @@ workflow DETAXIZER {
     //
     // MODULE: Prepare Kraken2 Database
     //
-
+    ch_kraken2_db_with_meta = Channel.fromPath(params.kraken2db).map {
+            item -> [['id': "kraken2_db"], item]
+            }
     KRAKEN2PREPARATION (
-        params.kraken2db
+        ch_kraken2_db_with_meta
     )
     ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions)
 
     //
     // MODULE: Run Kraken2
     //
+    ch_kraken2_db = FASTP.out.reads.combine(KRAKEN2PREPARATION.out.db).map{ it -> [it[3]]}
 
     KRAKEN2_KRAKEN2 (
         FASTP.out.reads,
-        KRAKEN2PREPARATION.out.db,
+        ch_kraken2_db,
         params.save_output_fastqs,
         params.save_reads_assignment
     )
