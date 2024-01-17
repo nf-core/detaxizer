@@ -2,7 +2,7 @@ process FILTER {
     tag "$meta.id"
     label 'process_high'
 //TODO
-    conda "bioconda::seqkit=2.6.1-0"
+    conda "bioconda::seqkit=2.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
         'biocontainers/seqkit:2.6.0--h9ee0642_0'}"
@@ -36,7 +36,7 @@ process FILTER {
     # TODO Replace version number by expression that changes if the container version changes
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        seqkit: 2.6.0
+        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
     END_VERSIONS
     """
 }

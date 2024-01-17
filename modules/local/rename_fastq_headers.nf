@@ -20,6 +20,7 @@ process RENAME_FASTQ_HEADERS_PRE {
     script:
     """
     #!/usr/bin/env python
+    import Bio
     from Bio import SeqIO, bgzf
     import gzip
     import sys
@@ -133,6 +134,7 @@ process RENAME_FASTQ_HEADERS_PRE {
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
+        f.write(f'    biopython: {Bio.__version__}\\n')
     """
 }
 
@@ -158,6 +160,7 @@ process RENAME_FASTQ_HEADERS_AFTER {
     script:
     """
     #!/usr/bin/env python
+    import Bio
     from Bio import SeqIO, bgzf
     import gzip
     import sys
@@ -202,5 +205,6 @@ process RENAME_FASTQ_HEADERS_AFTER {
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
+        f.write(f'    biopython: {Bio.__version__}\\n')
     """
 }

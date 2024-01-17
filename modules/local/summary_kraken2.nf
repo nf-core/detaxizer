@@ -87,5 +87,6 @@ process SUMMARY_KRAKEN2 {
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
+        f.write(f'    pandas: {pd.__version__}\\n')
     """
 }

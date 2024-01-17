@@ -2,7 +2,7 @@ process PREPARE_FASTA4BLASTN {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::seqkit=2.6.1-0"
+    conda "bioconda::seqkit=2.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
         'biocontainers/seqkit:2.6.0--h9ee0642_0'}"
@@ -16,13 +16,12 @@ process PREPARE_FASTA4BLASTN {
 
     when:
     task.ext.when == null || task.ext.when
-
+// TODO remove hard-coded version
     script:
     """
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        seqkit: 2.6.0
+        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
     END_VERSIONS
 
     if [ "$meta.single_end" == "true" ]; then

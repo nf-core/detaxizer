@@ -22,6 +22,7 @@ process SUMMARIZER {
     import glob
     import pandas as pd
     import subprocess
+    import numpy
 
     files_kraken2 = glob.glob('*.kraken2_summary.tsv')
     files_blastn = glob.glob('*.blastn_summary.tsv')
@@ -46,5 +47,7 @@ process SUMMARIZER {
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
+        f.write(f'    pandas: {pd.__version__}\\n')
+        f.write(f'    numpy: {numpy.__version__}\\n')
     """
 }
