@@ -85,9 +85,11 @@ The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They m
 :::
 
 ### fastp
+
 fastp performs preprocessing of the reads (adapter/quality trimming). For details of the output, please refer to [this site](https://nf-co.re/modules/fastp).
 
 ### kraken2
+
 kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `*.kraken2.report.txt`, `isolated/*.classified.txt` and `summary/*.kraken2_summary.tsv`. The first contains all reads, their classification and how many k-mers were assigned to which taxon. The second contains statistics on how many reads were classified as which taxon. Next is a file which is similar to the first one but only contains the read ids which were classified as the taxon/taxa to assess/to filter together with the whole information from the first file for the individual read ids. Last the summary gives you a fast overview of how many reads were passed to kraken2 and how many were classified as the taxon/taxa to assess or to filter.
 
 <summary>Output files</summary>
@@ -102,9 +104,10 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
     - `taxa_to_filter.txt`: contains the taxon ids of all taxa to assess the data for or to filter out
   - `sample1.classifiedreads.txt`: the whole kraken2 output for all reads
   - `sample1.kraken2.report.txt`: statistics on how many reads where assigned to which taxon/taxonomic group
-</details>
+  </details>
 
 ### blastn
+
 blastn can validate the reads classified by kraken2 as the taxon/taxa to be assessed/to be filtered.
 
 <summary>Output files</summary>
@@ -113,18 +116,19 @@ blastn can validate the reads classified by kraken2 as the taxon/taxa to be asse
   - `filteredIdentCov/`: The read ids and statistics of the reads which were validated by blastn to be the taxon/taxa to assess/to filter.
     - `sample1_R1.identcov.txt`
     - `sample1_R2.identcov.txt`
-  - `summary/`: Short overview of the amount of reads which were validated by blastn
-    - `sample1.blastn_summary.tsv`
-</details>
+  - `summary/`: Short overview of the amount of reads which were validated by blastn - `sample1.blastn_summary.tsv`
+  </details>
 
 ### filter
+
 In this folder, the filtered and re-renamed reads can be found. This result has to be carefully examined using the other information in the results folder.
 
 ### summary
+
 The summary file lists all statistics of kraken2 and blastn per sample. It is a combination of the summary files of kraken2 and blastn and can be used for a quick overview of the pipeline run.
 
 |             | kraken2                    | isolatedkraken2                         | blastn_unique_ids                                                         | blastn_lines                         | filteredblastn_unique_ids                                                                                                    | filteredblastn_lines                                                               |
-|-------------|----------------------------|-----------------------------------------|---------------------------------------------------------------------------|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| ----------- | -------------------------- | --------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | sample Name | Read IDs in kraken2 output | Read IDs in the isolated kraken2 output | Number of unique IDs in blastn output, should be the same as blastn_lines | Number of lines in the blastn output | Number of IDs in the blastn output after the filtering for identity and coverage, should be the same as filteredblastn_lines | Number of lines in the blastn output after the filtering for identity and coverage |
 
 ### MultiQC

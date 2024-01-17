@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial release of nf-core/detaxizer, created with the [nf-core](https://nf-co.re/) template.
 
 ### `Added`
+
 - Added preprocessing part of workflow (tool: fastp)
 - Added examination part of workflow (tools: kraken2 and optionally blastn) and a summary step for this part
 - Added optional filtering step (either applied to raw reads or preprocessed ones, and either with the output of kraken2 or blastn)

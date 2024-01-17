@@ -34,24 +34,26 @@ PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fa
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                             |
-| `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                                         |
-
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                              |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                              |
+| `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                                          |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
 ## Databases
+
 The databases used by detaxizer have an influence on the amount of false positives (classified as contamination although not originating from that taxon/taxa) and false negatives (not classified as the taxon/taxa defined as contamination although of such origin).
 
 The task of decontamination has to be balanced out between false positives and false negatives depending on what is needed in your use case.
 
 ### kraken2
+
 To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of RAM should be available, depending on the size of your data to be assessed even more. For standard decontamination tasks the Standard-8 database can be used (which is the default), but it should always be kept in mind that this leads to false negatives to some extend.
 
 Also, pangenome databases of the organism(s) classified as contamination could increase the amount of true positives while reducing the hardware requirements. For human such a database can be found [here](https://zenodo.org/doi/10.5281/zenodo.8339731). Such a database will increase false positives, unless a custom database is built together with the data of the organisms not classified as contamination. To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
 
 ### blastn
+
 The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step, a database of several organisms can be used. Start by building a fasta from several organisms, which then has to be provided to the pipeline by pointing to the fasta using the `fasta` parameter.
 
 ## Running the pipeline
