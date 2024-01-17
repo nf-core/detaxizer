@@ -2,6 +2,7 @@ process RENAME_FASTQ_HEADERS_PRE {
     tag "$meta.id"
     label 'process_medium'
 
+    conda "conda-forge::python=3.10.4 biopython=1.83 numpy=1.26.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81' :
         'biocontainers/biopython:1.81' }"
@@ -139,9 +140,11 @@ process RENAME_FASTQ_HEADERS_AFTER {
     tag "$meta.id"
     label 'process_medium'
 
+    conda "conda-forge::biopython=1.83"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.81' :
         'biocontainers/biopython:1.81' }"
+
     input:
     tuple val(meta), path(fastqfiltered), path(dict)
 

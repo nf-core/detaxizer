@@ -99,13 +99,8 @@ workflow DETAXIZER {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    //INPUT_CHECK (
-    //    file(params.input)
-    //)
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+
     // ! There is currently no tooling to help you write a sample sheet schema
-    // TODO: Make the map for single ended
     ch_input = Channel.fromSamplesheet('input')
 
 
