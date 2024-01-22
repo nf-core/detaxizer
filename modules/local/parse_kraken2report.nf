@@ -11,8 +11,8 @@ process PARSE_KRAKEN2REPORT {
     tuple val(meta), path(kraken2report)
 
     output:
-    path "versions.yml", emit: versions
     tuple val(meta), path ("taxa_to_filter.txt"), emit: to_filter
+    path "versions.yml",                          emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,127 +22,153 @@ process PARSE_KRAKEN2REPORT {
     #!/usr/bin/env python
     import subprocess
 
-
     def read_in_kraken2report(report):
-        kraken_list = []
-
+        krakenList = []
         with open(report, 'r') as f:
             for line in f:
                 if not line:
                     continue
+                lineToAppend = line.replace('\\n','').split('\\t')
+                krakenList.append(lineToAppend)
+        return krakenList
 
-                line = line.strip('\\n').split('\\t')
-                kraken_list.append(line)
-
-        return kraken_list
-
-
-    def kraken_taxonomy2hierarchy(kraken_list):
-        tax_dict = {}
+    def krakenTaxonomy2hierarchy(krakenList):
+        # function to read in the taxonomic information from a kraken2report into a nested dictionary
+        # init of nested dictonary to store taxonomy
+        taxDict = {}
+        # init of stack to keep track of the different taxonomic levels of each entry
         stack = []
 
-        for line in kraken_list:
+        # processing of the lines in the krakenList from the kraken2 report
+        for line in krakenList:
+            # level is indicated by the leading whitespaces
+            # (2 per hierarchy level) of the fifth entry in
+            # the kraken2 report. To address this to get the
+            # right level of the current node the ammount of
+            # whitespaces is divided by 2
             level = (len(line[5]) - len(line[5].strip())) / 2
             node = line[5].strip()
+
+            # Taxonomic ID, e.g. '9606' for 'Homo sapiens'
             id = line[4]
 
+            # while the length of the stack is greater than the level of the current node,
+            # remove the newest entry of the stack to go to the level of the parent
+            # node of the current node. When this is reached, continue
             while len(stack) > level:
                 stack.pop()
 
+            # for the initial levels (e.g. '0' for 'unclassified' or '1' for 'root')
+            # or if the stack is empty add a new parent node to the phylogenetic tree
             if level == 0 or not stack:
-                tax_dict[node] = {"id": id}
-                stack = [tax_dict[node]]
+                taxDict[node] = {"id": id}
+                stack = [taxDict[node]]
+            # Add the subtree to the current level of the tree (inside of the taxDict
+            # nested dictionary) and append this part of the taxDict to the stack
             else:
-                current_level = stack[-1]
-                current_level[node] = {"id": id}
-                stack.append(current_level[node])
+                currentLevel = stack[-1]
+                currentLevel[node] = {"id": id}
+                stack.append(currentLevel[node])
 
+        return taxDict
 
-        return tax_dict
-
-
-    def get_all_keys(nested_dict, parent_key='', sep='\\t'):
+    def getAllKeys(nestedDict, parentKey='', sep='\\t'):
+    # get all the keys in the nested taxonomic dictionary recursively.
+    # The format of the returned list is as follows:
+    # [
+    #       'unclassified',
+    #       'root',
+    #       'root\tcellular organism',
+    #       'root\tcellular organism\tBacteria',
+    #       ...
+    #       'root\tcellular organism\tEukaryota',
+    #       ...
+    # ]
         keys = []
 
-        for k, v in nested_dict.items():
-            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        for k, v in nestedDict.items():
+            newKey = f"{parentKey}{sep}{k}" if parentKey else k
 
             if k == 'id':
-                keys.append(parent_key)
+                keys.append(parentKey)
             elif isinstance(v, dict):
-                keys.extend(get_all_keys(v, new_key, sep=sep))
+                keys.extend(getAllKeys(v, newKey, sep=sep))
 
         return keys
 
-
-    def remove_incomplete_taxa(list_kraken):
-        # remove the incomplete paths to the leafs, keep all paths that are ending in a leaf
-        list_kraken.sort()
+    def removeIncompleteTaxa(listKrakenTaxonomicKeys, sep = '\\t'):
+        # remove the incomplete paths to the leafs of the hierarchical tree, keep all paths that are ending in a leaf
+        listKrakenTaxonomicKeys.sort()
         to_remove = set()
 
-        for i in range(len(list_kraken) - 1):
-            if list_kraken[i + 1].startswith(list_kraken[i] + ","):
+        for i in range(len(listKrakenTaxonomicKeys) - 1):
+            if listKrakenTaxonomicKeys[i + 1].startswith(listKrakenTaxonomicKeys[i] + sep):
                 to_remove.add(i)
 
-        return [item for idx, item in enumerate(list_kraken) if idx not in to_remove]
+        return [item for idx, item in enumerate(listKrakenTaxonomicKeys) if idx not in to_remove]
 
+    def generateDictForLookupOfTaxonomicSubentries(removedIncompleteTaxaList):
+        # This function generates a lookup dictionary that allows to get all subentries
+        # of a certain taxonomic entry (e.g. for 'Homo' it looks as follows:
+        # {'Homo':'Homo sapiens'})
+        lookupDict = {}
 
-    def generate_dict_for_lookup(removed_list):
-        lookup_dict = {}
+        for entry in removedIncompleteTaxaList:
+            listOfTaxonomicNames = entry.split('\\t')
 
-        for entry in removed_list:
-            new_list = entry.split('\\t')
+            while listOfTaxonomicNames:
+                newTaxomomicName = listOfTaxonomicNames.pop(0)
 
-            while new_list:
-                new_entry = new_list.pop(0)
-
-                if new_entry in lookup_dict:
-                    lookup_dict[new_entry].update(new_list)
+                if newTaxomomicName in lookupDict:
+                    lookupDict[newTaxomomicName].update(listOfTaxonomicNames)
                 else:
-                    lookup_dict[new_entry] = set(new_list)
+                    lookupDict[newTaxomomicName] = set(listOfTaxonomicNames)
 
-        for key in lookup_dict:
-            lookup_dict[key] = sorted(list(lookup_dict[key]))
+        for key in lookupDict:
+            lookupDict[key] = sorted(list(lookupDict[key]))
 
-        sorted_keys = sorted(lookup_dict)
-        return {k: lookup_dict[k] for k in sorted_keys}
+        sortedKeys = sorted(lookupDict)
+        return {k: lookupDict[k] for k in sortedKeys}
 
-    def get_keys_with_ids(kraken_dict, results=None):
+    def getKeysWithIDs(krakenHierarchicalTaxonomyDict, results=None):
+        # itterate over the hierarchical taxonomy dictionary and create
+        # a mapping from taxonomic name to taxonomic id.
+        # This is done recursively and results=None is the inital state.
         if results is None:
             results = {}
 
-        for k, v in kraken_dict.items():
+        for k, v in krakenHierarchicalTaxonomyDict.items():
             if isinstance(v, dict):
                 if 'id' in v:
                     results[k] = v['id']
-                results.update(get_keys_with_ids(v, results))
+                results.update(getKeysWithIDs(v, results))
         return results
 
     def get_version():
         version_output = subprocess.getoutput('python --version')
         return version_output.split()[1]
 
-
-    kraken_list = read_in_kraken2report('$kraken2report')
-    kraken_dict = kraken_taxonomy2hierarchy(kraken_list)
-    list_kraken = get_all_keys(kraken_dict)
-    result = remove_incomplete_taxa(list_kraken)
-    result = generate_dict_for_lookup(result)
+    krakenList = read_in_kraken2report('$kraken2report')
+    krakenHierarchicalTaxonomyDict = krakenTaxonomy2hierarchy(krakenList)
+    listKrakenTaxonomicKeys = getAllKeys(krakenHierarchicalTaxonomyDict)
+    resultRemovedIncompleteTaxa = removeIncompleteTaxa(listKrakenTaxonomicKeys)
+    resultLookUpDict = generateDictForLookupOfTaxonomicSubentries(resultRemovedIncompleteTaxa)
     try:
-        result_to_filter = result["$params.tax2filter"] + ["$params.tax2filter"]
+        # Try if the taxon to assess for/to filter is in the database (represented by the lookup dictionary)
+        # and add all subentries of the 'tax2filter' plus the 'tax2filter' to a single list
+        resultToFilter = resultLookUpDict["$params.tax2filter"] + ["$params.tax2filter"]
     except KeyError:
-        # Handle the error or raise it again
         raise KeyError("The taxaomic group/taxon you want to check for/filter out is not in the kraken database. Use a database that includes the taxonomic group or taxon or change the tax2filter parameter to something that is in the database.")
 
-    result = get_keys_with_ids(kraken_dict)
-    result_tax_name_id = []
-    for entry in result_to_filter:
+    resultLookUpOfIDsForTaxonomicNameDict = getKeysWithIDs(krakenHierarchicalTaxonomyDict)
+    resultTaxNameID = []
+    for entry in resultToFilter:
         tax_name = entry
-        tax_id = str(result[tax_name])
-        result_tax_name_id.append(tax_id)
+        tax_id = str(resultLookUpOfIDsForTaxonomicNameDict[tax_name])
+        resultTaxNameID.append(tax_id)
 
     with open('taxa_to_filter.txt', "w") as f:
-        for entry in result_tax_name_id:
+        for entry in resultTaxNameID:
             f.write(entry+'\\n')
 
     # Generate the version.yaml for MultiQC

@@ -11,7 +11,7 @@ process SUMMARIZER {
 
     output:
     tuple val(meta), path("summary.tsv"), emit: summary
-    path("versions.yml"), emit: versions
+    path("versions.yml")                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,6 +23,10 @@ process SUMMARIZER {
     import pandas as pd
     import subprocess
     import numpy
+
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        return version_output.split()[1]
 
     files_kraken2 = glob.glob('*.kraken2_summary.tsv')
     files_blastn = glob.glob('*.blastn_summary.tsv')
@@ -38,10 +42,6 @@ process SUMMARIZER {
 
     df = pd.concat([df_kraken2, df_blastn.reindex(df_kraken2.index)],axis=1)
     df.to_csv("summary.tsv",sep="\\t")
-
-    def get_version():
-        version_output = subprocess.getoutput('python --version')
-        return version_output.split()[1]
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:

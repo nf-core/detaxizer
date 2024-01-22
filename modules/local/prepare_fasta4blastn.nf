@@ -12,18 +12,13 @@ process PREPARE_FASTA4BLASTN {
 
     output:
     tuple val(meta), path("*.fasta"), emit: fasta
-    path("versions.yml"), emit: versions
+    path("versions.yml")            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
-// TODO remove hard-coded version
+
     script:
     """
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
-    END_VERSIONS
-
     if [ "$meta.single_end" == "true" ]; then
         seqkit fq2fa ${trimmedreads} -o out.fasta
         seqkit grep -f ${kraken2results} out.fasta -o ${meta.id}.fasta
@@ -36,5 +31,9 @@ process PREPARE_FASTA4BLASTN {
         seqkit grep -f ${kraken2results} out.fasta -o ${meta.id}_R2.fasta
         rm out.fasta
     fi
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
+    END_VERSIONS
     """
 }

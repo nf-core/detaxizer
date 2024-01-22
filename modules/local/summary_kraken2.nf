@@ -11,8 +11,8 @@ process SUMMARY_KRAKEN2 {
 
 
     output:
-    tuple val(meta), path("*.kraken2_summary.tsv"), emit: summary
-    path("versions.yml"), emit: versions
+    tuple val(meta), path("*.kraken2_summary.tsv")  , emit: summary
+    path("versions.yml")                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -46,6 +46,10 @@ process SUMMARY_KRAKEN2 {
                     lines += 1
         return lines
 
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        return version_output.split()[1]
+
     if "${meta.short_and_long_reads}" == "true":
         list_files = "${kraken2}".split(" ")
         kraken2_dict = sort_list_of_files_by_pattern(list_files)
@@ -78,10 +82,6 @@ process SUMMARY_KRAKEN2 {
         df.index = ["${meta.id}"]
 
         df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
-
-    def get_version():
-        version_output = subprocess.getoutput('python --version')
-        return version_output.split()[1]
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:

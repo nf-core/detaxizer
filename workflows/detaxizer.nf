@@ -34,17 +34,17 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { RENAME_FASTQ_HEADERS_PRE } from '../modules/local/rename_fastq_headers'
-include { KRAKEN2PREPARATION } from '../modules/local/kraken2preparation'
-include { PARSE_KRAKEN2REPORT } from '../modules/local/parse_kraken2report'
-include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN } from '../modules/local/isolate_ids_from_kraken2_to_blastn'
-include { PREPARE_FASTA4BLASTN } from '../modules/local/prepare_fasta4blastn'
-include { FILTER_BLASTN_IDENTCOV } from '../modules/local/filter_blastn_identcov'
-include { FILTER } from '../modules/local/filter'
-include { RENAME_FASTQ_HEADERS_AFTER } from '../modules/local/rename_fastq_headers'
-include { SUMMARY_KRAKEN2 } from '../modules/local/summary_kraken2'
-include { SUMMARY_BLASTN } from '../modules/local/summary_blastn'
-include { SUMMARIZER } from '../modules/local/summarizer'
+include { RENAME_FASTQ_HEADERS_PRE }            from '../modules/local/rename_fastq_headers_pre'
+include { KRAKEN2PREPARATION }                  from '../modules/local/kraken2preparation'
+include { PARSE_KRAKEN2REPORT }                 from '../modules/local/parse_kraken2report'
+include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN }  from '../modules/local/isolate_ids_from_kraken2_to_blastn'
+include { PREPARE_FASTA4BLASTN }                from '../modules/local/prepare_fasta4blastn'
+include { FILTER_BLASTN_IDENTCOV }              from '../modules/local/filter_blastn_identcov'
+include { FILTER }                              from '../modules/local/filter'
+include { RENAME_FASTQ_HEADERS_AFTER }          from '../modules/local/rename_fastq_headers_after'
+include { SUMMARY_KRAKEN2 }                     from '../modules/local/summary_kraken2'
+include { SUMMARY_BLASTN }                      from '../modules/local/summary_blastn'
+include { SUMMARIZER }                          from '../modules/local/summarizer'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -62,10 +62,10 @@ include { SUMMARIZER } from '../modules/local/summarizer'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { FASTP } from '../modules/nf-core/fastp/main'
-include { KRAKEN2_KRAKEN2 } from '../modules/nf-core/kraken2/kraken2/main'
-include { BLAST_BLASTN } from '../modules/nf-core/blast/blastn/main'
-include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb'
+include { FASTP }                       from '../modules/nf-core/fastp/main'
+include { KRAKEN2_KRAKEN2 }             from '../modules/nf-core/kraken2/kraken2/main'
+include { BLAST_BLASTN }                from '../modules/nf-core/blast/blastn/main'
+include { BLAST_MAKEBLASTDB }           from '../modules/nf-core/blast/makeblastdb'
 
 
 /*

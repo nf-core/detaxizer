@@ -10,11 +10,10 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     input:
     tuple val(meta), path(kraken2results), path(tax2filter)
 
-
     output:
     tuple val(meta), path('*classified.txt'), emit: classified
-    tuple val(meta), path('*ids.txt'), emit: classified_ids
-    path "versions.yml", emit: versions
+    tuple val(meta), path('*ids.txt')       , emit: classified_ids
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,13 +35,16 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 d[ncbi_id] += kmer_count
         return d
 
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        version = version_output.split()[1]
+        return version
+
     tax2filter = []
     with open('${tax2filter}','r') as file:
         for line in file:
             line = int(line.strip('\\n'))
             tax2filter.append(line)
-
-
 
     filterList = []
     with open('${kraken2results}', 'r') as file:
@@ -73,11 +75,6 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
     with open('${meta.id}.ids.txt', 'w') as outfile:
         for entry in filterList:
             outfile.write(entry+"\\n")
-
-    def get_version():
-        version_output = subprocess.getoutput('python --version')
-        version = version_output.split()[1]
-        return version
 
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')

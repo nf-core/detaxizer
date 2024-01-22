@@ -12,7 +12,7 @@ process KRAKEN2PREPARATION {
 
     output:
     tuple val(meta), path( "database/" ), emit: db
-    path "versions.yml", emit: versions
+    path "versions.yml"                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

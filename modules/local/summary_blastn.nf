@@ -11,8 +11,8 @@ process SUMMARY_BLASTN {
 
 
     output:
-    tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
-    path("versions.yml"), emit: versions
+    tuple val(meta), path("*.blastn_summary.tsv")   , emit: summary
+    path("versions.yml")                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -83,7 +83,9 @@ process SUMMARY_BLASTN {
                 blastnsummary_dict["filteredblastn_3"] = "NA"
             return blastnsummary_dict
 
-
+    def get_version():
+        version_output = subprocess.getoutput('python --version')
+        return version_output.split()[1]
 
     blastn = [
         "${blastn_1}".strip("_FILE1").strip("_FILE2").strip("_FILE3"),
@@ -129,10 +131,6 @@ process SUMMARY_BLASTN {
     df = pd.DataFrame(final_summary_blastnfilteredblastn, index = ["${meta.id}"])
 
     df.to_csv("${meta.id}.blastn_summary.tsv", sep="\\t")
-
-    def get_version():
-        version_output = subprocess.getoutput('python --version')
-        return version_output.split()[1]
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:

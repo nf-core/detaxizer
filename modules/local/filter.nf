@@ -1,7 +1,7 @@
 process FILTER {
     tag "$meta.id"
     label 'process_high'
-//TODO
+
     conda "bioconda::seqkit=2.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
@@ -11,8 +11,8 @@ process FILTER {
     tuple val(meta), path(fastq), path(ids_to_remove)
 
     output:
-    tuple val(meta), path('*.fastq.gz'), emit: filtered
-    path "versions.yml", emit: versions
+    tuple val(meta), path('*.fastq.gz') , emit: filtered
+    path "versions.yml"                 , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,7 +33,6 @@ process FILTER {
         seqkit grep -v -f ${ids_to_remove} ${fastq} -o ${meta.id}_filtered_renamed.fastq.gz
     fi
 
-    # TODO Replace version number by expression that changes if the container version changes
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
