@@ -7,8 +7,7 @@ process SUMMARY_BLASTN {
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'biocontainers/pandas:1.5.2' }"
     input:
-    tuple val(meta), path(blastn_1), path(blastn_2), path(blastn_3), path(filteredblastn_1), path(filteredblastn_2), path(filteredblastn_3)
-
+    tuple val(meta), path(blastn_1), path(blastn_2), path(filteredblastn_1), path(filteredblastn_2)
 
     output:
     tuple val(meta), path("*.blastn_summary.tsv")   , emit: summary
@@ -49,7 +48,7 @@ process SUMMARY_BLASTN {
             raise ValueError("Ammount of 'NO' entries do not match in blastn and filteredblastn lists.")
         else:
             blastnsummary_dict = {}
-            if "NO" in blastn and blastn.count("NO") != 3:
+            if "NO" in blastn and blastn.count("NO") != 2:
                 blastn.remove("NO")
                 blastn.sort()
                 filteredblastn.remove("NO")
@@ -60,7 +59,7 @@ process SUMMARY_BLASTN {
                     blastnsummary_dict["blastn_1"] = entry
                 elif "_R2" in entry:
                     blastnsummary_dict["blastn_2"] = entry
-                elif "_R3" in entry:
+                elif "_longReads" in entry:
                     blastnsummary_dict["blastn_3"] = entry
 
             for entry in filteredblastn:
@@ -68,7 +67,7 @@ process SUMMARY_BLASTN {
                     blastnsummary_dict["filteredblastn_1"] = entry
                 elif "_R2" in entry:
                     blastnsummary_dict["filteredblastn_2"] = entry
-                elif "_R3" in entry:
+                elif "_longReads" in entry:
                     blastnsummary_dict["filteredblastn_3"] = entry
 
             summary_keys = blastnsummary_dict.keys()
@@ -89,14 +88,12 @@ process SUMMARY_BLASTN {
 
     blastn = [
         "${blastn_1}".strip("_FILE1").strip("_FILE2").strip("_FILE3"),
-        "${blastn_2}".strip("_FILE1").strip("_FILE2").strip("_FILE3"),
-        "${blastn_3}".strip("_FILE1").strip("_FILE2").strip("_FILE3")
+        "${blastn_2}".strip("_FILE1").strip("_FILE2").strip("_FILE3")
     ]
 
     filteredblastn = [
         "${filteredblastn_1}".strip("_FILE4").strip("_FILE5").strip("_FILE6"),
-        "${filteredblastn_2}".strip("_FILE4").strip("_FILE5").strip("_FILE6"),
-        "${filteredblastn_3}".strip("_FILE4").strip("_FILE5").strip("_FILE6")
+        "${filteredblastn_2}".strip("_FILE4").strip("_FILE5").strip("_FILE6")
     ]
 
     blastnsummary_dict = sort_blastn_and_filteredblastn(blastn,filteredblastn)
@@ -117,16 +114,10 @@ process SUMMARY_BLASTN {
             unique_ids_blastn.update(get_unique_read_ids(blastnsummary_dict[key]))
 
     final_summary_blastnfilteredblastn = {}
-    if counter_NA == 6:
-        final_summary_blastnfilteredblastn["blastn_unique_ids"] = pd.NA
-        final_summary_blastnfilteredblastn["blastn_lines"] = pd.NA
-        final_summary_blastnfilteredblastn["filteredblastn_unique_ids"] = pd.NA
-        final_summary_blastnfilteredblastn["filteredblastn_lines"] = pd.NA
-    else:
-        final_summary_blastnfilteredblastn["blastn_unique_ids"] = len(unique_ids_blastn)
-        final_summary_blastnfilteredblastn["blastn_lines"] = lines_blastn
-        final_summary_blastnfilteredblastn["filteredblastn_unique_ids"] = len(unique_ids_filteredblastn)
-        final_summary_blastnfilteredblastn["filteredblastn_lines"] = lines_filtered_blastn
+    final_summary_blastnfilteredblastn["blastn_unique_ids"] = len(unique_ids_blastn)
+    final_summary_blastnfilteredblastn["blastn_lines"] = lines_blastn
+    final_summary_blastnfilteredblastn["filteredblastn_unique_ids"] = len(unique_ids_filteredblastn)
+    final_summary_blastnfilteredblastn["filteredblastn_lines"] = lines_filtered_blastn
 
     df = pd.DataFrame(final_summary_blastnfilteredblastn, index = ["${meta.id}"])
 

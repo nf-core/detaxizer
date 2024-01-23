@@ -103,7 +103,6 @@ workflow DETAXIZER {
     // ! There is currently no tooling to help you write a sample sheet schema
     ch_input = Channel.fromSamplesheet('input')
 
-
     // check whether the sample sheet is correctly formated
     ch_input.map {
         meta, fastq_1, fastq_2, fastq_3 ->
@@ -113,8 +112,6 @@ workflow DETAXIZER {
             error("Please provide single end reads in following format in the sample sheet: base name, fastq_1,,fastq_3. fastq_1 is the short read file, fastq_3 the long read file. The wrongly formated entry is ${meta.id}.")
         }
     }
-
-
 
     ch_input.branch {
 	    shortReads: it[1]
@@ -149,7 +146,7 @@ workflow DETAXIZER {
     ch_long.longReads.map {
         meta, fastq_1, fastq_2, fastq_3 ->
         def newMeta = meta.clone()
-        newMeta.id = "${newMeta.id}_R3"
+        newMeta.id = "${newMeta.id}_longReads"
         newMeta.single_end = true
         newMeta.long_reads = true
         return [newMeta, fastq_3]
@@ -157,13 +154,11 @@ workflow DETAXIZER {
         ch_long
     }
 
-
     ch_combined_short_long = ch_short.mix(ch_long)
 
     //
     // MODULE: Rename Fastq headers
     //
-
     RENAME_FASTQ_HEADERS_PRE(ch_combined_short_long)
 
     //
@@ -177,7 +172,6 @@ workflow DETAXIZER {
     //
     // MODULE: Run fastp
     //
-
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,
         [],
@@ -189,11 +183,11 @@ workflow DETAXIZER {
     //
     // MODULE: Prepare Kraken2 Database
     //
-    ch_kraken2_db_with_meta = Channel.fromPath(params.kraken2db).map {
+    ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
             item -> [['id': "kraken2_db"], item]
             }
     KRAKEN2PREPARATION (
-        ch_kraken2_db_with_meta
+        ch_kraken2_db
     )
     ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions)
 
@@ -213,7 +207,6 @@ workflow DETAXIZER {
     //
     // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
     //
-
     PARSE_KRAKEN2REPORT(
         KRAKEN2_KRAKEN2.out.report.take(1)
     )
@@ -222,7 +215,6 @@ workflow DETAXIZER {
     //
     // MODULE: Isolate the hits for a certain taxa and subclasses
     //
-
     ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
 
     KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
@@ -236,52 +228,41 @@ workflow DETAXIZER {
     //
     // MODULE: Summarize the kraken2 results and the isolated kraken2 hits
     //
-
-    // preparation of the channels
-    ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified)
-    ch_prepare_summary_kraken2 = ch_prepare_summary_kraken2.map {
+    ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified).map {
         meta, path1, path2 ->
-        [ ['id': meta.id ], [ path1, path2 ] ]
+        def newMeta = meta.clone()
+        return [ newMeta, [ path1, path2 ] ]
     }
 
-    ch_combined_kraken2 = ch_prepare_summary_kraken2
-        .map { meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
+    ch_combined_kraken2 = ch_prepare_summary_kraken2.map {
+        meta, path ->
+        def newMeta = meta.clone()
+        newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+        return [ newMeta , path]
         }
         .groupTuple(by: [0])
-        .map { meta, path ->
-            path = path.flatten()
-            return [meta, path]
+        .map {
+            meta, path ->
+                path = path.flatten()
+                return [meta, path]
             }
-        .map { meta, path ->
-            if(path.size() == 4) {
-                def newMeta = meta.clone()
-                newMeta.short_and_long_reads = true
-                return [newMeta, path]
-            } else {
-                def newMeta = meta.clone()
-                newMeta.short_and_long_reads = false
-                return [newMeta, path]
-            }
-        }
 
-    // run of the process
     ch_kraken2_summary = SUMMARY_KRAKEN2(
         ch_combined_kraken2
         )
 
-    // Get Software version and prepare it for multiqc
     ch_versions = ch_versions.mix(ch_kraken2_summary.versions.first())
 
+    // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
     ch_kraken2_summary = ch_kraken2_summary.summary.map {
             meta, path -> [path]
         }
 
     if (!params.skip_blastn) {
+
         //
         // MODULE: Extract the hits to fasta format
         //
-
         ch_combined = FASTP.out.reads
         .join(
             ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
@@ -311,20 +292,20 @@ workflow DETAXIZER {
         ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
             .flatMap { meta, fastaList ->
                 if (fastaList.size() == 2) {
-            // Handle paired-end FASTA files
                 return [
-                    [['id': "${meta.id}_R1", 'single_end': false], fastaList[0]],
-                    [['id': "${meta.id}_R2", 'single_end': false], fastaList[1]]
+                    [ [ 'id': "${meta.id}_R1", 'single_end': false, 'long_reads': false ], fastaList[0] ],
+                    [ [ 'id': "${meta.id}_R2", 'single_end': false, 'long_reads': false ], fastaList[1] ]
                 ]
 
-            } else {
-            // Handle single-end FASTA files
-            return [ [ [ 'id': "${meta.id}", 'single_end': true], fastaList ] ]
-            }
+                } else {
+                    return [
+                        [ [ 'id': "${meta.id}", 'single_end': true, 'long_reads': meta.long_reads ], fastaList ] ]
+                }
 
             }
-        ch_blastn_db = ch_fasta4blastn.combine(BLAST_MAKEBLASTDB.out.db).map{ it -> [it[2], it[3]]}
-        ch_blastn_db.dump()
+
+        ch_blastn_db = ch_fasta4blastn.combine(BLAST_MAKEBLASTDB.out.db).map{ it -> [ it[2], it[3] ] }
+
         BLAST_BLASTN (
             ch_fasta4blastn,
             ch_blastn_db
@@ -332,15 +313,18 @@ workflow DETAXIZER {
 
         ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
 
-        ch_combined_blast = BLAST_BLASTN.out.txt
-                                    .map { meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
+        ch_combined_blast = BLAST_BLASTN.out.txt.map {
+            meta, path ->
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path ]
         }
 
-
-        ch_combined_blast = ch_combined_blast
-                                .groupTuple(by: [0])
-                                .map { meta, paths -> [ meta, paths.flatten() ] }
+        ch_combined_blast = ch_combined_blast.groupTuple(
+                by: [0]
+            ).map {
+                meta, paths -> [ meta, paths.flatten() ]
+                }
 
         FILTER_BLASTN_IDENTCOV (
             BLAST_BLASTN.out.txt
@@ -349,19 +333,18 @@ workflow DETAXIZER {
 
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2|_R3)", "")], path ]
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path ]
         }
-        ch_filtered_combined = ch_filtered_combined
-            .groupTuple ()
-            .map {
-                meta, paths ->
+        .groupTuple ()
+        .map {
+            meta, paths ->
                 paths = paths.flatten()
-                return [meta, paths]
-            }
+                return [ meta, paths ]
+        }
 
-        ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true)
-
-        ch_blastn_combined = ch_blastn_combined.map {
+        ch_blastn_combined = ch_combined_blast.join(ch_filtered_combined, remainder: true).map{
             meta, blastn, filteredblastn ->
                 if (blastn[0] == null){
                     blastn[0] = "${projectDir}/assets/NO_FILE1"
@@ -369,36 +352,34 @@ workflow DETAXIZER {
                 if (blastn[1] == null){
                     blastn[1] = "${projectDir}/assets/NO_FILE2"
                 }
-                if (blastn[2] == null){
-                    blastn[2] = "${projectDir}/assets/NO_FILE3"
-                }
                 if (filteredblastn[0] == null){
-                    filteredblastn[0] = "${projectDir}/assets/NO_FILE4"
+                    filteredblastn[0] = "${projectDir}/assets/NO_FILE3"
                 }
                 if (filteredblastn[1] == null){
-                    filteredblastn[1] = "${projectDir}/assets/NO_FILE5"
+                    filteredblastn[1] = "${projectDir}/assets/NO_FILE4"
                 }
-                if (filteredblastn[2] == null){
-                    filteredblastn[2] = "${projectDir}/assets/NO_FILE6"
-                }
-                return [meta, blastn[0], blastn[1], blastn[2], filteredblastn[0], filteredblastn[1], filteredblastn[2]]
+                return [meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1]]
             }
 
-        // Get Software version and prepare it for multiqc
         ch_blastn_summary = SUMMARY_BLASTN (
             ch_blastn_combined
         )
         ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
 
+    // Drop meta of blastn_summary as it is not needed for the combination step of summarizer
         ch_blastn_summary = ch_blastn_summary.summary.map {
                 meta, path -> [path]
             }
         }
+
     //
     // MODULE: Filter out the classified or validated reads
     //
-
-    if ( ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2 ) && !params.filter_trimmed ) {
+    if (
+            (
+                ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
+            ) && !params.filter_trimmed
+        ) {
         ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
             .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
         FILTER(
@@ -406,15 +387,21 @@ workflow DETAXIZER {
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
 
-    } else if ( params.enable_filter && !params.filter_trimmed ) {
+    } else if (
+        params.enable_filter && !params.filter_trimmed
+        ) {
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-        meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            meta, path ->
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path]
         }
         .groupTuple(by:[0])
         ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
             meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -423,22 +410,32 @@ workflow DETAXIZER {
             ch_blastnfilter
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    } else if ( ( ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2 ) && params.filter_trimmed ){
+    } else if (
+        (
+            ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
+        ) && params.filter_trimmed
+    ){
         ch_kraken2filter = FASTP.out.reads
             .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
         FILTER(
             ch_kraken2filter
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    } else if ( params.enable_filter && params.filter_trimmed ){
+    } else if (
+        params.enable_filter && params.filter_trimmed
+    ){
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-        meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            meta, path ->
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path]
         }
         .groupTuple(by:[0])
         ch_combined_short_long_id = FASTP.out.reads.map {
             meta, path ->
-            [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            def newMeta = meta.clone()
+            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
+            return [ newMeta, path]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -448,7 +445,6 @@ workflow DETAXIZER {
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     }
-
 
     //
     // MODULE: Rename headers after filtering
@@ -456,13 +452,18 @@ workflow DETAXIZER {
     if ( params.enable_filter ) {
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        def newMeta = meta.clone()
+        newMeta.id  = newMeta.id.replaceAll("(_R1|_R2)", "")
+        return [ newMeta, path ]
     }
 
     ch_filtered2rename = FILTER.out.filtered.map {
         meta, path ->
-        [ ['id': meta.id.replaceAll("(_R1|_R2)", "")], path ]
+        def newMeta = meta.clone()
+        newMeta.id  = newMeta.id.replaceAll("(_R1|_R2)", "")
+        return [ newMeta, path ]
     }
+
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
 
     RENAME_FASTQ_HEADERS_AFTER(
@@ -473,21 +474,18 @@ workflow DETAXIZER {
     // MODULE: Summarize the classification process
     //
 
-    //ch_kraken2_summary = ch_kraken2_summary.map { meta, paths -> [paths] }
     if (!params.skip_blastn){
-    ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect()
-    ch_summary_with_meta = ch_summary.map {
+    ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect().map {
             item -> [['id': "summary_of_kraken2_and_blastn"], item]
-            }
+        }
     } else {
-        ch_summary = ch_kraken2_summary
-        ch_summary_with_meta = ch_summary.map {
+        ch_summary = ch_kraken2_summary.map {
             item -> [['id': "summary_of_kraken2"], item]
-            }
+        }
     }
 
     ch_summary = SUMMARIZER (
-        ch_summary_with_meta
+        ch_summary
     )
     ch_versions = ch_versions.mix(ch_summary.versions)
 
