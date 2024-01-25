@@ -30,18 +30,15 @@ process SUMMARIZER {
 
     files_kraken2 = glob.glob('*.kraken2_summary.tsv')
     files_blastn = glob.glob('*.blastn_summary.tsv')
-    df_kraken2 = pd.DataFrame()
-    df_blastn = pd.DataFrame()
 
-    for file in files_kraken2:
-        df_local = pd.read_csv(file, sep="\\t", index_col=0)
-        df_kraken2 = pd.concat([df_kraken2,df_local])
-    for file in files_blastn:
-        df_local = pd.read_csv(file, sep="\\t", index_col=0)
-        df_blastn = pd.concat([df_blastn,df_local])
+    kraken2_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_kraken2]
+    df_kraken2 = pd.concat(kraken2_dfs)
 
-    df = pd.concat([df_kraken2, df_blastn.reindex(df_kraken2.index)],axis=1)
-    df.to_csv("summary.tsv",sep="\\t")
+    blastn_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_blastn]
+    df_blastn = pd.concat(blastn_dfs)
+
+    summary_df = df_kraken2.join(df_blastn)
+    summary_df.to_csv("summary.tsv", sep="\\t")
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:
