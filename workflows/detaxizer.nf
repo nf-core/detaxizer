@@ -200,7 +200,7 @@ workflow DETAXIZER {
         FASTP.out.reads,
         ch_kraken2_db,
         params.save_output_fastqs,
-        params.save_reads_assignment
+        true
     )
     ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 

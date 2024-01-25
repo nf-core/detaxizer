@@ -13,57 +13,49 @@
             "properties": {
                 "enable_filter": {
                     "type": "boolean",
-                    "description": "If set to True the filter is used. Otherwise only assessing is performed."
+                    "description": "If the filtering step should be carried out.",
+                    "help_text": "If set to True the filter is used. Otherwise only assessing is performed."
                 },
                 "filter_trimmed": {
                     "type": "boolean",
-                    "description": "If set to True the the preproccesed reads are used for filtering. Else the raw reads are used"
+                    "description": "If the pre-processed reads should be used by the filter.",
+                    "help_text": "If set to True the the pre-proccesed reads are used for filtering. Else the raw reads are used."
                 },
                 "skip_blastn": {
                     "type": "boolean",
-                    "description": "Defines if blastn should be used or not. By default blastn is used in the workflow. If also the filter is enabled the reads are filtered using the output from blastn."
+                    "help_text": "Defines if blastn should be used or not. By default blastn is used in the workflow. If also the filter is enabled the reads are filtered using the output from blastn.",
+                    "description": "If blastn should be skipped."
                 },
                 "filter_with_kraken2": {
                     "type": "boolean",
-                    "description": "If this is set to True the kraken2 ouput is used for filtering."
+                    "help_text": "If this is set to True the kraken2 output is used for filtering.",
+                    "description": "If the output of kraken2 should be used for filtering."
                 }
             }
         },
         "kraken2": {
             "title": "kraken2",
             "type": "object",
-            "description": "Parameters used by kraken2 to classify all reads provided.",
+            "description": "Parameters used by kraken2 to classify all reads provided. Fine-tuning of the isolation step can be done via the cutoff_* parameters. The taxon for assessing/filtering can be set using tax2filter.",
             "default": "",
             "properties": {
                 "kraken2db": {
                     "type": "string",
                     "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz",
-                    "description": "The database which is used in the classification step. For input how to use this parameter to fine-tune the step refer to usage/Databases/kraken2"
+                    "help_text": "For input how to use this parameter to fine-tune the step refer to usage/Databases/kraken2",
+                    "description": "The database which is used in the classification step."
                 },
                 "save_output_fastqs": {
                     "type": "boolean",
-                    "description": "If the unclassified and classified reads should be saved to different files. The default false should be used",
+                    "description": "If the unclassified and classified (only if the reads were classified as any taxon or not, not to confuse with the classification for the assessing/filtering) reads should be saved to different files.",
                     "hidden": true
-                },
-                "save_reads_assignment": {
-                    "type": "boolean",
-                    "default": true,
-                    "hidden": true,
-                    "description": "If the read assignments should be saved. Leave this to be true"
                 },
                 "kraken2confidence": {
                     "type": "number",
                     "default": 0.05,
-                    "description": "Confidence in the classification of a read as a certain taxon. Refere to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
-                }
-            }
-        },
-        "kraken2taxa": {
-            "title": "kraken2taxa",
-            "type": "object",
-            "description": "Used for fine-tuning the isolation step of kraken2 output. Also here the taxon/taxa to be assessed/to be filtered can be set.",
-            "default": "",
-            "properties": {
+                    "description": "Confidence in the classification of a read as a certain taxon.",
+                    "help_text": "Refer to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
+                },
                 "cutoff_tax2filter": {
                     "type": "integer",
                     "default": 2,
@@ -71,7 +63,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to unclassified is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
                     "minimum": 0,
                     "maximum": 1
@@ -79,7 +71,8 @@
                 "tax2filter": {
                     "type": "string",
                     "default": "Homo",
-                    "description": "The taxon or taxonomic group to be assessed or filtered by the pipeline."
+                    "description": "The taxon or taxonomic group to be assessed or filtered by the pipeline.",
+                    "help_text": "If a whole taxonomic group should be assessed/filtered use the highest taxonomic name in the hierarchy. E.g. if you want to assess for/filter out the whole taxonomic subtree from Mammalia onward provide this parameter with the string 'Mammalia'."
                 }
             }
         },
@@ -91,14 +84,8 @@
             "properties": {
                 "blast_coverage": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
-                },
-                "blast_outformat": {
-                    "type": "string",
-                    "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp",
-                    "hidden": true,
-                    "description": "Output format of blastn. Should not be changed!"
                 },
                 "blast_evalue": {
                     "type": "number",
@@ -107,7 +94,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
                 },
                 "blast_max_hsps": {
@@ -119,6 +106,18 @@
                     "type": "integer",
                     "default": 1,
                     "description": "Number of aligned sequences to keep by blastn. Is set to 1 to reduce computational burden."
+                }
+            }
+        },
+        "fastqc": {
+            "title": "FastQC",
+            "type": "object",
+            "description": "Quality control of raw reads.",
+            "default": "",
+            "properties": {
+                "save_fastqc": {
+                    "type": "boolean",
+                    "description": "Can be used to save the output from FastQC to the results folder."
                 }
             }
         },
@@ -431,16 +430,16 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/blastn"
-        },
-        {
             "$ref": "#/definitions/workflow_parameters"
         },
         {
-            "$ref": "#/definitions/kraken2taxa"
+            "$ref": "#/definitions/kraken2"
         },
         {
-            "$ref": "#/definitions/kraken2"
+            "$ref": "#/definitions/blastn"
+        },
+        {
+            "$ref": "#/definitions/fastqc"
         },
         {
             "$ref": "#/definitions/fastp_options"
