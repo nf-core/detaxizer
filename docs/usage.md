@@ -6,7 +6,7 @@
 
 ## Introduction
 
-nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are ***Homo*** and ***Homo sapiens***.
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are **_Homo_** and **_Homo sapiens_**.
 
 ## Samplesheet input
 
@@ -35,8 +35,8 @@ PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fa
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                              |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                                                              |
-| `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                                                         |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
+| `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
@@ -100,7 +100,7 @@ genome: 'GRCh38'
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
-To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default ***Homo***). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default **_Homo_**). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
 
 To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
 
