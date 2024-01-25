@@ -11,7 +11,7 @@ process PREPARE_FASTA4BLASTN {
     tuple val(meta), path(trimmedreads), path(kraken2results)
 
     output:
-    tuple val(meta), path("*.fasta"), emit: fasta
+    tuple val(meta), path("*.fa.gz"), emit: fasta
     path("versions.yml")            , emit: versions
 
     when:
@@ -20,16 +20,16 @@ process PREPARE_FASTA4BLASTN {
     script:
     """
     if [ "$meta.single_end" == "true" ]; then
-        seqkit fq2fa ${trimmedreads} -o out.fasta
-        seqkit grep -f ${kraken2results} out.fasta -o ${meta.id}.fasta
-        rm out.fasta
+        seqkit fq2fa ${trimmedreads} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}.fa.gz
+        rm out.fa.gz
     else
-        seqkit fq2fa ${trimmedreads[0]} -o out.fasta
-        seqkit grep -f ${kraken2results} out.fasta -o ${meta.id}_R1.fasta
-        rm out.fasta
-        seqkit fq2fa ${trimmedreads[1]} -o out.fasta
-        seqkit grep -f ${kraken2results} out.fasta -o ${meta.id}_R2.fasta
-        rm out.fasta
+        seqkit fq2fa ${trimmedreads[0]} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R1.fa.gz
+        rm out.fa.gz
+        seqkit fq2fa ${trimmedreads[1]} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R2.fa.gz
+        rm out.fa.gz
     fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
