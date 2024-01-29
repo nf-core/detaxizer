@@ -68,7 +68,7 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
 
 ### blastn
 
-blastn can validate the reads classified by kraken2 as the taxon/taxa to be assessed/to be filtered.
+blastn can validate the reads classified by kraken2 as the taxon/taxa to be assessed/to be filtered. To reduce computational burden only the highest scoring hit per input sequence is returned. If in any case one would need more information this can be done via the `max_hsps`- and `max_target_seqs`-flags in the `modules.config`.
 
 <details markdown="1">
 <summary>Output files</summary>

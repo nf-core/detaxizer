@@ -96,16 +96,6 @@
                     "type": "number",
                     "default": 40,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
-                },
-                "blast_max_hsps": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "The maximum amount of HSPs returned by blastn per query. To reduce computational burden it is set to 1. Only the best HSP is shown, judged by the e-value."
-                },
-                "blast_max_target_seqs": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Number of aligned sequences to keep by blastn. Is set to 1 to reduce computational burden."
                 }
             }
         },
