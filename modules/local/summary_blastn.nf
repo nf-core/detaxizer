@@ -87,13 +87,13 @@ process SUMMARY_BLASTN {
         return version_output.split()[1]
 
     blastn = [
-        "${blastn_1}".strip("_FILE1").strip("_FILE2").strip("_FILE3"),
-        "${blastn_2}".strip("_FILE1").strip("_FILE2").strip("_FILE3")
+        "${blastn_1}".replace("_FILE1","").replace("_FILE2",""),
+        "${blastn_2}".replace("_FILE1","").replace("_FILE2","")
     ]
 
     filteredblastn = [
-        "${filteredblastn_1}".strip("_FILE4").strip("_FILE5").strip("_FILE6"),
-        "${filteredblastn_2}".strip("_FILE4").strip("_FILE5").strip("_FILE6")
+        "${filteredblastn_1}".replace("_FILE3","").replace("_FILE4",""),
+        "${filteredblastn_2}".replace("_FILE3","").replace("_FILE4","")
     ]
 
     blastnsummary_dict = sort_blastn_and_filteredblastn(blastn,filteredblastn)
