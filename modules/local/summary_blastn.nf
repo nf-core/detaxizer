@@ -39,61 +39,51 @@ process SUMMARY_BLASTN {
                 if line == '\\n':
                     continue
                 else:
-                    line = line.split("\\t")[0].strip("/1").strip("/2")
-                    read_id_set.add(line)
+                    read_id_set.add(line.split("\\t")[0])
         return read_id_set
 
     def sort_blastn_and_filteredblastn(blastn,filteredblastn):
-        if blastn.count("NO") != filteredblastn.count("NO"):
-            raise ValueError("Ammount of 'NO' entries do not match in blastn and filteredblastn lists.")
-        else:
-            blastnsummary_dict = {}
-            if "NO" in blastn and blastn.count("NO") != 2:
-                blastn.remove("NO")
-                blastn.sort()
-                filteredblastn.remove("NO")
-                filteredblastn.sort()
+        blastnsummary_dict = {}
+        for entry in blastn:
+            if "_R1" in entry:
+                blastnsummary_dict["blastn_1"] = entry
+            elif "_R2" in entry:
+                blastnsummary_dict["blastn_2"] = entry
+            elif "_longReads" in entry:
+                blastnsummary_dict["blastn_3"] = entry
 
-            for entry in blastn:
-                if "_R1" in entry:
-                    blastnsummary_dict["blastn_1"] = entry
-                elif "_R2" in entry:
-                    blastnsummary_dict["blastn_2"] = entry
-                elif "_longReads" in entry:
-                    blastnsummary_dict["blastn_3"] = entry
+        for entry in filteredblastn:
+            if "_R1" in entry:
+                blastnsummary_dict["filteredblastn_1"] = entry
+            elif "_R2" in entry:
+                blastnsummary_dict["filteredblastn_2"] = entry
+            elif "_longReads" in entry:
+                blastnsummary_dict["filteredblastn_3"] = entry
 
-            for entry in filteredblastn:
-                if "_R1" in entry:
-                    blastnsummary_dict["filteredblastn_1"] = entry
-                elif "_R2" in entry:
-                    blastnsummary_dict["filteredblastn_2"] = entry
-                elif "_longReads" in entry:
-                    blastnsummary_dict["filteredblastn_3"] = entry
-
-            summary_keys = blastnsummary_dict.keys()
-            if "blastn_1" not in summary_keys and "filteredblastn_1" not in summary_keys:
-                blastnsummary_dict["blastn_1"] = "NA"
-                blastnsummary_dict["filteredblastn_1"] = "NA"
-            if "blastn_2" not in summary_keys and "filteredblastn_2" not in summary_keys:
-                blastnsummary_dict["blastn_2"] = "NA"
-                blastnsummary_dict["filteredblastn_2"] = "NA"
-            if "blastn_3" not in summary_keys and "filteredblastn_3" not in summary_keys:
-                blastnsummary_dict["blastn_3"] = "NA"
-                blastnsummary_dict["filteredblastn_3"] = "NA"
-            return blastnsummary_dict
+        summary_keys = blastnsummary_dict.keys()
+        if "blastn_1" not in summary_keys and "filteredblastn_1" not in summary_keys:
+            blastnsummary_dict["blastn_1"] = "NA"
+            blastnsummary_dict["filteredblastn_1"] = "NA"
+        if "blastn_2" not in summary_keys and "filteredblastn_2" not in summary_keys:
+            blastnsummary_dict["blastn_2"] = "NA"
+            blastnsummary_dict["filteredblastn_2"] = "NA"
+        if "blastn_3" not in summary_keys and "filteredblastn_3" not in summary_keys:
+            blastnsummary_dict["blastn_3"] = "NA"
+            blastnsummary_dict["filteredblastn_3"] = "NA"
+        return blastnsummary_dict
 
     def get_version():
         version_output = subprocess.getoutput('python --version')
         return version_output.split()[1]
 
     blastn = [
-        "${blastn_1}".replace("_FILE1","").replace("_FILE2",""),
-        "${blastn_2}".replace("_FILE1","").replace("_FILE2","")
+        "${blastn_1}",
+        "${blastn_2}"
     ]
 
     filteredblastn = [
-        "${filteredblastn_1}".replace("_FILE3","").replace("_FILE4",""),
-        "${filteredblastn_2}".replace("_FILE3","").replace("_FILE4","")
+        "${filteredblastn_1}",
+        "${filteredblastn_2}"
     ]
 
     blastnsummary_dict = sort_blastn_and_filteredblastn(blastn,filteredblastn)
@@ -101,11 +91,10 @@ process SUMMARY_BLASTN {
     unique_ids_filteredblastn = set()
     lines_blastn = 0
     lines_filtered_blastn = 0
-    counter_NA = 0
+
     for key in blastnsummary_dict.keys():
         if blastnsummary_dict[key] == "NA":
-            blastnsummary_dict[key] = pd.NA
-            counter_NA += 1
+            continue
         elif "filteredblastn" in key:
             lines_filtered_blastn += get_lines_in_file(blastnsummary_dict[key])
             unique_ids_filteredblastn.update(get_unique_read_ids(blastnsummary_dict[key]))
