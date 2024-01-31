@@ -106,7 +106,7 @@ To change the organism(s) which should be validated as contamination(s) by blast
 
 Skipping blastn can be done by using `--skip_blastn`.
 
-Optionally enabling the filter can be done by using `--enable_filter`. By default the raw reads are taken for filtering. If you want to use the preprocessed reads use the `--filter_trimmed` flag. By default the blastn output is taken for filtering. To use the kraken2 output for filtering while still using blast for validation use the `filter_with_kraken2` flag. If you enable the filter and use the `--skip_blastn` option, kraken2 output is taken automatically for filtering.
+Optionally enabling the filter can be done by using `--enable_filter`. By default the raw reads are taken for filtering. If you want to use the preprocessed reads use the `--filter_trimmed` flag. By default the blastn output is taken for filtering. To use the kraken2 output for filtering while still using blast for validation use the `--filter_with_kraken2` flag. If you enable the filter and use the `--skip_blastn` option, kraken2 output is taken automatically for filtering.
 
 ### Updating the pipeline
 
