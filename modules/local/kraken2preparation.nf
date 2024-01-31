@@ -11,8 +11,8 @@ process KRAKEN2PREPARATION {
     tuple val(meta), path(db)
 
     output:
-    tuple val(meta), path( "database/" ), emit: db
-    path "versions.yml"                 , emit: versions
+    path( "database/" ) , emit: db
+    path "versions.yml" , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

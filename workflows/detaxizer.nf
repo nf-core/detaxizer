@@ -194,11 +194,10 @@ workflow DETAXIZER {
     //
     // MODULE: Run Kraken2
     //
-    ch_kraken2_db = FASTP.out.reads.combine(KRAKEN2PREPARATION.out.db).map{ it -> [it[3]] }.first()
 
     KRAKEN2_KRAKEN2 (
         FASTP.out.reads,
-        ch_kraken2_db,
+        KRAKEN2PREPARATION.out.db.first(),
         params.save_output_fastqs,
         true
     )
