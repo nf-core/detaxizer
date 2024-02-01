@@ -114,8 +114,8 @@ workflow DETAXIZER {
     }
 
     ch_input.branch {
-	    shortReads: it[1]
-	    }.set {
+        shortReads: it[1]
+        }.set {
             ch_short
         }
 
