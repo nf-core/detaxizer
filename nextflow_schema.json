@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipline to idenitfy (and remove) certain sequences from metagenomes using kraken2 and blast. Default organism to identify (and remove) is human. Removal is optional (and will be implemented in the future).",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data using kraken2 and blast. Default taxon to identify (and remove) is Homo. Removal is optional.",
     "type": "object",
     "definitions": {
         "input_output_options": {
