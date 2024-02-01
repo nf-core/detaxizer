@@ -2,109 +2,119 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from metagenomes using kraken2 and blast. Default organism to identify (and remove) is human. Removal is optional (and will be implemented in the future).",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data using kraken2 and blast. Default taxon to identify (and remove) is Homo. Removal is optional.",
     "type": "object",
     "definitions": {
-        "blastn": {
-            "title": "blastn",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "blastn_db": {
-                    "type": "string"
-                },
-                "blast_coverage": {
-                    "type": "number",
-                    "default": 90
-                },
-                "blast_outformat": {
-                    "type": "string",
-                    "default": "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs qcovhsp"
-                },
-                "blast_evalue": {
-                    "type": "number",
-                    "default": 0.1
-                },
-                "blast_identity": {
-                    "type": "number",
-                    "default": 90
-                },
-                "blast_max_hsps": {
-                    "type": "integer",
-                    "default": 1
-                },
-                "blast_max_target_seqs": {
-                    "type": "integer",
-                    "default": 1
-                }
-            }
-        },
         "workflow_parameters": {
             "title": "Workflow parameters",
             "type": "object",
-            "description": "",
+            "description": "Parameters which control the workflow.",
             "default": "",
             "properties": {
-                "single_end": {
-                    "type": "boolean"
-                },
-                "long_read": {
-                    "type": "boolean"
-                },
                 "enable_filter": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "If the filtering step should be carried out.",
+                    "help_text": "If set to True the filter is used. Otherwise only assessing is performed."
                 },
                 "filter_trimmed": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "If the pre-processed reads should be used by the filter.",
+                    "help_text": "If set to True the the pre-proccesed reads are used for filtering. Else the raw reads are used."
                 },
                 "skip_blastn": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "help_text": "Defines if blastn should be used or not. By default blastn is used in the workflow. If also the filter is enabled the reads are filtered using the output from blastn.",
+                    "description": "If blastn should be skipped."
                 },
                 "filter_with_kraken2": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "kraken2taxa": {
-            "title": "kraken2taxa",
-            "type": "object",
-            "description": "",
-            "default": "",
-            "properties": {
-                "tax2filter": {
-                    "type": "string",
-                    "default": "Mammalia"
+                    "type": "boolean",
+                    "help_text": "If this is set to True the kraken2 output is used for filtering.",
+                    "description": "If the output of kraken2 should be used for filtering."
                 }
             }
         },
         "kraken2": {
             "title": "kraken2",
             "type": "object",
-            "description": "",
+            "description": "Parameters used by kraken2 to classify all reads provided. Fine-tuning of the isolation step can be done via the cutoff_* parameters. The taxon for assessing/filtering can be set using tax2filter.",
             "default": "",
             "properties": {
                 "kraken2db": {
                     "type": "string",
-                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20230605.tar.gz"
+                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz",
+                    "help_text": "For input how to use this parameter to fine-tune the step refer to usage/Databases/kraken2",
+                    "description": "The database which is used in the classification step."
                 },
                 "save_output_fastqs": {
-                    "type": "boolean"
-                },
-                "save_reads_assignment": {
                     "type": "boolean",
-                    "default": true
+                    "description": "If the unclassified and classified (only if the reads were classified as any taxon or not, not to confuse with the classification for the assessing/filtering) reads should be saved to different files.",
+                    "hidden": true
                 },
                 "kraken2confidence": {
                     "type": "number",
-                    "default": 0.05
+                    "default": 0.05,
+                    "description": "Confidence in the classification of a read as a certain taxon.",
+                    "help_text": "Refer to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
+                },
+                "cutoff_tax2filter": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
+                },
+                "cutoff_unclassified": {
+                    "type": "number",
+                    "default": 0,
+                    "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to unclassified is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "tax2filter": {
+                    "type": "string",
+                    "default": "Homo",
+                    "description": "The taxon or taxonomic group to be assessed or filtered by the pipeline.",
+                    "help_text": "If a whole taxonomic group should be assessed/filtered use the highest taxonomic name in the hierarchy. E.g. if you want to assess for/filter out the whole taxonomic subtree from Mammalia onward provide this parameter with the string 'Mammalia'."
+                }
+            }
+        },
+        "blastn": {
+            "title": "blastn",
+            "type": "object",
+            "description": "Parameters to fine-tune the output of blastn.",
+            "default": "",
+            "properties": {
+                "blast_coverage": {
+                    "type": "number",
+                    "default": 40,
+                    "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
+                },
+                "blast_evalue": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "The expected(e)-value contains information on how many hits of the same score can be found in a database of the size used in the query by chance. The parameter can be used to fine-tune the validation step."
+                },
+                "blast_identity": {
+                    "type": "number",
+                    "default": 40,
+                    "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
+                }
+            }
+        },
+        "fastqc": {
+            "title": "FastQC",
+            "type": "object",
+            "description": "Quality control of raw reads.",
+            "default": "",
+            "properties": {
+                "save_fastqc": {
+                    "type": "boolean",
+                    "description": "Can be used to save the output from FastQC to the results folder."
                 }
             }
         },
         "fastp_options": {
             "title": "fastp options",
             "type": "object",
-            "description": "",
+            "description": "Options to control the behavior of fastp",
             "default": "",
             "properties": {
                 "reads_minlength": {
@@ -154,7 +164,8 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "results"
                 },
                 "email": {
                     "type": "string",
@@ -180,7 +191,8 @@
                     "type": "string",
                     "description": "Name of iGenomes reference.",
                     "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details.",
+                    "default": "GRCh38"
                 },
                 "fasta": {
                     "type": "string",
@@ -205,7 +217,7 @@
                 "igenomes_base": {
                     "type": "string",
                     "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes",
+                    "default": "s3://ngi-igenomes/igenomes/",
                     "format": "directory-path",
                     "fa_icon": "fas fa-cloud-download-alt"
                 }
@@ -408,16 +420,16 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/blastn"
-        },
-        {
             "$ref": "#/definitions/workflow_parameters"
         },
         {
-            "$ref": "#/definitions/kraken2taxa"
+            "$ref": "#/definitions/kraken2"
         },
         {
-            "$ref": "#/definitions/kraken2"
+            "$ref": "#/definitions/blastn"
+        },
+        {
+            "$ref": "#/definitions/fastqc"
         },
         {
             "$ref": "#/definitions/fastp_options"

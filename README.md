@@ -13,23 +13,15 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that initially checks for the presence of a specific taxon in fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing using fastp and quality assessment via FastQC, followed by taxon classification with kraken2, and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that initially checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing using fastp and quality assessment via FastQC, followed by taxon classification with kraken2 (the kraken2 database can be changed), and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
 3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
-5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the processed reads)
+5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from kraken2 or blastn)
 6. Summary of the processes
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
@@ -37,9 +29,6 @@
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
 
 First, prepare a samplesheet with your input data that looks as follows:
 
@@ -50,13 +39,9 @@ sample,fastq_1,fastq_2,fastq_3
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,AEG588A1_S1_L002_R3_001.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project.
-
--->
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. If you only have long reads put the reference to your file(s) in the forth column, leaving column 2 and 3 empty.
 
 Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
 nextflow run nf-core/detaxizer \
@@ -79,13 +64,11 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/detaxizer was originally written by Jannik Seidel.
+nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/jannikseidelQBiC) at the [Quantitative Biology Center(QBiC)](http://qbic.life/).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-Daniel Straub
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+[Daniel Straub](https://github.com/d4straub)
 
 ## Contributions and Support
 

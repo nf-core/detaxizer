@@ -1,5 +1,8 @@
 process SUMMARY_KRAKEN2 {
+    tag "$meta.id"
+    label 'process_single'
 
+    conda "conda-forge::python=3.10.4 pandas=1.5.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
         'biocontainers/pandas:1.5.2' }"
@@ -8,8 +11,11 @@ process SUMMARY_KRAKEN2 {
 
 
     output:
-    tuple val(meta), path("*.kraken2_summary.tsv"), emit: summary
-    path("versions.yml"), emit: versions
+    tuple val(meta), path("*.kraken2_summary.tsv")  , emit: summary
+    path("versions.yml")                            , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """
@@ -40,46 +46,30 @@ process SUMMARY_KRAKEN2 {
                     lines += 1
         return lines
 
-    if "${meta.short_and_long_reads}" == "true":
-        list_files = "${kraken2}".split(" ")
-        kraken2_dict = sort_list_of_files_by_pattern(list_files)
-        kraken2_dict_lines = {
-            "kraken2": 0,
-            "isolatedkraken2": 0
-        }
-        for key in kraken2_dict.keys():
-            for entry in kraken2_dict[key]:
-                kraken2_dict_lines[key] += calculate_lines_of_file(entry)
-            kraken2_dict_lines[key] = [ kraken2_dict_lines[key] ]
-        df = pd.DataFrame(kraken2_dict_lines)
-
-        df.index = ["${meta.id}"]
-
-        df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
-    else:
-        list_files = "${kraken2}".split(" ")
-        kraken2_dict = sort_list_of_files_by_pattern(list_files)
-        kraken2_dict_lines = {
-            "kraken2": 0,
-            "isolatedkraken2": 0
-        }
-        for key in kraken2_dict.keys():
-            for entry in kraken2_dict[key]:
-                kraken2_dict_lines[key] += calculate_lines_of_file(entry)
-            kraken2_dict_lines[key] = [ kraken2_dict_lines[key] ]
-        df = pd.DataFrame(kraken2_dict_lines)
-
-        df.index = ["${meta.id}"]
-
-        df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
-
     def get_version():
         version_output = subprocess.getoutput('python --version')
         return version_output.split()[1]
+
+    list_files = "${kraken2}".split(" ")
+    kraken2_dict = sort_list_of_files_by_pattern(list_files)
+    kraken2_dict_lines = {
+        "kraken2": 0,
+        "isolatedkraken2": 0
+    }
+    for key in kraken2_dict.keys():
+        for entry in kraken2_dict[key]:
+            kraken2_dict_lines[key] += calculate_lines_of_file(entry)
+        kraken2_dict_lines[key] = [ kraken2_dict_lines[key] ]
+    df = pd.DataFrame(kraken2_dict_lines)
+
+    df.index = ["${meta.id}"]
+
+    df.to_csv("${meta.id}.kraken2_summary.tsv",sep='\\t')
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
         f.write(f'    python: {get_version()}\\n')
+        f.write(f'    pandas: {pd.__version__}\\n')
     """
 }

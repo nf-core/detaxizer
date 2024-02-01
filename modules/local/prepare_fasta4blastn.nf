@@ -1,36 +1,39 @@
 process PREPARE_FASTA4BLASTN {
+    tag "$meta.id"
+    label 'process_single'
 
+    conda "bioconda::seqkit=2.6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/seqtk%3A1.4--he4a0461_1':
-        'biocontainers/seqtk:1.3--ha92aebf_0' }"
+        'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
+        'biocontainers/seqkit:2.6.0--h9ee0642_0'}"
 
     input:
     tuple val(meta), path(trimmedreads), path(kraken2results)
 
     output:
-    tuple val(meta), path("*.fasta"), emit: fasta
-    tuple val(meta), path("ids*.txt"), emit: ids
-    path("versions.yml"), emit: versions
+    tuple val(meta), path("*.fa.gz"), emit: fasta
+    path("versions.yml")            , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """
-
+    if [ "$meta.single_end" == "true" ]; then
+        seqkit fq2fa ${trimmedreads} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}.fa.gz
+        rm out.fa.gz
+    else
+        seqkit fq2fa ${trimmedreads[0]} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R1.fa.gz
+        rm out.fa.gz
+        seqkit fq2fa ${trimmedreads[1]} -o out.fa.gz
+        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R2.fa.gz
+        rm out.fa.gz
+    fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        seqtk: 1.4
+        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
     END_VERSIONS
-
-    if [ "$meta.single_end" == "true" ]; then
-
-        awk -F'\t' '{print \$2}' ${kraken2results} > ids.txt
-        seqtk subseq ${trimmedreads} ids.txt | seqtk seq -A - > ${meta.id}.fasta
-
-    else
-        awk -F'\t' '{print \$2"/1"}' ${kraken2results} > ids_R1.txt
-        awk -F'\t' '{print \$2"/2"}' ${kraken2results} > ids_R2.txt
-
-        seqtk subseq ${trimmedreads[0]} ids_R1.txt | seqtk seq -A - > ${meta.id}_R1.fasta
-        seqtk subseq ${trimmedreads[1]} ids_R2.txt | seqtk seq -A - > ${meta.id}_R2.fasta
-    fi
     """
 }
