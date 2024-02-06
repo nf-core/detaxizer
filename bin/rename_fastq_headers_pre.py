@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Jannik Seidel and released under MIT license.
+
 from Bio import SeqIO, bgzf
 import gzip
 import sys
