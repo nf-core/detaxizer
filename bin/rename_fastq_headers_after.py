@@ -22,8 +22,9 @@ def main():
 
     fastq = args.input
 
-    with gzip.open(args.jsondict, 'r') as file:
-        headerDict = json.load(file)
+    with gzip.open(args.jsondict, 'rt', encoding='utf-8') as file:
+        textDict = file.read()
+        headerDict = json.loads(textDict)
 
     if len(fastq) == 2:
         with gzip.open(fastq[0], "rt") as handle1, gzip.open(fastq[1], "rt") as handle2:
