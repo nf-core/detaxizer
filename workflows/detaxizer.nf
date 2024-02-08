@@ -478,7 +478,7 @@ workflow DETAXIZER {
             item -> [['id': "summary_of_kraken2_and_blastn"], item]
         }
     } else {
-        ch_summary = ch_kraken2_summary.map {
+        ch_summary = ch_kraken2_summary.collect().map {
             item -> [['id': "summary_of_kraken2"], item]
         }
     }

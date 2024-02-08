@@ -33,12 +33,14 @@ process SUMMARIZER {
 
     kraken2_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_kraken2]
     df_kraken2 = pd.concat(kraken2_dfs)
-
-    blastn_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_blastn]
-    df_blastn = pd.concat(blastn_dfs)
-
-    summary_df = df_kraken2.join(df_blastn)
-    summary_df.to_csv("summary.tsv", sep="\\t")
+    if files_blastn != []:
+        blastn_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_blastn]
+        df_blastn = pd.concat(blastn_dfs)
+        summary_df = df_kraken2.join(df_blastn)
+        summary_df.to_csv("summary.tsv", sep="\\t")
+    else:
+        summary_df = df_kraken2
+        summary_df.to_csv("summary.tsv", sep="\\t")
 
     # Generate the version.yaml for MultiQC
     with open('versions.yml', 'w') as f:
