@@ -50,11 +50,7 @@ jobs:
     strategy:
       matrix:
         # Run remaining test profiles with minimum nextflow version
-        profile:
-          [
-            test_skip_blastn,
-            test_filter_preprocessed
-          ]
+        profile: [test_skip_blastn, test_filter_preprocessed]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v4
