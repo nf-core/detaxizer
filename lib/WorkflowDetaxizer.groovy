@@ -53,13 +53,14 @@ class WorkflowDetaxizer {
 
     public static String toolCitationText(params) {
 
-        // TODO nf-core: Optionally add in-text citation tools to this list.
-        // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-        // Uncomment function in methodsDescriptionText to render in MultiQC report
         def citation_text = [
                 "Tools used in the workflow included:",
                 "FastQC (Andrews 2010),",
-                "MultiQC (Ewels et al. 2016)",
+                "MultiQC (Ewels et al. 2016),",
+                "Kraken2 (Wood et al. 2019),",
+                !params["skip_blastn"] ? "BLAST (Altschul et al. 1990)," : "",
+                !params["skip_blastn"] | params["enable_filter"] ? "seqkit (Shen et al. 2016)," : "",
+                "fastp (Chen et al. 2018)",
                 "."
             ].join(' ').trim()
 
@@ -68,12 +69,13 @@ class WorkflowDetaxizer {
 
     public static String toolBibliographyText(params) {
 
-        // TODO Optionally add bibliographic entries to this list.
-        // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-        // Uncomment function in methodsDescriptionText to render in MultiQC report
         def reference_text = [
                 "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
-                "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
+                "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>",
+                "<li>Wood, D. E., Lu, J. & Langmead, B. (2019) Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257. doi: 10.1186/s13059-019-1891-0</li>",
+                !params["skip_blastn"] ? "<li>Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. (1990) Basic local alignment search tool. Journal of Molecular Biology 215, 403–410. doi: 10.1016/s0022-2836(05)80360-2.</li>" : "",
+                !params["skip_blastn"] | params["enable_filter"] ? "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi: 10.1371/journal.pone.0163962</li>" : "",
+                "<li>Chen, S., Zhou, Y., Chen, Y. & Gu, J. (2018) fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890. doi: 10.1093/bioinformatics/bty560</li>"
             ].join(' ').trim()
 
         return reference_text
@@ -93,9 +95,8 @@ class WorkflowDetaxizer {
         meta["tool_citations"] = ""
         meta["tool_bibliography"] = ""
 
-        // TODO Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-        //meta["tool_citations"] = toolCitationText(params).replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-        //meta["tool_bibliography"] = toolBibliographyText(params)
+        meta["tool_citations"] = toolCitationText(params).replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+        meta["tool_bibliography"] = toolBibliographyText(params)
 
 
         def methods_text = mqc_methods_yaml.text

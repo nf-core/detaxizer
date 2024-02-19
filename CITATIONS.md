@@ -30,6 +30,18 @@
 
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
+- [seqkit](https://bioinf.shenwei.me/seqkit/)
+
+  > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi:10.1371/journal.pone.0163962
+
+## Python
+
+- [Python](https://www.python.org/)
+
+- [biopython](https://biopython.org/)
+
+  > Cock, P. J. A., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., & de Hoon, M. J. L. (2009). Biopython: freely available Python tools for computational molecular biology and bioinformatics. In Bioinformatics (Vol. 25, Issue 11, pp. 1422–1423). Oxford University Press (OUP). doi:10.1093/bioinformatics/btp163
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
