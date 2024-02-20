@@ -33,8 +33,8 @@ def renameReadsPaired(reads):
             read_rv_stripped = read_rv_stripped + " 2:N:10:"
             read_renamed = [read_fw_stripped,read_rv_stripped]
     elif "/1" in read_fw and "/2" in read_rv and " " in read_fw and " " in read_rv:
-        read_fw_stripped = read_fw.strip("1").strip("/").split(" ")[0]
-        read_rv_stripped = read_rv.strip("2").strip("/").split(" ")[0]
+        read_fw_stripped = read_fw.split(" ")[0].strip("1").strip("/")
+        read_rv_stripped = read_rv.split(" ")[0].strip("2").strip("/")
         if read_fw_stripped != read_rv_stripped:
             sys.exit("Read IDs were not matching! Please provide matching headers.")
         else:
@@ -52,8 +52,26 @@ def renameReadsPaired(reads):
             read_fw_stripped = read_fw_stripped + " 1:N:10:"
             read_rv_stripped = read_rv_stripped + " 2:N:10:"
             read_renamed = [read_fw_stripped,read_rv_stripped]
+    elif " " in read_fw and " " in read_rv:
+        read_fw_stripped = read_fw.split(" ")[0]
+        read_rv_stripped = read_rv.split(" ")[0]
+        if read_fw_stripped != read_rv_stripped:
+            sys.exit("Read IDs were not matching! Please provide matching headers.")
+        else:
+            read_dict[read_fw_stripped] = [read_fw, read_rv]
+            read_fw_stripped = read_fw_stripped + " 1:N:10:"
+            read_rv_stripped = read_rv_stripped + " 2:N:10:"
+            read_renamed = [read_fw_stripped,read_rv_stripped]
     else:
-        sys.exit("The headers were not matching the patterns!")
+        read_fw_stripped = read_fw
+        read_rv_stripped = read_rv
+        if read_fw_stripped != read_rv_stripped:
+            sys.exit("Read IDs were not matching! Please provide matching headers.")
+        else:
+            read_dict[read_fw_stripped] = [read_fw, read_rv]
+            read_fw_stripped = read_fw_stripped + " 1:N:10:"
+            read_rv_stripped = read_rv_stripped + " 2:N:10:"
+            read_renamed = [read_fw_stripped,read_rv_stripped]
     return (read_dict,read_renamed)
 
 def renameReadSingle(read):
@@ -64,7 +82,7 @@ def renameReadSingle(read):
         read_fw_stripped = read_fw_stripped + " 1:N:10:"
         read_renamed = [read_fw_stripped]
     elif "/1" in read and " " in read:
-        read_fw_stripped = read.strip("1").strip("/").split(" ")[0]
+        read_fw_stripped = read.split(" ")[0].strip("1").strip("/")
         read_dict[read_fw_stripped] = [read]
         read_fw_stripped = read_fw_stripped + " 1:N:10:"
         read_renamed = [read_fw_stripped]
@@ -79,7 +97,10 @@ def renameReadSingle(read):
         read_fw_stripped = read_fw_stripped + " 1:N:10:"
         read_renamed = [read_fw_stripped]
     else:
-        sys.exit("The headers were not matching the patterns!")
+        read_fw_stripped = read
+        read_dict[read_fw_stripped] = [read]
+        read_fw_stripped = read_fw_stripped + " 1:N:10:"
+        read_renamed = [read_fw_stripped]
     return (read_dict,read_renamed)
 
 def main():
