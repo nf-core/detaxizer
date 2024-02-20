@@ -64,7 +64,7 @@
                 "cutoff_unclassified": {
                     "type": "number",
                     "default": 0,
-                    "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to unclassified is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
+                    "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to (unclassified+sum(to filter/assess)) is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
                     "minimum": 0,
                     "maximum": 1
                 },
