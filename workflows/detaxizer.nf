@@ -1,38 +1,21 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PRINT PARAMS SUMMARY
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { paramsSummaryLog; paramsSummaryMap; fromSamplesheet } from 'plugin/nf-validation'
 
-def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-def summary_params = paramsSummaryMap(workflow)
+include { FASTQC                 } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap       } from 'plugin/nf-validation'
+include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
 
-// Print parameter summary log to screen
-log.info logo + paramsSummaryLog(workflow) + citation
-
-WorkflowDetaxizer.initialise(params, log)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-nextflow.enable.dsl=2
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+include { FASTP }                       from '../modules/nf-core/fastp/main'
+include { KRAKEN2_KRAKEN2 }             from '../modules/nf-core/kraken2/kraken2/main'
+include { BLAST_BLASTN }                from '../modules/nf-core/blast/blastn/main'
+include { BLAST_MAKEBLASTDB }           from '../modules/nf-core/blast/makeblastdb/main'
 
 include { RENAME_FASTQ_HEADERS_PRE }            from '../modules/local/rename_fastq_headers_pre'
 include { KRAKEN2PREPARATION }                  from '../modules/local/kraken2preparation'
@@ -45,37 +28,11 @@ include { RENAME_FASTQ_HEADERS_AFTER }          from '../modules/local/rename_fa
 include { SUMMARY_KRAKEN2 }                     from '../modules/local/summary_kraken2'
 include { SUMMARY_BLASTN }                      from '../modules/local/summary_blastn'
 include { SUMMARIZER }                          from '../modules/local/summarizer'
-
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// MODULE: Installed directly from nf-core/modules
-//
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { FASTP }                       from '../modules/nf-core/fastp/main'
-include { KRAKEN2_KRAKEN2 }             from '../modules/nf-core/kraken2/kraken2/main'
-include { BLAST_BLASTN }                from '../modules/nf-core/blast/blastn/main'
-include { BLAST_MAKEBLASTDB }           from '../modules/nf-core/blast/makeblastdb'
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-// Info required for completion email and summary
-def multiqc_report = []
 
 // speficy the fasta parameter if it is not provided via --fasta
 def fasta = false
@@ -90,30 +47,26 @@ if (!params.fasta) {
     fasta = params.fasta
 }
 
-
-
 workflow DETAXIZER {
 
+    take:
+    ch_samplesheet // channel: samplesheet read in from --input
+
+    main:
     ch_versions = Channel.empty()
-
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-
-    // ! There is currently no tooling to help you write a sample sheet schema
-    ch_input = Channel.fromSamplesheet('input')
+    ch_multiqc_files = Channel.empty()
 
     // check whether the sample sheet is correctly formated
-    ch_input.map {
-        meta, fastq_1, fastq_2, fastq_3 ->
-        if (!fastq_1 && !fastq_3){
-            error("Please provide at least one single end file as input in the sample sheet for ${meta.id}.")
-        } else if (!fastq_1 && fastq_2 && fastq_3){
-            error("Please provide single end reads in following format in the sample sheet: base name, fastq_1,,fastq_3. fastq_1 is the short read file, fastq_3 the long read file. The wrongly formated entry is ${meta.id}.")
+    ch_samplesheet.map {
+            meta, fastq_1, fastq_2, fastq_3 ->
+                if (!fastq_1 && !fastq_3){
+                    error("Please provide at least one single end file as input in the sample sheet for ${meta.id}.")
+                } else if (!fastq_1 && fastq_2 && fastq_3){
+                    error("Please provide single end reads in following format in the sample sheet: base name, fastq_1,,fastq_3. fastq_1 is the short read file, fastq_3 the long read file. The wrongly formated entry is ${meta.id}.")
+            }
         }
-    }
 
-    ch_input.branch {
+    ch_samplesheet.branch {
         shortReads: it[1]
         }.set {
             ch_short
@@ -137,7 +90,7 @@ workflow DETAXIZER {
         ch_short
     }
 
-    ch_input.branch {
+    ch_samplesheet.branch {
         longReads: it[3]
     }.set {
         ch_long
@@ -154,12 +107,14 @@ workflow DETAXIZER {
         ch_long
     }
 
-    ch_combined_short_long = ch_short.mix(ch_long)
+    ch_short_long = ch_short.mix(ch_long)
+
 
     //
     // MODULE: Rename Fastq headers
     //
-    RENAME_FASTQ_HEADERS_PRE(ch_combined_short_long)
+    RENAME_FASTQ_HEADERS_PRE(ch_short_long)
+
 
     //
     // MODULE: Run FastQC
@@ -167,6 +122,7 @@ workflow DETAXIZER {
     FASTQC (
         RENAME_FASTQ_HEADERS_PRE.out.fastq
     )
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     //
@@ -488,26 +444,26 @@ workflow DETAXIZER {
     )
     ch_versions = ch_versions.mix(ch_summary.versions)
 
+    // Collate and save software versions
+    //
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
+        .set { ch_collated_versions }
 
-
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
 
     //
     // MODULE: MultiQC
     //
-    workflow_summary    = WorkflowDetaxizer.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
-
-    methods_description    = WorkflowDetaxizer.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
-    ch_methods_description = Channel.value(methods_description)
-
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
+    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
 
     MULTIQC (
         ch_multiqc_files.collect(),
@@ -515,33 +471,10 @@ workflow DETAXIZER {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList()
     )
-    multiqc_report = MULTIQC.out.report.toList()
 
-
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.dump_parameters(workflow, params)
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
-    }
-}
-
-workflow.onError {
-    if (workflow.errorReport.contains("Process requirement exceeds available memory")) {
-        println("🛑 Default resources exceed availability 🛑 ")
-        println("💡 See here on how to configure pipeline: https://nf-co.re/docs/usage/configuration#tuning-workflow-resources 💡")
-    }
+    emit:
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
 /*
