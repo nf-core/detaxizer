@@ -61,8 +61,8 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 unclassified = lca_mapping[0]
 
                 if (
-                    sum_to_filter > sum_to_keep
-                    and sum_to_filter > $params.cutoff_tax2filter
+                    sum_to_filter > $params.cutoff_tax2filter
+                    and sum_to_filter/(sum_to_keep + sum_to_filter) > $params.cutoff_tax2keep
                     and sum_to_filter/(unclassified + sum_to_filter) > $params.cutoff_unclassified
                 ):
                     filterList.append(line[1])

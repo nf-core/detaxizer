@@ -61,12 +61,21 @@
                     "default": 2,
                     "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
                 },
+                "cutoff_tax2keep": {
+                    "type": "number",
+                    "default": 0.5,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Ratio per read of assigned to tax2filter k-mers to k-mers assigned to any other taxon (except unclassified).",
+                    "help_text": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to (sum(to keep)+sum(to filter/assess)) is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0."
+                },
                 "cutoff_unclassified": {
                     "type": "number",
                     "default": 0,
-                    "description": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to (unclassified+sum(to filter/assess)) is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0.",
+                    "description": "Ratio per read of assigned to tax2filter k-mers to unclassified k-mers.",
                     "minimum": 0,
-                    "maximum": 1
+                    "maximum": 1,
+                    "help_text": "If the ratio of the sum of k-mers mapped to the taxon/taxa to be assessed/to be filtered to (unclassified+sum(to filter/assess)) is below this threshold the read is ignored by the pipeline. Can take values between 0.0 and 1.0."
                 },
                 "tax2filter": {
                     "type": "string",
