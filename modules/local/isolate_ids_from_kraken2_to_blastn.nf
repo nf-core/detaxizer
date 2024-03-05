@@ -60,14 +60,10 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                 sum_to_filter = sum([lca_mapping[id_] for id_ in tax2filter])
                 unclassified = lca_mapping[0]
 
-                # Add pseudo count
-                if unclassified == 0:
-                    unclassified = 1
-
                 if (
-                    sum_to_filter > sum_to_keep
-                    and sum_to_filter > $params.cutoff_tax2filter
-                    and sum_to_filter/unclassified > $params.cutoff_unclassified
+                    sum_to_filter > $params.cutoff_tax2filter
+                    and sum_to_filter/(sum_to_keep + sum_to_filter) > $params.cutoff_tax2keep
+                    and sum_to_filter/(unclassified + sum_to_filter) > $params.cutoff_unclassified
                 ):
                     filterList.append(line[1])
                     outfile.write("\\t".join(line))
