@@ -2,10 +2,10 @@ process FILTER {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::seqkit=2.6.0"
+    conda "bioconda::seqkit=2.7.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/seqkit%3A2.6.0--h9ee0642_0':
-        'biocontainers/seqkit:2.6.0--h9ee0642_0'}"
+        'https://depot.galaxyproject.org/singularity/seqkit:2.7.0--h9ee0642_0':
+        'biocontainers/seqkit:2.7.0--h9ee0642_0'}"
 
     input:
     tuple val(meta), path(fastq), path(ids_to_remove)
