@@ -12,12 +12,12 @@
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "a01c66c96e0bc610ad126e7adc4a94cd4acd1b48",
                         "installed_by": ["modules"]
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "d086322563bdbb08c94bf15a7db58a39ccdb1520",
+                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
