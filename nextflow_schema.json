@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data using kraken2 and blast. Default taxon to identify (and remove) is Homo. Removal is optional.",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal is optional.",
     "type": "object",
     "definitions": {
         "workflow_parameters": {
@@ -71,7 +71,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Ratio per read of assigned to tax2filter k-mers to unclassified k-mers.",
                     "minimum": 0,
                     "maximum": 1,
@@ -93,7 +93,7 @@
             "properties": {
                 "blast_coverage": {
                     "type": "number",
-                    "default": 40,
+                    "default": 40.0,
                     "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
                 },
                 "blast_evalue": {
@@ -103,7 +103,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 40,
+                    "default": 40.0,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
                 }
             }
