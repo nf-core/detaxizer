@@ -20,16 +20,16 @@ process PREPARE_FASTA4BLASTN {
     script:
     """
     if [ "$meta.single_end" == "true" ]; then
-        seqkit fq2fa ${trimmedreads} -o out.fa.gz
-        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}.fa.gz
-        rm out.fa.gz
+        seqkit grep -f ${kraken2results} ${trimmedreads} -o out.fq.gz
+        seqkit fq2fa out.fq.gz -o ${meta.id}.fa.gz
+        rm out.fq.gz
     else
-        seqkit fq2fa ${trimmedreads[0]} -o out.fa.gz
-        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R1.fa.gz
-        rm out.fa.gz
-        seqkit fq2fa ${trimmedreads[1]} -o out.fa.gz
-        seqkit grep -f ${kraken2results} out.fa.gz -o ${meta.id}_R2.fa.gz
-        rm out.fa.gz
+        seqkit grep -f ${kraken2results} ${trimmedreads[0]} -o out.fq.gz
+        seqkit fq2fa out.fq.gz -o ${meta.id}_R1.fa.gz
+        rm out.fq.gz
+        seqkit grep -f ${kraken2results} ${trimmedreads[1]} -o out.fq.gz
+        seqkit fq2fa out.fq.gz -o ${meta.id}_R2.fa.gz
+        rm out.fq.gz
     fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
