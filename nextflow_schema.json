@@ -108,18 +108,6 @@
                 }
             }
         },
-        "fastqc": {
-            "title": "FastQC",
-            "type": "object",
-            "description": "Quality control of raw reads.",
-            "default": "",
-            "properties": {
-                "save_fastqc": {
-                    "type": "boolean",
-                    "description": "Can be used to save the output from FastQC to the results folder."
-                }
-            }
-        },
         "fastp_options": {
             "title": "fastp options",
             "type": "object",
@@ -438,9 +426,6 @@
             "$ref": "#/definitions/blastn"
         },
         {
-            "$ref": "#/definitions/fastqc"
-        },
-        {
             "$ref": "#/definitions/fastp_options"
         },
         {
@@ -458,5 +443,10 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "save_intermediates": {
+            "type": "boolean"
+        }
+    }
 }
