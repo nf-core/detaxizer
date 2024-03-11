@@ -10,7 +10,6 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [Renaming](#renaming) - Renaming the read headers before and after the pipeline run to avoid difficulties with different header formats
 - [FastQC](#fastqc) - Raw read QC - Output not in the results directory by default
 - [fastp](#fastp) - Preprocessing of raw reads
 - [kraken2](#kraken2) - Classification of the preprocessed reads and extracting the searched taxa from the results
@@ -19,10 +18,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [summary](#summary) - The summary of the classification and the optional validation
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
-
-### Renaming
-
-Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. As stated above, this step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
 
 ### FastQC
 
@@ -48,7 +43,8 @@ fastp performs preprocessing of the reads (adapter/quality trimming). For detail
 
 ### kraken2
 
-kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `*.kraken2.report.txt`, `isolated/*.classified.txt` and `summary/*.kraken2_summary.tsv`. The first contains all reads, their classification and how many k-mers were assigned to which taxon. The second contains statistics on how many reads were classified as which taxon. Next is a file which is similar to the first one but only contains the read ids which were classified as the taxon/taxa to assess/to filter together with the whole information from the first file for the individual read ids. Last the summary gives you a fast overview of how many reads were passed to kraken2 and how many were classified as the taxon/taxa to assess or to filter. `<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
+kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `*.kraken2.report.txt`, `isolated/*.classified.txt` and `summary/*.kraken2_summary.tsv`.
+`<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -68,7 +64,7 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
 
 ### blastn
 
-blastn can validate the reads classified by kraken2 as the taxon/taxa to be assessed/to be filtered. To reduce computational burden only the highest scoring hit per input sequence is returned. If in any case one would need more information this can be done via the `max_hsps`- and `max_target_seqs`-flags in the `modules.config`.
+blastn can validate the reads classified by kraken2 as the taxon/taxa to be assessed/to be filtered. To reduce computational burden only the highest scoring hit per input sequence is returned. If in any case one would need more information this can be done via the `max_hsps`- and `max_target_seqs`-flags in the `modules.config` file.
 
 <details markdown="1">
 <summary>Output files</summary>

@@ -19,7 +19,7 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that initially checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing using fastp and quality assessment via FastQC, followed by taxon classification with kraken2 (the kraken2 database can be changed), and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp and quality assessment via FastQC, followed by taxon classification with kraken2, and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
 
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
@@ -28,7 +28,7 @@
 3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
 5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from kraken2 or blastn)
-6. Summary of the processes
+6. Summary of the processes (how many reads were initially present after preprocessing, how many were classified as the `tax2filter` plus potential taxonomic subtree and optionally how many were validated)
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
@@ -38,14 +38,12 @@
 
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.csv`:
-
-```csv
+```csv title="samplesheet.csv"
 sample,fastq_1,fastq_2,fastq_3
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,AEG588A1_S1_L002_R3_001.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. If you only have long reads put the reference to your file(s) in the forth column, leaving column 2 and 3 empty.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. For more detailed information about the samplesheet, see the [usage documentation](docs/usage.md).
 
 Now, you can run the pipeline using:
 
@@ -70,11 +68,11 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/jannikseidelQBiC) at the [Quantitative Biology Center(QBiC)](http://qbic.life/).
+nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/jannikseidelQBiC) at the [Quantitative Biology Center (QBiC)](http://qbic.life/).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-[Daniel Straub](https://github.com/d4straub)
+- [Daniel Straub](https://github.com/d4straub)
 
 ## Contributions and Support
 

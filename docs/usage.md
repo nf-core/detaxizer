@@ -34,7 +34,7 @@ PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fa
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz".                                                              |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional, if `fastq_3` is also provided.                                                              |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
 | `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
 
@@ -94,19 +94,20 @@ with `params.yaml` containing:
 ```yaml
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh38'
 <...>
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
-To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default **_Homo_**). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
+
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
 
 To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
 
 Skipping blastn can be done by using `--skip_blastn`.
 
-Optionally enabling the filter can be done by using `--enable_filter`. By default the raw reads are taken for filtering. If you want to use the preprocessed reads use the `--filter_trimmed` flag. By default the blastn output is taken for filtering. To use the kraken2 output for filtering while still using blast for validation use the `--filter_with_kraken2` flag. If you enable the filter and use the `--skip_blastn` option, kraken2 output is taken automatically for filtering.
+Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the `blastn` step, or using the output from the  `kraken2` step. If `blastn` is skipped, the classified read IDs of `kraken2` are automatically used in the filtering step.
 
 ### Updating the pipeline
 
