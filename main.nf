@@ -17,7 +17,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { DETAXIZER  } from './workflows/detaxizer'
+include { DETAXIZER               } from './workflows/detaxizer'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_detaxizer_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_detaxizer_pipeline'
 
