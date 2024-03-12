@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+# Written by Jannik Seidel and released under MIT license.
+
 import argparse
 import sys
 
