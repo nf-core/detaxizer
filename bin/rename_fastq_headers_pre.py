@@ -152,8 +152,10 @@ def main():
                     j.id = renamedHeaders[1][1]
                     SeqIO.write(sequences=i, handle=outgz1, format="fastq")
                     SeqIO.write(sequences=j, handle=outgz2, format="fastq")
-        with gzip.open(args.output + "_headers.json.gz", "wt", encoding="utf-8") as outfile:
-            json.dump(renamed, outfile)
+        with gzip.open(args.output + "_headers_fw.txt.gz", "wt", encoding="utf-8") as outfile1, gzip.open(args.output + "_headers_rv.txt.gz", "wt", encoding="utf-8") as outfile2:
+            for key in renamed.keys():
+                outfile1.write(key + "\t" + renamed[key][0] + "\n")
+                outfile2.write(key + "\t" + renamed[key][1] + "\n")
     else:
         renamed = {}
         with gzip.open(fastq[0], "rt") as handle1:
@@ -165,8 +167,9 @@ def main():
                     i.description = renamedHeader[1][0]
                     i.id = renamedHeader[1][0]
                     SeqIO.write(sequences=i, handle=outgz1, format="fastq")
-        with gzip.open(args.output + "_headers.json.gz", "wt", encoding="utf-8") as outfile:
-            json.dump(renamed, outfile)
+        with gzip.open(args.output + "_headers.txt.gz", "wt", encoding="utf-8") as outfile:
+            for key in renamed.keys():
+                outfile.write(key + "\t" + renamed[key][0] + "\n")
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -11,7 +11,7 @@ process RENAME_FASTQ_HEADERS_PRE {
     tuple val(meta), path(inputfastq)
 
     output:
-    tuple val(meta), path('*_headers.json.gz')  , emit: headers
+    tuple val(meta), path('*_headers*.txt.gz')  , emit: headers
     tuple val(meta), path('*.fastq.gz')         , emit: fastq
     path "versions.yml"                         , emit: versions
 
