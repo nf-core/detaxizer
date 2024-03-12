@@ -21,14 +21,14 @@ process RENAME_FASTQ_HEADERS_AFTER {
     """
     if [ "$meta.single_end" == "true" ]; then
         gzip -d $renamedHeaders
-        seqkit replace -p '^(.+)\$' -r ' {kv}' -k *_headers.txt $fastqfiltered -o ${meta.id}_filtered.fastq.gz
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers.txt $fastqfiltered -o ${meta.id}_filtered.fastq.gz
         rm *_headers.txt
     else
         gzip -d ${renamedHeaders[0]}
-        seqkit replace -p '^(.+)\$' -r ' {kv}' -k *_headers_fw.txt ${fastqfiltered[0]} -o ${meta.id}_R1_filtered.fastq.gz
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_fw.txt ${fastqfiltered[0]} -o ${meta.id}_R1_filtered.fastq.gz
         rm *_headers_fw.txt
         gzip -d ${renamedHeaders[1]}
-        seqkit replace -p '^(.+)\$' -r ' {kv}' -k *_headers_rv.txt ${fastqfiltered[1]} -o ${meta.id}_R2_filtered.fastq.gz
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_rv.txt ${fastqfiltered[1]} -o ${meta.id}_R2_filtered.fastq.gz
         rm *_headers_rv.txt
     fi
     cat <<-END_VERSIONS > versions.yml
