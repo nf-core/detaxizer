@@ -35,8 +35,5 @@
         }
     },
     "required": ["sample"],
-    "anyOf": [
-        { "required": ["fastq_1"] },
-        { "required": ["fastq_3"] }
-    ]
+    "anyOf": [{ "required": ["fastq_1"] }, { "required": ["fastq_3"] }]
 }
