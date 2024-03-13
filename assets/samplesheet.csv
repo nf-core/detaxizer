@@ -1,0 +1,5 @@
+sample,fastq_1,fastq_2,fastq_3
+test_paired-end_plus_long-reads,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R3_001.fastq.gz
+test_paired-end,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz,
+test_single-end_short,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,,,
+test_single-end_long,,,/path/to/fastq/files/AEG588A1_S1_L002_R3_001.fastq.gz

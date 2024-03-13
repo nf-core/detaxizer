@@ -2,13 +2,13 @@ process RENAME_FASTQ_HEADERS_AFTER {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "conda-forge::python=3.12.0 biopython=1.81 numpy=1.26.3"
+    conda "bioconda::seqkit=2.8.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/biopython:1.81' :
-        'biocontainers/biopython:1.81' }"
+        'https://depot.galaxyproject.org/singularity/seqkit:2.8.0--h9ee0642_0':
+        'biocontainers/seqkit:2.8.0--h9ee0642_0'}"
 
     input:
-    tuple val(meta), path(fastqfiltered), path(dict)
+    tuple val(meta), path(fastqfiltered), path(renamedHeaders)
 
     output:
     tuple val(meta), path('*.fastq.gz'), emit: fastq
@@ -19,12 +19,21 @@ process RENAME_FASTQ_HEADERS_AFTER {
 
     script:
     """
-    rename_fastq_headers_after.py -i $fastqfiltered -j $dict -o $meta.id
-
+    if [ "$meta.single_end" == "true" ]; then
+        gzip -d $renamedHeaders
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers.txt $fastqfiltered -o ${meta.id}_filtered.fastq.gz
+        rm *_headers.txt
+    else
+        gzip -d ${renamedHeaders[0]}
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_fw.txt ${fastqfiltered[0]} -o ${meta.id}_R1_filtered.fastq.gz
+        rm *_headers_fw.txt
+        gzip -d ${renamedHeaders[1]}
+        seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_rv.txt ${fastqfiltered[1]} -o ${meta.id}_R2_filtered.fastq.gz
+        rm *_headers_rv.txt
+    fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
-        biopython: \$(python -c "import pkg_resources; print(pkg_resources.get_distribution('biopython').version)")
+        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
     END_VERSIONS
     """
 }
