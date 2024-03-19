@@ -18,12 +18,12 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below. For single-end short reads use the second column, for long reads use the forth column.
+The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below. For single-end short reads use the column `short_reads_fastq_1`, for long reads use the column `long_reads_fastq_1`.
 
 A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 5 samples, showing all possible combinations of short and long reads.
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2,fastq_3
+sample,short_reads_fastq_1,short_reads_fastq_2,long_reads_fastq_1
 SINGLE_END_SHORT,AEG588A1_S1_L002_R1_001.fastq.gz,,
 PAIRED_END_SHORT,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz,
 SINGLE_END_LONG,,,AEG588A3_001.fastq.gz
@@ -34,9 +34,9 @@ PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fa
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional, if `fastq_3` is also provided.                     |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
-| `fastq_3` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
+| `short_reads_fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional, if `long_reads_fastq_1` is also provided.                     |
+| `short_reads_fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
+| `long_reads_fastq_1` | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 

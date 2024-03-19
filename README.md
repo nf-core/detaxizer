@@ -39,7 +39,7 @@
 First, prepare a samplesheet with your input data that looks as follows:
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2,fastq_3
+sample,short_reads_fastq_1,short_reads_fastq_2,long_reads_fastq_1
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,AEG588A1_S1_L002_R3_001.fastq.gz
 ```
 
