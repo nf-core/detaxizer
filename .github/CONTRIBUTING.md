@@ -26,10 +26,10 @@ If you're not used to this workflow with git, you can start with some [docs from
 
 ## Tests
 
-You have the option to test your changes locally by running the pipeline. For receiving warnings about process selectors and other `debug` information, it is recommended to use the debug profile. Execute all the tests with the following command:
+You have the option to test your changes locally by running the pipeline. For receiving warnings about process selectors and other `debug` information, it is recommended to use the debug profile. Execute the main functionality test with the following command:
 
 ```bash
-nf-test test --profile debug,test,docker --verbose
+nextflow run . --profile debug,test,docker
 ```
 
 When you create a pull request with changes, [GitHub Actions](https://github.com/features/actions) will run automatic tests.
