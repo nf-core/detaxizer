@@ -56,16 +56,6 @@ workflow DETAXIZER {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    // check whether the sample sheet is correctly formated
-    ch_samplesheet.map {
-            meta, fastq_1, fastq_2, fastq_3 ->
-                if (!fastq_1 && !fastq_3){
-                    error("Please provide at least one single end file as input in the sample sheet for ${meta.id}.")
-                } else if (!fastq_1 && fastq_2 && fastq_3){
-                    error("Please provide single end reads in following format in the sample sheet: base name, fastq_1,,fastq_3. fastq_1 is the short read file, fastq_3 the long read file. The wrongly formated entry is ${meta.id}.")
-            }
-        }
-
     ch_samplesheet.branch {
         shortReads: it[1]
         }.set {
@@ -73,18 +63,18 @@ workflow DETAXIZER {
         }
 
     ch_short.shortReads.map{
-        meta, fastq_1, fastq_2, fastq_3 ->
-            if (fastq_2){
+        meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
+            if (short_reads_fastq_2){
                 def newMeta = meta.clone()
                 newMeta.single_end = false
                 newMeta.long_reads = false
-                return [newMeta, [fastq_1, fastq_2]]
+                return [newMeta, [short_reads_fastq_1, short_reads_fastq_2]]
             } else {
                 def newMeta = meta.clone()
                 newMeta.id = "${newMeta.id}_R1"
                 newMeta.single_end = true
                 newMeta.long_reads = false
-                return [newMeta, fastq_1]
+                return [newMeta, short_reads_fastq_1]
             }
     }.set{
         ch_short
@@ -97,12 +87,12 @@ workflow DETAXIZER {
     }
 
     ch_long.longReads.map {
-        meta, fastq_1, fastq_2, fastq_3 ->
+        meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             def newMeta = meta.clone()
             newMeta.id = "${newMeta.id}_longReads"
             newMeta.single_end = true
             newMeta.long_reads = true
-            return [newMeta, fastq_3]
+            return [newMeta, long_reads_fastq_1]
     }.set {
         ch_long
     }

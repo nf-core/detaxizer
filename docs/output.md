@@ -72,7 +72,7 @@ blastn can validate the reads classified by kraken2 as the taxon/taxa to be asse
 <summary>Output files</summary>
 
 - `blast/`
-  - `filteredIdentCov/`: The read ids and statistics of the reads which were validated by blastn to be the taxon/taxa to assess/to filter.
+  - `filtered_ident_cov/`: The read ids and statistics of the reads which were validated by blastn to be the taxon/taxa to assess/to filter.
     - `<sample>_R1.identcov.txt`: File is present for single-end and paired-end short reads.
     - `<sample>_R2.identcov.txt`: File is present for paired-end short reads.
     - `<sample>_longReads.identcov.txt`: File is present for long reads.

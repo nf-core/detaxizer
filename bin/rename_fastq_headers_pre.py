@@ -5,7 +5,6 @@
 from Bio import SeqIO, bgzf
 import gzip
 import sys
-import json
 import argparse
 import re
 
@@ -37,15 +36,16 @@ def renameReadsPaired(reads: tuple, filenames: str) -> tuple:
         if read_fw.endswith("/1"):
             read_fw_stripped = read_fw[:-2]
         else:
-            sys.exit("Please provide the forward reads in fastq_1 (where the headers are as follows: 'example.1/1').")
+            raise ValueError("Please provide the forward reads in short_reads_fastq_1 (where the headers are as follows: 'example.1/1').")
 
         if read_rv.endswith("/2"):
             read_rv_stripped = read_rv[:-2]
         else:
-            sys.exit("Please provide the reverse reads in fastq_2 (where the headers are as follows: 'example.1/2').")
+            raise ValueError("Please provide the reverse reads in short_reads_fastq_2 (where the headers are as follows: 'example.1/2').")
 
         if read_fw_stripped != read_rv_stripped:
-            sys.exit(f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}.")
+            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
+            raise ValueError(msg)
         else:
             read_dict[read_fw_stripped] = [read_fw, read_rv]
             read_renamed = [read_fw_stripped,read_rv_stripped]
@@ -55,15 +55,16 @@ def renameReadsPaired(reads: tuple, filenames: str) -> tuple:
         if read_fw_split.endswith("/1"):
             read_fw_stripped = read_fw_split[:-2]
         else:
-            sys.exit("Please provide the forward reads in fastq_1 (where the headers are as follows: 'example.1/1 additionalInformation').")
+            raise ValueError("Please provide the forward reads in short_reads_fastq_1 (where the headers are as follows: 'example.1/1 additionalInformation').")
 
         if read_rv_split.endswith("/2"):
             read_rv_stripped = read_rv_split[:-2]
         else:
-            sys.exit("Please provide the reverse reads in fastq_2 (where the headers are as follows: 'example.1/2 additionalInformation').")
+            raise ValueError("Please provide the reverse reads in short_reads_fastq_2 (where the headers are as follows: 'example.1/2 additionalInformation').")
 
         if read_fw_stripped != read_rv_stripped:
-            sys.exit(f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}.")
+            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
+            raise ValueError(msg)
         else:
             read_dict[read_fw_stripped] = [read_fw, read_rv]
             read_renamed = [read_fw_stripped,read_rv_stripped]
@@ -72,7 +73,8 @@ def renameReadsPaired(reads: tuple, filenames: str) -> tuple:
         read_rv_split = read_rv.split(" ")[0]
 
         if read_fw_split != read_rv_split:
-            sys.exit(f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}.")
+            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
+            raise ValueError(msg)
         else:
             read_dict[read_fw_split] = [read_fw, read_rv]
             read_renamed = [read_fw_split,read_rv_split]
@@ -81,18 +83,21 @@ def renameReadsPaired(reads: tuple, filenames: str) -> tuple:
         read_rv_split = read_rv.split(" ")[0]
 
         if read_fw_split != read_rv_split:
-            sys.exit(f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}.")
+            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
+            raise ValueError(msg)
         else:
             read_dict[read_fw_split] = [read_fw, read_rv]
             read_renamed = [read_fw_split,read_rv_split]
     elif bool(re.match(pattern5,read_fw)) and bool(re.match(pattern5,read_rv)):
         if read_fw != read_rv:
-            sys.exit(f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}.")
+            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
+            raise ValueError(msg)
         else:
             read_dict[read_fw] = [read_fw, read_rv]
             read_renamed = [read_fw,read_rv]
     else:
-        sys.exit(f"The provided files, {filenames}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported.")
+        msg = f"The provided files, {filenames}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported."
+        raise ValueError(msg)
     return (read_dict,read_renamed)
 
 def renameReadSingle(read: str, filename: str) -> tuple:
@@ -128,7 +133,8 @@ def renameReadSingle(read: str, filename: str) -> tuple:
             read_dict[read] = [read]
             read_renamed = [read]
     else:
-        sys.exit(f"The provided file, {filename}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported.")
+        msg = f"The provided file, {filename}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported."
+        raise ValueError(msg)
     return (read_dict,read_renamed)
 
 def main():
