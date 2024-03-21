@@ -35,14 +35,14 @@ include { SUMMARIZER                            } from '../modules/local/summari
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// speficy the fasta parameter if it is not provided via --fasta
-def fasta = false
+// speficy the fasta channel if it is not provided via --fasta
+def fasta = Channel.empty()
 
-if (!params.fasta) {
-    fasta = getGenomeAttribute('fasta')
-} else {
+if (!params.fasta && !params.skip_blastn) {
+    fasta = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if (!params.skip_blastn){
     // If params.fasta is there, use it for the creation of the blastn database
-    fasta = params.fasta
+    fasta = Channel.fromPath(params.fasta)
 }
 
 workflow DETAXIZER {
@@ -207,7 +207,7 @@ workflow DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
-        ch_reference_fasta = Channel.fromPath( fasta )
+        ch_reference_fasta = fasta
 
         ch_reference_fasta_with_meta = ch_reference_fasta.map {
             item -> [['id': "id-fasta-for-makeblastdb"], item]
