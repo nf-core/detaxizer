@@ -63,9 +63,9 @@ workflow DETAXIZER {
     ch_short.shortReads.map{
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             if (short_reads_fastq_2){
-                return [meta + [ single_end: false, long_reads: false , amount_of_files: 2], [short_reads_fastq_1, short_reads_fastq_2]]
+                return [meta + [ single_end: false, long_reads: false , amount_of_files: 2 ], [ short_reads_fastq_1, short_reads_fastq_2 ] ]
             } else {
-                return [meta + [id: "${meta.id}_R1", single_end: true, long_reads: false, amount_of_files: 1], short_reads_fastq_1]
+                return [meta + [ id: "${meta.id}_R1", single_end: true, long_reads: false, amount_of_files: 1 ], short_reads_fastq_1 ]
             }
     }.set{
         ch_short
@@ -79,7 +79,7 @@ workflow DETAXIZER {
 
     ch_long.longReads.map {
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
-            return [meta + [id: "${meta.id}_longReads", single_end: true, long_reads: true, amount_of_files: 1], long_reads_fastq_1]
+            return [meta + [ id: "${meta.id}_longReads", single_end: true, long_reads: true, amount_of_files: 1 ], long_reads_fastq_1 ]
     }.set {
         ch_long
     }
@@ -167,10 +167,7 @@ workflow DETAXIZER {
 
     ch_combined_kraken2 = ch_prepare_summary_kraken2.map {
         meta, path ->
-            return [ meta +[id: meta.id.replaceAll("(_R1|_R2)", "")] , path]
-        }
-        .map{
-            meta, path -> tuple( groupKey(meta, meta.amount_of_files), path )
+            return [ meta +[ id: meta.id.replaceAll("(_R1|_R2)", "") ] , path]
         }
         .groupTuple(by: [0])
         .map {
@@ -247,7 +244,7 @@ workflow DETAXIZER {
 
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
-                return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path ]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }.map{
             meta, path -> tuple( groupKey(meta, meta.amount_of_files), path )
         }.groupTuple(
@@ -263,7 +260,7 @@ workflow DETAXIZER {
 
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
-                return [meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path ]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }.map{
             meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
         }
@@ -288,7 +285,7 @@ workflow DETAXIZER {
                 if (filteredblastn[1] == null){
                     filteredblastn[1] = []
                 }
-                return [meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1]]
+                return [ meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1] ]
             }
 
         ch_blastn_summary = SUMMARY_BLASTN (
@@ -322,7 +319,7 @@ workflow DETAXIZER {
         ) {
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
             meta, path ->
-                return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         .map{
             meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
@@ -330,7 +327,7 @@ workflow DETAXIZER {
         .groupTuple(by:[0])
         ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
             meta, path ->
-                return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -355,7 +352,7 @@ workflow DETAXIZER {
     ){
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
             meta, path ->
-                return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         .map{
             meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
@@ -363,7 +360,7 @@ workflow DETAXIZER {
         .groupTuple(by:[0])
         ch_combined_short_long_id = FASTP.out.reads.map {
             meta, path ->
-                return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -380,12 +377,12 @@ workflow DETAXIZER {
     if ( params.enable_filter ) {
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
-            return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
 
     ch_filtered2rename = FILTER.out.filtered.map {
         meta, path ->
-            return [ meta + [id: meta.id.replaceAll("(_R1|_R2)", "")], path ]
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
 
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
