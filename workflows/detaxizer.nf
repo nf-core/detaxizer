@@ -169,7 +169,6 @@ workflow DETAXIZER {
         meta, path ->
             return [ meta +[ id: meta.id.replaceAll("(_R1|_R2)", "") ] , path]
         }
-        .groupTuple(by: [0])
         .map {
             meta, path ->
                 path = path.flatten()
@@ -245,7 +244,11 @@ workflow DETAXIZER {
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }.groupTuple(
+        }
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
+        }
+        .groupTuple(
                 by: [0]
             ).map {
                 meta, paths -> [ meta, paths.flatten() ]
@@ -259,6 +262,9 @@ workflow DETAXIZER {
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        }
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
         }
         .groupTuple (by: [0])
         .map {
@@ -354,6 +360,7 @@ workflow DETAXIZER {
             meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
         }
         .groupTuple(by:[0])
+
         ch_combined_short_long_id = FASTP.out.reads.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
