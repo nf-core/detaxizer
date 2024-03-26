@@ -11,6 +11,7 @@ include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
+include { getGenomeAttribute     } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
 
 include { FASTP             } from '../modules/nf-core/fastp/main'
 include { KRAKEN2_KRAKEN2   } from '../modules/nf-core/kraken2/kraken2/main'
@@ -34,17 +35,14 @@ include { SUMMARIZER                            } from '../modules/local/summari
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// speficy the fasta parameter if it is not provided via --fasta
-def fasta = false
+// speficy the fasta channel if it is not provided via --fasta
+def fasta = Channel.empty()
 
-if (!params.fasta) {
-    // If params.fasta is false and params.genome is present
-    if (params.genome) {
-        fasta = params.genomes[params.genome]?.fasta ?: false
-    }
-} else {
-    // If params.fasta is there, use it
-    fasta = params.fasta
+if (!params.fasta && !params.skip_blastn) {
+    fasta = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if (!params.skip_blastn){
+    // If params.fasta is there, use it for the creation of the blastn database
+    fasta = Channel.fromPath(params.fasta)
 }
 
 workflow DETAXIZER {
@@ -65,16 +63,9 @@ workflow DETAXIZER {
     ch_short.shortReads.map{
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             if (short_reads_fastq_2){
-                def newMeta = meta.clone()
-                newMeta.single_end = false
-                newMeta.long_reads = false
-                return [newMeta, [short_reads_fastq_1, short_reads_fastq_2]]
+                return [meta + [ single_end: false, long_reads: false , amount_of_files: 2 ], [ short_reads_fastq_1, short_reads_fastq_2 ] ]
             } else {
-                def newMeta = meta.clone()
-                newMeta.id = "${newMeta.id}_R1"
-                newMeta.single_end = true
-                newMeta.long_reads = false
-                return [newMeta, short_reads_fastq_1]
+                return [meta + [ id: "${meta.id}_R1", single_end: true, long_reads: false, amount_of_files: 1 ], short_reads_fastq_1 ]
             }
     }.set{
         ch_short
@@ -88,11 +79,7 @@ workflow DETAXIZER {
 
     ch_long.longReads.map {
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
-            def newMeta = meta.clone()
-            newMeta.id = "${newMeta.id}_longReads"
-            newMeta.single_end = true
-            newMeta.long_reads = true
-            return [newMeta, long_reads_fastq_1]
+            return [meta + [ id: "${meta.id}_longReads", single_end: true, long_reads: true, amount_of_files: 1 ], long_reads_fastq_1 ]
     }.set {
         ch_long
     }
@@ -175,17 +162,13 @@ workflow DETAXIZER {
     //
     ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified).map {
         meta, path1, path2 ->
-            def newMeta = meta.clone()
-            return [ newMeta, [ path1, path2 ] ]
+            return [ meta, [ path1, path2 ] ]
     }
 
     ch_combined_kraken2 = ch_prepare_summary_kraken2.map {
         meta, path ->
-            def newMeta = meta.clone()
-            newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-            return [ newMeta , path]
+            return [ meta +[ id: meta.id.replaceAll("(_R1|_R2)", "") ] , path]
         }
-        .groupTuple(by: [0])
         .map {
             meta, path ->
                 path = path.flatten()
@@ -223,7 +206,7 @@ workflow DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
-        ch_reference_fasta = Channel.fromPath( fasta )
+        ch_reference_fasta = fasta
 
         ch_reference_fasta_with_meta = ch_reference_fasta.map {
             item -> [['id': "id-fasta-for-makeblastdb"], item]
@@ -238,13 +221,13 @@ workflow DETAXIZER {
             .flatMap { meta, fastaList ->
                 if (fastaList.size() == 2) {
                 return [
-                    [ [ 'id': "${meta.id}_R1", 'single_end': false, 'long_reads': false ], fastaList[0] ],
-                    [ [ 'id': "${meta.id}_R2", 'single_end': false, 'long_reads': false ], fastaList[1] ]
+                    [ meta + [ id: "${meta.id}_R1" ], fastaList[0] ],
+                    [ meta + [ id: "${meta.id}_R2" ], fastaList[1] ]
                 ]
 
                 } else {
                     return [
-                        [ [ 'id': "${meta.id}", 'single_end': true, 'long_reads': meta.long_reads ], fastaList ] ]
+                        [ meta , fastaList ] ]
                 }
 
             }
@@ -260,12 +243,12 @@ workflow DETAXIZER {
 
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path ]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
-
-        ch_combined_blast = ch_combined_blast.groupTuple(
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
+        }
+        .groupTuple(
                 by: [0]
             ).map {
                 meta, paths -> [ meta, paths.flatten() ]
@@ -278,11 +261,12 @@ workflow DETAXIZER {
 
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path ]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
-        .groupTuple ()
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
+        }
+        .groupTuple (by: [0])
         .map {
             meta, paths ->
                 paths = paths.flatten()
@@ -303,7 +287,7 @@ workflow DETAXIZER {
                 if (filteredblastn[1] == null){
                     filteredblastn[1] = []
                 }
-                return [meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1]]
+                return [ meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1] ]
             }
 
         ch_blastn_summary = SUMMARY_BLASTN (
@@ -337,16 +321,15 @@ workflow DETAXIZER {
         ) {
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        }
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
         }
         .groupTuple(by:[0])
         ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -371,16 +354,16 @@ workflow DETAXIZER {
     ){
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        }
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
         }
         .groupTuple(by:[0])
+
         ch_combined_short_long_id = FASTP.out.reads.map {
             meta, path ->
-                def newMeta = meta.clone()
-                newMeta.id = newMeta.id.replaceAll("(_R1|_R2)", "")
-                return [ newMeta, path]
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
@@ -397,16 +380,12 @@ workflow DETAXIZER {
     if ( params.enable_filter ) {
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
-            def newMeta = meta.clone()
-            newMeta.id  = newMeta.id.replaceAll("(_R1|_R2)", "")
-            return [ newMeta, path ]
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
 
     ch_filtered2rename = FILTER.out.filtered.map {
         meta, path ->
-            def newMeta = meta.clone()
-            newMeta.id  = newMeta.id.replaceAll("(_R1|_R2)", "")
-            return [ newMeta, path ]
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
 
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
@@ -418,7 +397,6 @@ workflow DETAXIZER {
     //
     // MODULE: Summarize the classification process
     //
-
     if (!params.skip_blastn){
     ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect().map {
             item -> [['id': "summary_of_kraken2_and_blastn"], item]

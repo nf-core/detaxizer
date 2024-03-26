@@ -19,7 +19,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
-Only the filtering results, the summary, MultiQC and Pipeline information are shown by default in the results folder.
+Only the filtering results, the summary, MultiQC and pipeline information are shown by default in the results folder.
 
 ### FastQC
 
