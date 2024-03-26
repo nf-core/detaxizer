@@ -6,58 +6,62 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are **_Homo_** and **_Homo sapiens_**.
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below. For single-end short reads use the column `short_reads_fastq_1`, for long reads use the column `long_reads_fastq_1`.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 5 samples, showing all possible combinations of short and long reads.
 
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+```csv title="samplesheet.csv"
+sample,short_reads_fastq_1,short_reads_fastq_2,long_reads_fastq_1
+SINGLE_END_SHORT,AEG588A1_S1_L002_R1_001.fastq.gz,,
+PAIRED_END_SHORT,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz,
+SINGLE_END_LONG,,,AEG588A3_001.fastq.gz
+SINGLE_END_SHORT_LONG,AEG588A4_S1_L002_R1_001.fastq.gz,,AEG588A4_001.fastq.gz
+PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fastq.gz,AEG588A5_001.fastq.gz
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| Column                | Description                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`              | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `short_reads_fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional, if `long_reads_fastq_1` is also provided.          |
+| `short_reads_fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
+| `long_reads_fastq_1`  | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+
+## Databases
+
+The databases used by detaxizer have an influence on the amount of false positives (classified as contamination although not originating from that taxon/taxa) and false negatives (not classified as the taxon/taxa defined as contamination although of such origin).
+
+The task of decontamination has to be balanced out between false positives and false negatives depending on what is needed in your use case.
+
+### kraken2
+
+To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extend.
+
+Also, pangenome databases of the organism(s) classified as contamination could increase the amount of true positives while reducing the hardware requirements. For human such a database can be found [here](https://zenodo.org/doi/10.5281/zenodo.8339731). Such a database will increase false positives, unless a custom database is built together with the data of the organisms not classified as contamination. To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+
+### blastn
+
+The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta` parameter.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -75,7 +79,9 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
-> ⚠️ Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+:::warning
+Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+:::
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -88,11 +94,20 @@ with `params.yaml` containing:
 ```yaml
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
+
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+
+Skipping blastn can be done by using `--skip_blastn`.
+
+Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the `blastn` step, or using the output from the `kraken2` step. If `blastn` is skipped, the classified read IDs of `kraken2` are automatically used in the filtering step.
 
 ### Updating the pipeline
 
@@ -112,11 +127,15 @@ This version number will be logged in reports when you run the pipeline, so that
 
 To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-> 💡 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+:::tip
+If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+:::
 
 ## Core Nextflow arguments
 
-> **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+:::note
+These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+:::
 
 ### `-profile`
 
@@ -124,7 +143,9 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
 
-> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+:::info
+We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+:::
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
