@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data using kraken2 and blast. Default taxon to identify (and remove) is Homo. Removal is optional.",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal is optional.",
     "type": "object",
     "definitions": {
         "input_output_options": {
@@ -265,6 +265,13 @@
                     "description": "Validation of parameters in lenient more.",
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
+                },
+                "pipelines_testdata_base_path": {
+                    "type": "string",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 }
             }
         }
