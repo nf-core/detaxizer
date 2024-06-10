@@ -13,21 +13,27 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "short_reads_fastq_1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "FastQ file for short reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
-            "fastq_2": {
+            "short_reads_fastq_2": {
                 "type": "string",
                 "format": "file-path",
-                "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "FastQ file for short reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "long_reads_fastq_1": {
+                "type": "string",
+                "format": "file-path",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FastQ file for long reads cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             }
-        },
-        "required": ["sample", "fastq_1"]
-    }
+        }
+    },
+    "required": ["sample"],
+    "anyOf": [{ "required": ["short_reads_fastq_1"] }, { "required": ["long_reads_fastq_1"] }]
 }
