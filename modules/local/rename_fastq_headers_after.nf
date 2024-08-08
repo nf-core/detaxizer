@@ -2,10 +2,10 @@ process RENAME_FASTQ_HEADERS_AFTER {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::seqkit=2.8.0"
+    conda "bioconda::seqkit=2.8.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/seqkit:2.8.0--h9ee0642_0':
-        'biocontainers/seqkit:2.8.0--h9ee0642_0'}"
+        'https://depot.galaxyproject.org/singularity/seqkit:2.8.2--h9ee0642_0':
+        'biocontainers/seqkit:2.8.2--h9ee0642_0'}"
 
     input:
     tuple val(meta), path(fastqfiltered), path(renamedHeaders)

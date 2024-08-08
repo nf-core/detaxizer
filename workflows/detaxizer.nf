@@ -111,6 +111,7 @@ workflow DETAXIZER {
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,
         [],
+        [],
         params.fastp_save_trimmed_fail,
         []
     )
