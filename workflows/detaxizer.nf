@@ -15,18 +15,21 @@ include { getGenomeAttribute     } from '../subworkflows/local/utils_nfcore_deta
 
 include { FASTP             } from '../modules/nf-core/fastp/main'
 include { KRAKEN2_KRAKEN2   } from '../modules/nf-core/kraken2/kraken2/main'
+include { BBMAP_BBDUK       } from '../modules/nf-core/bbmap/bbduk/main'
 include { BLAST_BLASTN      } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
 
 include { RENAME_FASTQ_HEADERS_PRE              } from '../modules/local/rename_fastq_headers_pre'
 include { KRAKEN2PREPARATION                    } from '../modules/local/kraken2preparation'
 include { PARSE_KRAKEN2REPORT                   } from '../modules/local/parse_kraken2report'
-include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN    } from '../modules/local/isolate_ids_from_kraken2_to_blastn'
+include { ISOLATE_KRAKEN2_IDS                   } from '../modules/local/isolate_kraken2_ids'
+include { ISOLATE_BBDUK_IDS                     } from '../modules/local/isolate_bbduk_ids'
+include { MERGE_IDS                             } from '../modules/local/merge_ids'
 include { PREPARE_FASTA4BLASTN                  } from '../modules/local/prepare_fasta4blastn'
 include { FILTER_BLASTN_IDENTCOV                } from '../modules/local/filter_blastn_identcov'
 include { FILTER                                } from '../modules/local/filter'
 include { RENAME_FASTQ_HEADERS_AFTER            } from '../modules/local/rename_fastq_headers_after'
-include { SUMMARY_KRAKEN2                       } from '../modules/local/summary_kraken2'
+include { SUMMARY_CLASSIFICATION                } from '../modules/local/summary_classification'
 include { SUMMARY_BLASTN                        } from '../modules/local/summary_blastn'
 include { SUMMARIZER                            } from '../modules/local/summarizer'
 /*
@@ -38,9 +41,9 @@ include { SUMMARIZER                            } from '../modules/local/summari
 // speficy the fasta channel if it is not provided via --fasta
 def fasta = Channel.empty()
 
-if (!params.fasta && !params.skip_blastn) {
+if ((!params.fasta && params.validation_blastn) || (!params.fasta && params.classification_bbduk) ) {
     fasta = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if (!params.skip_blastn){
+} else if (params.validation_blastn || params.classification_bbduk){
     // If params.fasta is there, use it for the creation of the blastn database
     fasta = Channel.fromPath(params.fasta)
 }
@@ -113,87 +116,244 @@ workflow DETAXIZER {
     )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
-    //
-    // MODULE: Prepare Kraken2 Database
-    //
-    ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
-            item -> [['id': "kraken2_db"], item]
-        }
-    KRAKEN2PREPARATION (
-        ch_kraken2_db
-    )
-    ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions)
+    //////////////////////////////////////////////////
+    //  Classification
+    //////////////////////////////////////////////////
 
-    //
-    // MODULE: Run Kraken2
-    //
+    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2 && !params.classification_bbduk)) {
 
-    KRAKEN2_KRAKEN2 (
-        FASTP.out.reads,
-        KRAKEN2PREPARATION.out.db.first(),
-        params.save_output_fastqs,
-        true
-    )
-    ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
-    //
-    // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
-    //
-    PARSE_KRAKEN2REPORT(
-        KRAKEN2_KRAKEN2.out.report.take(1)
-    )
-    ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
-
-    //
-    // MODULE: Isolate the hits for a certain taxa and subclasses
-    //
-    ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
-
-    KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
-
-    ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN (
-        ch_combined
-    )
-
-    ch_versions = ch_versions.mix(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.versions.first())
-
-    //
-    // MODULE: Summarize the kraken2 results and the isolated kraken2 hits
-    //
-    ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified).map {
-        meta, path1, path2 ->
-            return [ meta, [ path1, path2 ] ]
-    }
-
-    ch_combined_kraken2 = ch_prepare_summary_kraken2.map {
-        meta, path ->
-            return [ meta +[ id: meta.id.replaceAll("(_R1|_R2)", "") ] , path]
-        }
-        .map {
-            meta, path ->
-                path = path.flatten()
-                return [meta, path]
+        //
+        // MODULE: Prepare Kraken2 Database
+        //
+        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
+                item -> [['id': "kraken2_db"], item]
             }
 
-    ch_kraken2_summary = SUMMARY_KRAKEN2(
-        ch_combined_kraken2
+        KRAKEN2PREPARATION (
+            ch_kraken2_db
+        )
+        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
+
+
+        //
+        // MODULE: Run Kraken2
+        //
+        KRAKEN2_KRAKEN2 (
+            FASTP.out.reads,
+            KRAKEN2PREPARATION.out.db.first(),
+            params.save_output_fastqs,
+            true
+        )
+        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
+
+
+        //
+        // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
+        //
+        PARSE_KRAKEN2REPORT(
+            KRAKEN2_KRAKEN2.out.report.take(1)
+        )
+        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
+
+
+        //
+        // MODULE: Isolate the hits for a certain taxa and subclasses
+        //
+        ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
+
+        KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
+
+        ISOLATE_KRAKEN2_IDS (
+            ch_combined
         )
 
-    ch_versions = ch_versions.mix(ch_kraken2_summary.versions.first())
+        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
 
-    // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
-    ch_kraken2_summary = ch_kraken2_summary.summary.map {
-            meta, path -> [path]
-        }
 
-    if (!params.skip_blastn) {
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_KRAKEN2_IDS.out.classified_ids
+        )
+
+        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Summarize the classification results
+        //
+
+        SUMMARY_CLASSIFICATION(
+            MERGE_IDS.out.classified_ids
+        )
+
+        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
+        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
+                meta, path -> [path]
+            }
+
+
+    } else if (params.classification_bbduk && !params.classification_kraken2) {
+
+
+        //
+        // MODULE: Run bbduk
+        //
+        BBMAP_BBDUK (
+            FASTP.out.reads,
+            fasta.first()
+        )
+        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
+
+
+        //
+        // MODULE: Run ISOLATE_BBDUK_IDS
+        //
+        ISOLATE_BBDUK_IDS(
+            BBMAP_BBDUK.out.contaminated_reads
+        )
+        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_BBDUK_IDS.out.classified_ids
+        )
+
+        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Summarize the classification results
+        //
+
+        SUMMARY_CLASSIFICATION(
+            MERGE_IDS.out.classified_ids
+        )
+
+        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
+        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
+                meta, path -> [path]
+            }
+
+
+    } else if (params.classification_bbduk && params.classification_kraken2) {
+
+
+        //
+        // MODULE: Run bbduk
+        //
+        BBMAP_BBDUK (
+            FASTP.out.reads,
+            fasta.first()
+        )
+        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
+
+
+        //
+        // MODULE: Run ISOLATE_BBDUK_IDS
+        //
+        ISOLATE_BBDUK_IDS(
+            BBMAP_BBDUK.out.contaminated_reads
+        )
+        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Prepare Kraken2 Database
+        //
+        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
+                item -> [['id': "kraken2_db"], item]
+            }
+
+        KRAKEN2PREPARATION (
+            ch_kraken2_db
+        )
+        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
+
+
+        //
+        // MODULE: Run Kraken2
+        //
+        KRAKEN2_KRAKEN2 (
+            FASTP.out.reads,
+            KRAKEN2PREPARATION.out.db.first(),
+            params.save_output_fastqs,
+            true
+        )
+        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
+
+
+        //
+        // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
+        //
+        PARSE_KRAKEN2REPORT(
+            KRAKEN2_KRAKEN2.out.report.take(1)
+        )
+        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
+
+
+        //
+        // MODULE: Isolate the hits for a certain taxa and subclasses
+        //
+        ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
+
+        KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
+
+        ISOLATE_KRAKEN2_IDS (
+            ch_combined
+        )
+
+        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_KRAKEN2_IDS.out.classified_ids.join(
+                ISOLATE_BBDUK_IDS.out.classified_ids, by: [0]
+            ).map{
+                meta, path1, path2 ->
+                    [meta,[path1,path2]]
+            }
+        )
+
+        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
+
+
+        //
+        // MODULE: Summarize the classification results
+        //
+
+        SUMMARY_CLASSIFICATION(
+            MERGE_IDS.out.classified_ids
+        )
+
+        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
+        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
+                meta, path -> [path]
+            }
+
+    }
+
+    //////////////////////////////////////////////////
+    //  Validation
+    //////////////////////////////////////////////////
+
+    if (params.validation_blastn) {
+
 
         //
         // MODULE: Extract the hits to fasta format
         //
         ch_combined = FASTP.out.reads
         .join(
-            ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
+            MERGE_IDS.out.classified_ids, by: [0]
         )
 
 
@@ -202,6 +362,7 @@ workflow DETAXIZER {
         )
 
         ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
+
 
         //
         // MODULE: Run BLASTN
@@ -289,7 +450,6 @@ workflow DETAXIZER {
                 }
                 return [ meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1] ]
             }
-
         ch_blastn_summary = SUMMARY_BLASTN (
             ch_blastn_combined
         )
@@ -301,18 +461,19 @@ workflow DETAXIZER {
             }
         }
 
+
     //
     // MODULE: Filter out the classified or validated reads
     //
     if (
             (
-                ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
+                ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
             ) && !params.filter_trimmed
         ) {
-        ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
-            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+        ch_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
+            .join(MERGE_IDS.out.classified_ids, by:[0])
         FILTER(
-            ch_kraken2filter
+            ch_classification
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
 
@@ -340,13 +501,13 @@ workflow DETAXIZER {
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     } else if (
         (
-            ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
+            ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
         ) && params.filter_trimmed
     ){
-        ch_kraken2filter = FASTP.out.reads
-            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+        ch_classification = FASTP.out.reads
+            .join(MERGE_IDS.out.classified_ids, by:[0])
         FILTER(
-            ch_kraken2filter
+            ch_classification
         )
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     } else if (
@@ -374,6 +535,7 @@ workflow DETAXIZER {
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     }
 
+
     //
     // MODULE: Rename headers after filtering
     //
@@ -394,15 +556,17 @@ workflow DETAXIZER {
         ch_rename_filtered
     )
     }
+
+
     //
     // MODULE: Summarize the classification process
     //
-    if (!params.skip_blastn){
-    ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect().map {
+    if (params.validation_blastn){
+    ch_summary = ch_classification_summary.mix(ch_blastn_summary).collect().map {
             item -> [['id': "summary_of_kraken2_and_blastn"], item]
         }
     } else {
-        ch_summary = ch_kraken2_summary.collect().map {
+        ch_summary = ch_classification_summary.collect().map {
             item -> [['id': "summary_of_kraken2"], item]
         }
     }
@@ -412,6 +576,7 @@ workflow DETAXIZER {
     )
     ch_versions = ch_versions.mix(ch_summary.versions)
 
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)

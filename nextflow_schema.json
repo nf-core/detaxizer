@@ -49,6 +49,22 @@
             "description": "Parameters which enable/disable certain steps used in the workflow.",
             "default": "",
             "properties": {
+                "classification_bbduk": {
+                    "type": "boolean",
+                    "description": "Signifies that bbduk is used in the classification process. Can be combined with the 'classification_kraken2' parameter to run both."
+                },
+                "classification_kraken2": {
+                    "type": "boolean",
+                    "description": "Signifies that kraken2 is used in the classification process. Can be combined with the 'classification_bbduk' parameter to run both. For kraken2 alone no parameter is needed."
+                },
+                "validation_blastn": {
+                    "type": "boolean",
+                    "description": "If a validation of the classified reads via blastn should be carried out."
+                },
+                "filter_with_classification": {
+                    "type": "boolean",
+                    "description": "When a validation via blastn is wanted but the filtering should use the IDs from the classification process."
+                },
                 "enable_filter": {
                     "type": "boolean",
                     "description": "If the filtering step should be carried out.",
@@ -59,16 +75,6 @@
                     "description": "If the pre-processed reads should be used by the filter.",
                     "help_text": "If set to `True` the the pre-proccesed reads are used for filtering. Else the raw reads are used."
                 },
-                "filter_with_kraken2": {
-                    "type": "boolean",
-                    "help_text": "If this is set to True the kraken2 output is used for filtering.",
-                    "description": "If the output of kraken2 should be used for filtering."
-                },
-                "skip_blastn": {
-                    "type": "boolean",
-                    "help_text": "Defines if blastn should be used or not. By default blastn is used in the workflow. If also the filter is enabled the reads are filtered using the output from blastn.",
-                    "description": "If blastn should be skipped."
-                },
                 "save_intermediates": {
                     "type": "boolean",
                     "description": "Save intermediates to the results folder.",
@@ -76,6 +82,19 @@
                 }
             },
             "fa_icon": "fas fa-angle-double-right"
+        },
+        "new_group_1": {
+            "title": "New Group 1",
+            "type": "object",
+            "description": "Parameter to customize bbduk execution",
+            "default": "",
+            "properties": {
+                "bbduk_kmers": {
+                    "type": "integer",
+                    "default": 27,
+                    "description": "Length of k-mers for classification carried out by bbduk"
+                }
+            }
         },
         "kraken2": {
             "title": "kraken2",
@@ -102,7 +121,7 @@
                 },
                 "cutoff_tax2filter": {
                     "type": "integer",
-                    "default": 2,
+                    "default": 0,
                     "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
                 },
                 "cutoff_tax2keep": {
@@ -436,6 +455,9 @@
         },
         {
             "$ref": "#/definitions/general_workflow_parameters"
+        },
+        {
+            "$ref": "#/definitions/new_group_1"
         },
         {
             "$ref": "#/definitions/kraken2"
