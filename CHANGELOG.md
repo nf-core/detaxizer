@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- Added bbduk to the classification step (kraken2 as default, both can be run together)
+- Added `fasta_bbduk` parameter to provide a fasta file with contaminants
+- Rewrote summary step of classification to be usable with bbduk and/or kraken2
+
 ### `Fixed`
 
 - [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `tax2filter` parameter.
+- Made validation via blastn optional by default
+- Changed parameter `fasta` to `fasta_blastn`
 
 ### `Dependencies`
 

@@ -83,12 +83,16 @@
             },
             "fa_icon": "fas fa-angle-double-right"
         },
-        "new_group_1": {
-            "title": "New Group 1",
+        "bbduk": {
+            "title": "bbduk",
             "type": "object",
             "description": "Parameter to customize bbduk execution",
             "default": "",
             "properties": {
+                "fasta_bbduk": {
+                    "type": "string",
+                    "description": "Location of the fasta which contains the contaminant sequences."
+                },
                 "bbduk_kmers": {
                     "type": "integer",
                     "default": 27,
@@ -155,6 +159,10 @@
             "description": "Parameters to fine-tune the output of blastn.",
             "default": "",
             "properties": {
+                "fasta_blastn": {
+                    "type": "string",
+                    "description": "Location of the fasta from which the blastn database will be constructed."
+                },
                 "blast_coverage": {
                     "type": "number",
                     "default": 40,
@@ -217,15 +225,6 @@
                     "fa_icon": "fas fa-book",
                     "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details.",
                     "default": "GRCh38"
-                },
-                "fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
                 },
                 "igenomes_ignore": {
                     "type": "boolean",
@@ -457,7 +456,7 @@
             "$ref": "#/definitions/general_workflow_parameters"
         },
         {
-            "$ref": "#/definitions/new_group_1"
+            "$ref": "#/definitions/bbduk"
         },
         {
             "$ref": "#/definitions/kraken2"

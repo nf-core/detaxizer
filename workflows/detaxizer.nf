@@ -38,14 +38,25 @@ include { SUMMARIZER                            } from '../modules/local/summari
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// speficy the fasta channel if it is not provided via --fasta
-def fasta = Channel.empty()
+// speficy the fasta_blastn channel if it is not provided via --fasta_blastn
+def fasta_blastn = Channel.empty()
 
-if ((!params.fasta && params.validation_blastn) || (!params.fasta && params.classification_bbduk) ) {
-    fasta = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if (params.validation_blastn || params.classification_bbduk){
-    // If params.fasta is there, use it for the creation of the blastn database
-    fasta = Channel.fromPath(params.fasta)
+if ( !params.fasta_blastn && params.validation_blastn ) {
+    fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if ( params.validation_blastn ){
+    // If params.fasta_blastn is there, use it for the creation of the blastn database
+    fasta_blastn = Channel.fromPath(params.fasta_blastn)
+}
+
+// speficy the fasta_bbduk channel if it is not provided via --fasta_bbduk
+
+def fasta_bbduk = Channel.empty()
+
+if ( !params.fasta_bbduk && params.classification_bbduk ) {
+    fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if ( params.classification_bbduk ){
+    // If params.fasta_bbduk is there, use it for the creation of the blastn database
+    fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
 }
 
 workflow DETAXIZER {
@@ -204,7 +215,7 @@ workflow DETAXIZER {
         //
         BBMAP_BBDUK (
             FASTP.out.reads,
-            fasta.first()
+            fasta_bbduk.first()
         )
         ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
@@ -250,7 +261,7 @@ workflow DETAXIZER {
         //
         BBMAP_BBDUK (
             FASTP.out.reads,
-            fasta.first()
+            fasta_bbduk.first()
         )
         ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
@@ -368,7 +379,7 @@ workflow DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
-        ch_reference_fasta = fasta
+        ch_reference_fasta = fasta_blastn
 
         ch_reference_fasta_with_meta = ch_reference_fasta.map {
             item -> [['id': "id-fasta-for-makeblastdb"], item]
