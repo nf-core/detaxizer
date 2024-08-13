@@ -1,6 +1,14 @@
 Changes in module 'nf-core/bbmap/bbduk'
 --- modules/nf-core/bbmap/bbduk/main.nf
 +++ modules/nf-core/bbmap/bbduk/main.nf
+@@ -1,6 +1,6 @@
+ process BBMAP_BBDUK {
+     tag "$meta.id"
+-    label 'process_medium'
++    label 'process_high'
+ 
+     conda "${moduleDir}/environment.yml"
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
 @@ -12,9 +12,10 @@
      path contaminants
  
