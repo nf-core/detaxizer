@@ -19,10 +19,11 @@ process MERGE_IDS {
 
     script:
     """
-    if [ -n "${ids}" ]; then
-        cat ${ids} > ${meta.id}.ids.txt
+    stringarray=($ids)
+    if [ "\${#stringarray[@]}" == 1 ]; then
+        cat \${stringarray[0]} > ${meta.id}.ids.txt
     else
-        awk '!seen[\$0]++' ${ids[0]} ${ids[1]} > ${meta.id}.ids.txt
+        awk '!seen[\$0]++' \${stringarray[0]} \${stringarray[1]} > ${meta.id}.ids.txt
     fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
