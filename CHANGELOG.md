@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rewrote summary step of classification to be usable with bbduk and/or kraken2
 - Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
 - Optionally the removed reads can now be written to the output folder
+- Added optional classification of filtered and removed reads via kraken2
 
 ### `Fixed`
 
