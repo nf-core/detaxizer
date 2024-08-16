@@ -49,6 +49,10 @@
             "description": "Parameters which enable/disable certain steps used in the workflow.",
             "default": "",
             "properties": {
+                "preprocessing": {
+                    "type": "boolean",
+                    "description": "If preprocessing with fastp should be turned on."
+                },
                 "classification_bbduk": {
                     "type": "boolean",
                     "description": "Signifies that bbduk is used in the classification process. Can be combined with the 'classification_kraken2' parameter to run both."
@@ -138,7 +142,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "Ratio per read of assigned to tax2filter k-mers to unclassified k-mers.",
                     "minimum": 0,
                     "maximum": 1,
@@ -165,7 +169,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
                 },
                 "blast_evalue": {
@@ -175,7 +179,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
                 }
             },

@@ -119,6 +119,8 @@ workflow DETAXIZER {
     //
     // MODULE: Run fastp
     //
+    if (params.preprocessing) {
+
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,
         [],
@@ -126,8 +128,12 @@ workflow DETAXIZER {
         params.fastp_save_trimmed_fail,
         []
     )
-    ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
+    ch_fastq_for_classification = FASTP.out.reads
+    ch_versions = ch_versions.mix(FASTP.out.versions.first())
+    } else {
+        ch_fastq_for_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
+    }
     //////////////////////////////////////////////////
     //  Classification
     //////////////////////////////////////////////////
@@ -152,7 +158,7 @@ workflow DETAXIZER {
         // MODULE: Run Kraken2
         //
         KRAKEN2_KRAKEN2 (
-            FASTP.out.reads,
+            ch_fastq_for_classification,
             KRAKEN2PREPARATION.out.db.first(),
             params.save_output_fastqs,
             true
@@ -214,7 +220,7 @@ workflow DETAXIZER {
         // MODULE: Run bbduk
         //
         BBMAP_BBDUK (
-            FASTP.out.reads,
+            ch_fastq_for_classification,
             fasta_bbduk.first()
         )
         ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
@@ -260,7 +266,7 @@ workflow DETAXIZER {
         // MODULE: Run bbduk
         //
         BBMAP_BBDUK (
-            FASTP.out.reads,
+            ch_fastq_for_classification,
             fasta_bbduk.first()
         )
         ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
@@ -292,7 +298,7 @@ workflow DETAXIZER {
         // MODULE: Run Kraken2
         //
         KRAKEN2_KRAKEN2 (
-            FASTP.out.reads,
+            ch_fastq_for_classification,
             KRAKEN2PREPARATION.out.db.first(),
             params.save_output_fastqs,
             true
@@ -363,7 +369,7 @@ workflow DETAXIZER {
         //
         // MODULE: Extract the hits to fasta format
         //
-        ch_combined = FASTP.out.reads
+        ch_combined = ch_fastq_for_classification
         .join(
             MERGE_IDS.out.classified_ids, by: [0]
         )
@@ -516,7 +522,7 @@ workflow DETAXIZER {
             ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
         ) && params.filter_trimmed
     ){
-        ch_classification = FASTP.out.reads
+        ch_classification = ch_fastq_for_classification
             .join(MERGE_IDS.out.classified_ids, by:[0])
         FILTER(
             ch_classification
@@ -534,7 +540,7 @@ workflow DETAXIZER {
         }
         .groupTuple(by:[0])
 
-        ch_combined_short_long_id = FASTP.out.reads.map {
+        ch_combined_short_long_id = ch_fastq_for_classification.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
