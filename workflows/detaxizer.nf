@@ -567,12 +567,27 @@ workflow DETAXIZER {
         meta, path ->
             return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
-
+    ch_removed2rename = Channel.empty()
+    if ( params.output_removed_reads ){
+        ch_removed2rename = FILTER.out.removed.map {
+        meta, path ->
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+    }
+    }
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
 
-    RENAME_FASTQ_HEADERS_AFTER(
-        ch_rename_filtered
+    ch_removed2rename = ch_removed2rename.ifEmpty(['empty', []])
+    if ( params.output_removed_reads ){
+        RENAME_FASTQ_HEADERS_AFTER(
+        ch_rename_filtered,
+        ch_removed2rename
+        )
+    } else {
+        RENAME_FASTQ_HEADERS_AFTER(
+        ch_rename_filtered,
+        ch_removed2rename.first()
     )
+    }
     }
 
 
