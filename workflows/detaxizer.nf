@@ -345,7 +345,7 @@ workflow DETAXIZER {
         ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
                 meta, path -> [path]
             }
-
+        ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
     }
 
     //////////////////////////////////////////////////
@@ -571,11 +571,13 @@ workflow DETAXIZER {
         ch_rename_filtered,
         ch_removed2rename
         )
+        ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
     } else {
         RENAME_FASTQ_HEADERS_AFTER(
         ch_rename_filtered,
         ch_removed2rename.first()
     )
+    ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
     }
     if ( params.classification_kraken2_post_filtering ) {
 
@@ -585,7 +587,7 @@ workflow DETAXIZER {
             params.save_output_fastqs_filtered,
             true
             )
-
+        ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
         if (params.output_removed_reads) {
             KRAKEN2_POST_CLASSIFICATION_REMOVED (
                 RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed,
@@ -593,6 +595,7 @@ workflow DETAXIZER {
                 params.save_output_fastqs_removed,
                 true
                 )
+            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
 
         }
 
