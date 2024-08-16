@@ -65,6 +65,10 @@
                     "type": "boolean",
                     "description": "If a validation of the classified reads via blastn should be carried out."
                 },
+                "classification_kraken2_post_filtering": {
+                    "type": "boolean",
+                    "description": "If the filtered reads should be classified with kraken2."
+                },
                 "filter_with_classification": {
                     "type": "boolean",
                     "description": "When a validation via blastn is wanted but the filtering should use the IDs from the classification process."
@@ -125,11 +129,29 @@
                     "description": "Save unclassified reads and classified reads (those assigned to any taxon, not specifically assessed or filtered) to separate files.",
                     "hidden": true
                 },
+                "save_output_fastqs_filtered": {
+                    "type": "boolean",
+                    "description": "Save unclassified reads and classified reads (those assigned to any taxon, not specifically assessed or filtered) to separate files. For the filtered reads."
+                },
+                "save_output_fastqs_removed": {
+                    "type": "boolean",
+                    "description": "Save unclassified reads and classified reads (those assigned to any taxon, not specifically assessed or filtered) to separate files. For the removed reads."
+                },
                 "kraken2confidence": {
                     "type": "number",
-                    "default": 0.05,
+                    "default": 0,
                     "description": "Confidence in the classification of a read as a certain taxon.",
                     "help_text": "Refer to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
+                },
+                "kraken2confidence_filtered": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Confidence in the classification of a read as a certain taxon. For the filtered reads."
+                },
+                "kraken2confidence_removed": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Confidence in the classification of a read as a certain taxon. For the removed reads."
                 },
                 "cutoff_tax2filter": {
                     "type": "integer",
@@ -138,7 +160,7 @@
                 },
                 "cutoff_tax2keep": {
                     "type": "number",
-                    "default": 0.5,
+                    "default": 0,
                     "minimum": 0,
                     "maximum": 1,
                     "description": "Ratio per read of assigned to tax2filter k-mers to k-mers assigned to any other taxon (except unclassified).",

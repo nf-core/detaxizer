@@ -11,8 +11,9 @@ process RENAME_FASTQ_HEADERS_AFTER {
     tuple val(meta) , path(fastqfiltered), path(renamedHeaders)
     tuple val(meta1), path(fastqremoved)
     output:
-    tuple val(meta), path('*.fastq.gz'), emit: fastq
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path('*_filtered.fastq.gz')                    , emit: fastq
+    tuple val(meta), path('*_removed.fastq.gz') , optional: true    , emit: fastq_removed
+    path "versions.yml"                                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

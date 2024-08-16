@@ -13,11 +13,13 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
 include { getGenomeAttribute     } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
 
-include { FASTP             } from '../modules/nf-core/fastp/main'
-include { KRAKEN2_KRAKEN2   } from '../modules/nf-core/kraken2/kraken2/main'
-include { BBMAP_BBDUK       } from '../modules/nf-core/bbmap/bbduk/main'
-include { BLAST_BLASTN      } from '../modules/nf-core/blast/blastn/main'
-include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
+include { FASTP                                                     } from '../modules/nf-core/fastp/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_KRAKEN2                        } from '../modules/nf-core/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_FILTERED   } from '../modules/nf-core/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_REMOVED    } from '../modules/nf-core/kraken2/kraken2/main'
+include { BBMAP_BBDUK                                               } from '../modules/nf-core/bbmap/bbduk/main'
+include { BLAST_BLASTN                                              } from '../modules/nf-core/blast/blastn/main'
+include { BLAST_MAKEBLASTDB                                         } from '../modules/nf-core/blast/makeblastdb/main'
 
 include { RENAME_FASTQ_HEADERS_PRE              } from '../modules/local/rename_fastq_headers_pre'
 include { KRAKEN2PREPARATION                    } from '../modules/local/kraken2preparation'
@@ -138,9 +140,7 @@ workflow DETAXIZER {
     //  Classification
     //////////////////////////////////////////////////
 
-    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2 && !params.classification_bbduk)) {
-
-
+    if ( params.classification_kraken2_post_filtering || (!params.classification_kraken2 && !params.classification_bbduk) || (params.classification_kraken2) ){
         //
         // MODULE: Prepare Kraken2 Database
         //
@@ -152,7 +152,10 @@ workflow DETAXIZER {
             ch_kraken2_db
         )
         ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
+    }
 
+
+    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2 && !params.classification_bbduk)) {
 
         //
         // MODULE: Run Kraken2
@@ -279,20 +282,6 @@ workflow DETAXIZER {
             BBMAP_BBDUK.out.contaminated_reads
         )
         ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
-
-
-        //
-        // MODULE: Prepare Kraken2 Database
-        //
-        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
-                item -> [['id': "kraken2_db"], item]
-            }
-
-        KRAKEN2PREPARATION (
-            ch_kraken2_db
-        )
-        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
-
 
         //
         // MODULE: Run Kraken2
@@ -587,6 +576,26 @@ workflow DETAXIZER {
         ch_rename_filtered,
         ch_removed2rename.first()
     )
+    }
+    if ( params.classification_kraken2_post_filtering ) {
+
+        KRAKEN2_POST_CLASSIFICATION_FILTERED (
+            RENAME_FASTQ_HEADERS_AFTER.out.fastq,
+            KRAKEN2PREPARATION.out.db.first(),
+            params.save_output_fastqs_filtered,
+            true
+            )
+
+        if (params.output_removed_reads) {
+            KRAKEN2_POST_CLASSIFICATION_REMOVED (
+                RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed,
+                KRAKEN2PREPARATION.out.db.first(),
+                params.save_output_fastqs_removed,
+                true
+                )
+
+        }
+
     }
     }
 
