@@ -575,11 +575,11 @@ workflow DETAXIZER {
     //
     if (params.validation_blastn){
     ch_summary = ch_classification_summary.mix(ch_blastn_summary).collect().map {
-            item -> [['id': "summary_of_kraken2_and_blastn"], item]
+            item -> [['id': "summary_of_classification_and_blastn"], item]
         }
     } else {
         ch_summary = ch_classification_summary.collect().map {
-            item -> [['id': "summary_of_kraken2"], item]
+            item -> [['id': "summary_of_classification"], item]
         }
     }
 
