@@ -7,18 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- Added bbduk to the classification step (kraken2 as default, both can be run together)
-- Added `fasta_bbduk` parameter to provide a fasta file with contaminants
-- Rewrote summary step of classification to be usable with bbduk and/or kraken2
-- Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
-- Optionally the removed reads can now be written to the output folder
-- Added optional classification of filtered and removed reads via kraken2
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added bbduk to the classification step (kraken2 as default, both can be run together)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added `fasta_bbduk` parameter to provide a fasta file with contaminants
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Rewrote summary step of classification to be usable with bbduk and/or kraken2
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Optionally the removed reads can now be written to the output folder
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added optional classification of filtered and removed reads via kraken2
 
 ### `Fixed`
 
 - [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `tax2filter` parameter.
-- Made validation via blastn optional by default
-- Changed parameter `fasta` to `fasta_blastn`
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Made validation via blastn optional by default
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Changed parameter `fasta` to `fasta_blastn`
 
 ### `Dependencies`
 
