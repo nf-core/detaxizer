@@ -155,7 +155,7 @@ workflow DETAXIZER {
     }
 
 
-    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2 && !params.classification_bbduk)) {
+    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2)) {
 
         //
         // MODULE: Run Kraken2
@@ -190,6 +190,36 @@ workflow DETAXIZER {
         )
 
         ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
+
+    }
+
+    if (params.classification_bbduk) {
+
+
+        //
+        // MODULE: Run bbduk
+        //
+        BBMAP_BBDUK (
+            ch_fastq_for_classification,
+            fasta_bbduk.first()
+        )
+        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
+
+
+        //
+        // MODULE: Run ISOLATE_BBDUK_IDS
+        //
+        ISOLATE_BBDUK_IDS(
+            BBMAP_BBDUK.out.contaminated_reads
+        )
+        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
+
+
+    }
+
+    // Prepare MERGE_IDS Channel (with or without merging of IDs)
+
+    if (params.classification_kraken2 || (!params.classification_kraken2 && !params.classification_bbduk)){
 
 
         //
@@ -199,43 +229,8 @@ workflow DETAXIZER {
             ISOLATE_KRAKEN2_IDS.out.classified_ids
         )
 
-        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
 
-
-        //
-        // MODULE: Summarize the classification results
-        //
-
-        SUMMARY_CLASSIFICATION(
-            MERGE_IDS.out.classified_ids
-        )
-
-        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
-        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
-                meta, path -> [path]
-            }
-
-
-    } else if (params.classification_bbduk && !params.classification_kraken2) {
-
-
-        //
-        // MODULE: Run bbduk
-        //
-        BBMAP_BBDUK (
-            ch_fastq_for_classification,
-            fasta_bbduk.first()
-        )
-        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
-
-
-        //
-        // MODULE: Run ISOLATE_BBDUK_IDS
-        //
-        ISOLATE_BBDUK_IDS(
-            BBMAP_BBDUK.out.contaminated_reads
-        )
-        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
+    } else if (params.classification_bbduk && !params.classification_kraken2){
 
 
         //
@@ -245,77 +240,8 @@ workflow DETAXIZER {
             ISOLATE_BBDUK_IDS.out.classified_ids
         )
 
-        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
 
-
-        //
-        // MODULE: Summarize the classification results
-        //
-
-        SUMMARY_CLASSIFICATION(
-            MERGE_IDS.out.classified_ids
-        )
-
-        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
-        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
-                meta, path -> [path]
-            }
-
-
-    } else if (params.classification_bbduk && params.classification_kraken2) {
-
-
-        //
-        // MODULE: Run bbduk
-        //
-        BBMAP_BBDUK (
-            ch_fastq_for_classification,
-            fasta_bbduk.first()
-        )
-        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
-
-
-        //
-        // MODULE: Run ISOLATE_BBDUK_IDS
-        //
-        ISOLATE_BBDUK_IDS(
-            BBMAP_BBDUK.out.contaminated_reads
-        )
-        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
-
-        //
-        // MODULE: Run Kraken2
-        //
-        KRAKEN2_KRAKEN2 (
-            ch_fastq_for_classification,
-            KRAKEN2PREPARATION.out.db.first(),
-            params.save_output_fastqs,
-            true
-        )
-        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
-
-
-        //
-        // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
-        //
-        PARSE_KRAKEN2REPORT(
-            KRAKEN2_KRAKEN2.out.report.take(1)
-        )
-        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
-
-
-        //
-        // MODULE: Isolate the hits for a certain taxa and subclasses
-        //
-        ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
-
-        KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
-
-        ISOLATE_KRAKEN2_IDS (
-            ch_combined
-        )
-
-        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
+    } else if (params.classification_bbduk && params.classification_kraken2){
 
 
         //
@@ -330,23 +256,26 @@ workflow DETAXIZER {
             }
         )
 
-        ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
 
-
-        //
-        // MODULE: Summarize the classification results
-        //
-
-        SUMMARY_CLASSIFICATION(
-            MERGE_IDS.out.classified_ids
-        )
-
-        // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
-        ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
-                meta, path -> [path]
-            }
-        ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
     }
+
+    ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
+
+
+    //
+    // MODULE: Summarize the classification results
+    //
+
+    SUMMARY_CLASSIFICATION(
+        MERGE_IDS.out.classified_ids
+    )
+
+    // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
+    ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
+            meta, path -> [path]
+    }
+    ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
+
 
     //////////////////////////////////////////////////
     //  Validation
