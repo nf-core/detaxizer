@@ -7,22 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added bbduk to the classification step (kraken2 as default, both can be run together)
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added `fasta_bbduk` parameter to provide a fasta file with contaminants
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Rewrote summary step of classification to be usable with bbduk and/or kraken2
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Optionally the removed reads can now be written to the output folder
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Added optional classification of filtered and removed reads via kraken2
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added bbduk to the classification step (kraken2 as default, both can be run together)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added `fasta_bbduk` parameter to provide a fasta file with contaminants
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Rewrote summary step of classification to be usable with bbduk and/or kraken2
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Optionally the removed reads can now be written to the output folder
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added optional classification of filtered and removed reads via kraken2
+
+#### Parameters
+
+Added parameters:
+
+| Parameter                               |
+| --------------------------------------- |
+| `fasta_bbduk`                           |
+| `preprocessing`                         |
+| `output_removed_reads`                  |
+| `classification_kraken2`                |
+| `classification_bbduk`                  |
+| `kraken2confidence_filtered`            |
+| `kraken2confidence_removed`             |
+| `classification_kraken2_post_filtering` |
+| `fastp_eval_duplication`                |
+| `bbduk_kmers`                           |
+
+Changed default values of parameters:
+
+| Parameter                | Old default value                                                             | New default value                                                             |
+| ------------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `fastp_cut_mean_quality` | 15                                                                            | 1                                                                             |
+| `kraken2db`              | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz' | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz' |
+| `kraken2confidence`      | 0.05                                                                          | 0.00                                                                          |
+| `tax2filter`             | 'Homo'                                                                        | 'Homo sapiens'                                                                |
+| `cutoff_tax2filter`      | 2                                                                             | 0                                                                             |
+| `cutoff_tax2keep`        | 0.5                                                                           | 0.0                                                                           |
 
 ### `Fixed`
 
 - [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `tax2filter` parameter.
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Made validation via blastn optional by default
-- [PR #34](https://github.com/nf-core/detaxizer/pull/34) Changed parameter `fasta` to `fasta_blastn`
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made validation via blastn optional by default
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Changed parameter `fasta` to `fasta_blastn`
 
 ### `Dependencies`
 
+Updated and added dependencies
+| Tool    | Previous version | Current version |
+| ------- | ---------------- | --------------- |
+| bbmap   | -                | 39.06           |
+| blastn  | 2.14.1           | 2.15.0          |
+| kraken2 | 2.1.2            | 2.1.3           |
+| seqkit  | 2.8.0            | 2.8.2           |
+
+
 ### `Deprecated`
+
+| Parameter     | New parameter       | Reason                                                                               |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| `fasta`       | `fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters     |
+| `skip_blastn` | `validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting |
+
 
 ## v1.0.0 - Kobbfarbad - [2024-03-26]
 
