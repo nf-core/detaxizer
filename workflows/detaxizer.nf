@@ -219,14 +219,19 @@ workflow DETAXIZER {
 
     // Prepare MERGE_IDS Channel (with or without merging of IDs)
 
-    if (params.classification_kraken2 || (!params.classification_kraken2 && !params.classification_bbduk)){
+    if (params.classification_bbduk && params.classification_kraken2){
 
 
         //
         // MODULE: Merge IDs
         //
         MERGE_IDS(
-            ISOLATE_KRAKEN2_IDS.out.classified_ids
+            ISOLATE_KRAKEN2_IDS.out.classified_ids.join(
+                ISOLATE_BBDUK_IDS.out.classified_ids, by: [0]
+            ).map{
+                meta, path1, path2 ->
+                    [meta,[path1,path2]]
+            }
         )
 
 
@@ -241,20 +246,16 @@ workflow DETAXIZER {
         )
 
 
-    } else if (params.classification_bbduk && params.classification_kraken2){
+    } else if (params.classification_kraken2 || (!params.classification_kraken2 && !params.classification_bbduk)){
 
 
         //
         // MODULE: Merge IDs
         //
         MERGE_IDS(
-            ISOLATE_KRAKEN2_IDS.out.classified_ids.join(
-                ISOLATE_BBDUK_IDS.out.classified_ids, by: [0]
-            ).map{
-                meta, path1, path2 ->
-                    [meta,[path1,path2]]
-            }
+            ISOLATE_KRAKEN2_IDS.out.classified_ids
         )
+
 
 
     }
