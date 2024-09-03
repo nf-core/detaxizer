@@ -51,13 +51,12 @@ Changed default values of parameters:
 ### `Dependencies`
 
 Updated and added dependencies
-| Tool    | Previous version | Current version |
+| Tool | Previous version | Current version |
 | ------- | ---------------- | --------------- |
-| bbmap   | -                | 39.06           |
-| blastn  | 2.14.1           | 2.15.0          |
-| kraken2 | 2.1.2            | 2.1.3           |
-| seqkit  | 2.8.0            | 2.8.2           |
-
+| bbmap | - | 39.06 |
+| blastn | 2.14.1 | 2.15.0 |
+| kraken2 | 2.1.2 | 2.1.3 |
+| seqkit | 2.8.0 | 2.8.2 |
 
 ### `Deprecated`
 
@@ -65,7 +64,6 @@ Updated and added dependencies
 | ------------- | ------------------- | ------------------------------------------------------------------------------------ |
 | `fasta`       | `fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters     |
 | `skip_blastn` | `validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting |
-
 
 ## v1.0.0 - Kobbfarbad - [2024-03-26]
 
