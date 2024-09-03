@@ -257,7 +257,6 @@ workflow DETAXIZER {
         )
 
 
-
     }
 
     ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
