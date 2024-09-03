@@ -9,7 +9,6 @@ process SUMMARY_CLASSIFICATION {
     input:
     tuple val(meta),path(classification)
 
-
     output:
     tuple val(meta), path("*.classification_summary.tsv")   , emit: summary
     path("versions.yml")                                    , emit: versions
