@@ -24,7 +24,7 @@
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Optional Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
+2. Optional pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
 3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/), [`bbduk`](https://sourceforge.net/projects/bbmap/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
 5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from the classification (kraken2 and/or bbduk) or blastn)
