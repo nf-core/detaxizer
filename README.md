@@ -74,6 +74,8 @@ We thank the following people for their extensive assistance in the development 
 
 - [Daniel Straub](https://github.com/d4straub)
 
+This work was initially funded by the German Center for Infection Research (DZIF).
+
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).

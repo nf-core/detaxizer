@@ -1,7 +1,7 @@
-name: blast_blastn
+name: bbmap_bbduk
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::blast=2.15.0
+  - bioconda::bbmap=39.06

@@ -1,4 +1,4 @@
-process PREPARE_FASTA4BLASTN {
+process ISOLATE_BBDUK_IDS {
     tag "$meta.id"
     label 'process_single'
 
@@ -8,11 +8,11 @@ process PREPARE_FASTA4BLASTN {
         'biocontainers/seqkit:2.8.2--h9ee0642_0'}"
 
     input:
-    tuple val(meta), path(trimmedreads), path(kraken2results)
+    tuple val(meta), path(contamination)
 
     output:
-    tuple val(meta), path("*.fa.gz"), emit: fasta
-    path("versions.yml")            , emit: versions
+    tuple val(meta), path('*.bbduk.txt')    , emit: classified_ids
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,16 +20,11 @@ process PREPARE_FASTA4BLASTN {
     script:
     """
     if [ "$meta.single_end" == "true" ]; then
-        seqkit grep -f ${kraken2results} ${trimmedreads} -o out.fq.gz
-        seqkit fq2fa out.fq.gz -o ${meta.id}.fa.gz
-        rm out.fq.gz
+        seqkit seq -n $contamination > ${meta.id}.bbduk.txt
     else
-        seqkit grep -f ${kraken2results} ${trimmedreads[0]} -o out.fq.gz
-        seqkit fq2fa out.fq.gz -o ${meta.id}_R1.fa.gz
-        rm out.fq.gz
-        seqkit grep -f ${kraken2results} ${trimmedreads[1]} -o out.fq.gz
-        seqkit fq2fa out.fq.gz -o ${meta.id}_R2.fa.gz
-        rm out.fq.gz
+        seqkit seq -n ${contamination[0]} > read_ids1.txt
+        seqkit seq -n ${contamination[1]} > read_ids2.txt
+        awk '!seen[\$0]++' read_ids1.txt read_ids2.txt > ${meta.id}.bbduk.txt
     fi
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

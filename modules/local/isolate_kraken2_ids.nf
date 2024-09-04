@@ -1,4 +1,4 @@
-process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
+process ISOLATE_KRAKEN2_IDS {
     tag "$meta.id"
     label 'process_single'
 
@@ -68,7 +68,7 @@ process ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN {
                     filterList.append(line[1])
                     outfile.write("\\t".join(line))
 
-    with open('${meta.id}.ids.txt', 'w') as outfile:
+    with open('${meta.id}.kraken2.ids.txt', 'w') as outfile:
         for entry in filterList:
             outfile.write(entry+"\\n")
 
