@@ -96,9 +96,8 @@ Either the merged IDs from [bbduk](#bbduk) and [kraken2](#kraken2) or the ones p
 - `classification/`:
   - `ids/`: Contains either the merged ID files of the classification step or the ones from one classification tool.
     - `<sample>.ids.txt`: Contains the classified IDs.
-  - `summary/`: Contains the summary files of either the classification step or the ones from one classification tool.
-    - `<sample>.classification_summary.tsv`: Contains the count of reads classified.
-</details>
+  - `summary/`: Contains the summary files of either the classification step or the ones from one classification tool. - `<sample>.classification_summary.tsv`: Contains the count of reads classified.
+  </details>
 
 ### blastn
 
@@ -128,7 +127,7 @@ In this folder, the filtered and re-renamed reads can be found. This result has 
   - `filtered/`: Folder containing the decontaminated reads
     - `<sample>_filtered.fastq.gz`: The filtered reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
 - `removed/`: Folder containing the removed reads (optional)
-    - `<sample>_removed.fastq.gz`: The removed reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
+  - `<sample>_removed.fastq.gz`: The removed reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
 
 </details>
 
@@ -136,8 +135,8 @@ In this folder, the filtered and re-renamed reads can be found. This result has 
 
 The summary file lists all statistics of kraken2 and/or bbduk (and optionally blastn) per sample. It is a combination of the summary files of the classification step and blastn and can be used for a quick overview of the pipeline run. By default, only the summary of the classification step is shown.
 
-|                                                                                                                    | classified with *                                                         | blastn_unique_ids                    | blastn_lines                                                                                                                 | filteredblastn_unique_ids                                                          | filteredblastn_lines |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------- |
+|                                                                                                                    | classified with \*                                  | blastn_unique_ids                                                         | blastn_lines                         | filteredblastn_unique_ids                                                                                                    | filteredblastn_lines                                                               |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `<sample>` (For short reads it is the same as in the `samplesheet.csv`, for long reads it is `<sample>_longReads`) | Number of IDs classified in the classification step | Number of unique IDs in blastn output, should be the same as blastn_lines | Number of lines in the blastn output | Number of IDs in the blastn output after the filtering for identity and coverage, should be the same as filteredblastn_lines | Number of lines in the blastn output after the filtering for identity and coverage |
 
 <details markdown="1">
