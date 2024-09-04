@@ -19,16 +19,16 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp and quality assessment via FastQC, followed by taxon classification with kraken2, and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxon classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
 
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
-3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
+2. Optional Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
+3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/), [`bbduk`](https://sourceforge.net/projects/bbmap/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
-5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from kraken2 or blastn)
-6. Summary of the processes (how many reads were initially present after preprocessing, how many were classified as the `tax2filter` plus potential taxonomic subtree and optionally how many were validated)
+5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from the classification (kraken2 and/or bbduk) or blastn)
+6. Summary of the processes (how many were classified and optionally how many were validated)
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
@@ -44,6 +44,9 @@ CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,A
 ```
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. For more detailed information about the samplesheet, see the [usage documentation](docs/usage.md).
+
+> [!NOTE]
+> Be aware that the `tax2filter` (default _Homo sapiens_) has to be in the provided kraken2 database (if kraken2 is used) and that the reference for bbduk (provided by the `fasta_bbduk` parameter) has to contain the taxa to filter/assess.
 
 Now, you can run the pipeline using:
 
