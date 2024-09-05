@@ -15,7 +15,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [kraken2](#kraken2) - Classification of the (preprocessed) reads and extracting the searched taxa from the results
 - [bbduk](#bbduk) - Classification of the (preprocessed) reads
 - [classification](#classification) - Preparation of the read IDs for filtering and/or validation
-- [blastn](#blastn) - (Optional) Validation of the reads classified as the searched taxa and extracting ids of validated reads
+- [blastn](#blastn) - (Optional) validation of the reads classified as the searched taxa and extracting ids of validated reads
 - [filter](#filter) - (Optional) filtering of the raw or preprocessed reads using either the read ids from kraken2 and/or bbduk output or blastn output
 - [summary](#summary) - The summary of the classification and the optional validation
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
@@ -53,7 +53,7 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
 <details markdown="1">
 <summary>Output files</summary>
 
-- `kraken2/`: Contains the output from the kraken2 classification step.
+- `kraken2/`: Contains the output from the kraken2 classification steps.
   - `filtered/`: Contains the classification of the filtered reads (post-filtering).
     - `<sample>.classifiedreads.txt`: The whole kraken2 output for filtered reads.
     - `<sample>.kraken2.report.txt`: Statistics on how many reads where assigned to which taxon/taxonomic group in the filtered reads.
