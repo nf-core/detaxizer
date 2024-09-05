@@ -82,7 +82,7 @@ bbduk classifies the reads. The important files are `*.bbduk.log` and `ids/*.bbd
 - `bbduk/`: Contains the output from the bbduk classification step.
   - `ids/`: Contains the files with the IDs classified by bbduk.
     - `<sample>.bbduk.txt`: Contains the classified IDs per sample.
-  - `<sample>.bbduk.log`: Contains statistics on the bbduk run
+  - `<sample>.bbduk.log`: Contains statistics on the bbduk run.
 
 </details>
 
@@ -93,7 +93,7 @@ Either the merged IDs from [bbduk](#bbduk) and [kraken2](#kraken2) or the ones p
 <details markdown="1">
 <summary>Output files</summary>
 
-- `classification/`:
+- `classification/`: Contains the results and the summaries of the classification step.
   - `ids/`: Contains either the merged ID files of the classification step or the ones from one classification tool.
     - `<sample>.ids.txt`: Contains the classified IDs.
   - `summary/`: Contains the summary files of either the classification step or the ones from one classification tool. - `<sample>.classification_summary.tsv`: Contains the count of reads classified.
