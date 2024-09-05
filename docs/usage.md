@@ -6,7 +6,7 @@
 
 ## Introduction
 
-nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are **_Homo_** and **_Homo sapiens_**.
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxon classified as contamination is **_Homo sapiens_**.
 
 ## Samplesheet input
 
@@ -48,13 +48,17 @@ The task of decontamination has to be balanced out between false positives and f
 
 ### kraken2
 
-To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extend.
+To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extend.
 
-Also, pangenome databases of the organism(s) classified as contamination could increase the amount of true positives while reducing the hardware requirements. For human such a database can be found [here](https://zenodo.org/doi/10.5281/zenodo.8339731). Such a database will increase false positives, unless a custom database is built together with the data of the organisms not classified as contamination. To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+
+### bbduk
+
+bbduk uses a fasta file which contains sequences from the taxon/taxa classified as contamination. Default is the `GRCh38` human reference genome. Provide a custom file using the `fasta_bbduk` parameter.
 
 ### blastn
 
-The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta` parameter.
+The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta_blastn` parameter.
 
 ## Running the pipeline
 
@@ -101,13 +105,21 @@ You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-c
 
 Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
 
-To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo sapiens`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
 
-To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+To change what is classified by `bbduk`, a fasta containing the sequences of the contaminant taxon/taxa has to be provided using the `fasta_bbduk` parameter.
 
-Skipping blastn can be done by using `--skip_blastn`.
+If you want to run `bbduk` use the `--classification_bbduk` flag. For running both classification steps and use the merged output for filtering, use both flags (`--classification_kraken2` and `--classification_bbduk`).
 
-Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the `blastn` step, or using the output from the `kraken2` step. If `blastn` is skipped, the classified read IDs of `kraken2` are automatically used in the filtering step.
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+
+blastn can be turned on using the `validation_blastn` parameter.
+
+Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step.
+
+If you want to output the removed reads, use `--output_removed_reads`.
+
+Optional classification of the filtered (and removed) reads can be done using `--classification_kraken2_post_filtering`. This uses the kraken2 database provided by `kraken2db`.
 
 ### Updating the pipeline
 

@@ -10,6 +10,10 @@
 
 ## Pipeline tools
 
+- [bbmap](https://sourceforge.net/projects/bbmap/)
+
+  > Bushnell B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/
+
 - [blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
 
   > Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. Basic local alignment search tool. Journal of Molecular Biology 215, 403–410 (1990). doi:10.1016/s0022-2836(05)80360-2.
