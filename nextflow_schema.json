@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
     "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal is optional.",
@@ -139,18 +139,18 @@
                 },
                 "kraken2confidence": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Confidence in the classification of a read as a certain taxon.",
                     "help_text": "Refer to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
                 },
                 "kraken2confidence_filtered": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Confidence in the classification of a read as a certain taxon. For the filtered reads."
                 },
                 "kraken2confidence_removed": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Confidence in the classification of a read as a certain taxon. For the removed reads."
                 },
                 "cutoff_tax2filter": {
@@ -160,7 +160,7 @@
                 },
                 "cutoff_tax2keep": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "minimum": 0,
                     "maximum": 1,
                     "description": "Ratio per read of assigned to tax2filter k-mers to k-mers assigned to any other taxon (except unclassified).",
@@ -168,7 +168,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Ratio per read of assigned to tax2filter k-mers to unclassified k-mers.",
                     "minimum": 0,
                     "maximum": 1,
@@ -195,7 +195,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 40,
+                    "default": 40.0,
                     "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
                 },
                 "blast_evalue": {
@@ -205,7 +205,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 40,
+                    "default": 40.0,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
                 }
             },
@@ -277,6 +277,23 @@
                     "default": "s3://ngi-igenomes/igenomes/",
                     "format": "directory-path",
                     "fa_icon": "fas fa-cloud-download-alt"
+                }
+            }
+        },
+        "generate_samplesheet_options": {
+            "title": "Downstream pipeline samplesheet generation options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Options for generating input samplesheets for complementary downstream pipelines.",
+            "properties": {
+                "generate_downstream_samplesheets": {
+                    "type": "boolean",
+                    "description": "Turn on generation of samplesheets for downstream pipelines."
+                },
+                "generate_pipeline_samplesheets": {
+                    "type": "string",
+                    "default": "taxprofiler",
+                    "description": "Specify which pipeline to generate a samplesheet for."
                 }
             }
         },
@@ -503,6 +520,9 @@
         },
         {
             "$ref": "#/definitions/reference_genome_options"
+        },
+        {
+            "$ref": "#/definitions/generate_samplesheet_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"
