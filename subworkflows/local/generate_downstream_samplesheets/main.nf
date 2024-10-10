@@ -22,9 +22,9 @@ workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
                                             def sample              = meta.id
                                             def run_accession       = meta.id - "_longReads"
                                             def instrument_platform = !meta.long_reads ? "ILLUMINA" : "OXFORD_NANOPORE"
-                                            def fastq_1             = !meta.long_reads ? (meta.single_end ?  out_path + reads.getName(): out_path + reads[0].getName()) : ""
-                                            def fastq_2             = !meta.long_reads && !meta.single_end ? out_path + reads[1].getName() : ""
-                                            def fasta               = meta.long_reads  ? out_path + reads.getName() : ""
+                                            def fastq_1             = meta.single_end  ?  out_path + reads.getName(): out_path + reads[0].getName()
+                                            def fastq_2             = !meta.single_end ? out_path + reads[1].getName() : ""
+                                            def fasta               = ""
                                         [ sample: sample, run_accession:run_accession, instrument_platform:instrument_platform, fastq_1:fastq_1, fastq_2:fastq_2, fasta:fasta ]
                                     }
                                     .tap{ ch_colnames } //ch_header exists
