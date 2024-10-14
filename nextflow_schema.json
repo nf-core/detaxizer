@@ -293,7 +293,7 @@
                 "generate_pipeline_samplesheets": {
                     "type": "string",
                     "default": "taxprofiler,mag",
-                    "description": "Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for. Currently supported pipeline(s): taxprofiler,mag",
+                    "description": "Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for.",
                     "pattern": "^(taxprofiler|mag)(?:,(taxprofiler|mag)){0,1}"
                 }
             }

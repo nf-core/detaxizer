@@ -2,12 +2,11 @@
 // Subworkflow with functionality specific to the nf-core/createtaxdb pipeline
 //
 
-workflow SAMPLESHEET_TAXPROFILER{
+workflow SAMPLESHEET_TAXPROFILER {
     take:
     ch_reads
 
     main:
-    ch_header  = Channel.empty()
     format     = 'csv' // most common format in nf-core
     format_sep = ','
 
@@ -19,7 +18,7 @@ workflow SAMPLESHEET_TAXPROFILER{
                                         def sample              = meta.id
                                         def run_accession       = meta.id - "_longReads"
                                         def instrument_platform = !meta.long_reads ? "ILLUMINA" : "OXFORD_NANOPORE"
-                                        def fastq_1             = meta.single_end  ?  out_path + reads.getName(): out_path + reads[0].getName()
+                                        def fastq_1             = meta.single_end  ? out_path + reads.getName() : out_path + reads[0].getName()
                                         def fastq_2             = !meta.single_end ? out_path + reads[1].getName() : ""
                                         def fasta               = ""
                                     [ sample: sample, run_accession:run_accession, instrument_platform:instrument_platform, fastq_1:fastq_1, fastq_2:fastq_2, fasta:fasta ]
@@ -30,12 +29,11 @@ workflow SAMPLESHEET_TAXPROFILER{
 
 }
 
-workflow SAMPLESHEET_MAG{
+workflow SAMPLESHEET_MAG {
     take:
     ch_reads
 
     main:
-    ch_header  = Channel.empty()
     format     = 'csv' // most common format in nf-core
     format_sep = ','
 
@@ -45,14 +43,14 @@ workflow SAMPLESHEET_MAG{
             }
         .groupTuple(remainder: true)
         .map{key, meta, reads ->
-            new_meta = [
-                id: key,
-                run: key,
-                single_end: meta[0].single_end,
-                long_reads: meta[0]?.long_reads ?: meta[1]?.long_reads ?: false
-                ]
-            // Making sure the long reads are the final element of the array.
-            read_files = reads.flatten().sort(false){ a, b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }
+                new_meta = [
+                    id: key,
+                    run: key,
+                    single_end: meta[0].single_end,
+                    long_reads: meta[0]?.long_reads ?: meta[1]?.long_reads ?: false
+                    ]
+                // Making sure the long reads are the final element of the array.
+                read_files = reads.flatten().sort(false){ a, b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }
             [new_meta, read_files]
             }
         .tap{ ch_reads_grouped }
@@ -65,7 +63,7 @@ workflow SAMPLESHEET_MAG{
                                         def sample         = meta.id
                                         def run            = meta.run
                                         def group          = ""                                                                                       // only used for co-abundance in binning
-                                        def short_reads_1  = meta.long_reads == (reads.size() > 2) ? out_path + reads[0].getName() : ""                // If long reads, but no short reads, then short_reads_1 is empty
+                                        def short_reads_1  = meta.long_reads == (reads.size() > 2) ? out_path + reads[0].getName() : ""               // If long reads, but no short reads, then short_reads_1 is empty
                                         def short_reads_2  = meta.long_reads == (reads.size() > 2) && reads[1] ? out_path + reads[1].getName() : ""
                                         def long_reads     = meta.long_reads ? out_path + reads.last().getName() : ""                                  // If long reads, take final element
                                     [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads]
@@ -97,9 +95,9 @@ workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
 
 }
 
-def channelToSamplesheet(ch_header,ch_list_for_samplesheet, outdir_subdir, pipeline, format, format_sep) {
-    // Constructs the header string and then the strings of each row, and
-    // finally concatenates for saving.
+
+// Constructs the header string and then the strings of each row, and
+def channelToSamplesheet(ch_header, ch_list_for_samplesheet, outdir_subdir, pipeline, format, format_sep) {
     ch_header
         .first()
         .map{ it.keySet().join(format_sep) }

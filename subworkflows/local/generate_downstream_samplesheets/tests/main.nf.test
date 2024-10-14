@@ -23,19 +23,19 @@ nextflow_workflow {
                             file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
                         ],
                         [
+                            [id:'test_paired-end_plus_long-reads', single_end:false, long_reads:false, amount_of_files:2],
+                            [
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
+                            ]
+                        ],
+                        [
                             [id:'test_single-end_long_longReads', single_end:true, long_reads:true, amount_of_files:1],
                             file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
                         ],
                         [
                             [id:'test_single-end_short', single_end:true, long_reads:false, amount_of_files:1],
                             file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true)
-                        ],
-                        [
-                            [id:'test_paired-end_plus_long-reads', single_end:false, long_reads:false, amount_of_files:2],
-                            [
-                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
-                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
-                            ]
                         ],
                         [
                             [id:'test_paired-end', single_end:false, long_reads:false, amount_of_files:2],

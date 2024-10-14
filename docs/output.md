@@ -175,12 +175,17 @@ pipelines:
 
 - `downstream_samplesheets/`
   - `taxprofiler.csv`: Filled out nf-core/taxprofiler `--input` csv with paths to reads relative to the results directory
+  - `mag.csv`: Filled out nf-core/mag `--input` csv with paths to reads relative to the results directory
 
 </details>
 
 :::warning
 Any generated downstream samplesheet is provided as 'best effort' and are not guaranteed to work straight out of the box!
 They may not be complete (e.g. some columns may need to be manually filled in).
+:::
+
+:::warning
+Detaxizer can process long-reads independent from short reads. `nf-core/mag@v3.1.0` can only take short, or short+long but not standalone long-reads as an input (this is being worked on). If you want to use the output of Detaxizer for Mag, you'll have to remove the standalone long reads from the `mag.csv` file.
 :::
 
 ### Pipeline information
