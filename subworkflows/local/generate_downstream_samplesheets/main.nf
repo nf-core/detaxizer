@@ -64,10 +64,10 @@ workflow SAMPLESHEET_MAG{
                                         def out_path       = file(params.outdir).toString() + '/filter/filtered/'
                                         def sample         = meta.id
                                         def run            = meta.run
-                                        def group          = ""                                                                                 // only used for co-abundance in binning
-                                        def short_reads_1  = meta.long_reads == (reads.size() > 2) ? outpath + reads[0].getName() : ""                    // If long reads, but no short reads, then short_reads_1 is empty
-                                        def short_reads_2  = meta.long_reads == (reads.size() > 2) && reads[1] ? outpath + reads[1].getName() : ""
-                                        def long_reads     = meta.long_reads ? outpath + reads.last().getName() : ""                                      // If long reads, take final element
+                                        def group          = ""                                                                                       // only used for co-abundance in binning
+                                        def short_reads_1  = meta.long_reads == (reads.size() > 2) ? out_path + reads[0].getName() : ""                // If long reads, but no short reads, then short_reads_1 is empty
+                                        def short_reads_2  = meta.long_reads == (reads.size() > 2) && reads[1] ? out_path + reads[1].getName() : ""
+                                        def long_reads     = meta.long_reads ? out_path + reads.last().getName() : ""                                  // If long reads, take final element
                                     [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads]
                                 }
                                 .tap{ ch_colnames } //ch_header exists using ch_colnames instead
