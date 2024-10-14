@@ -1,0 +1,58 @@
+nextflow_workflow {
+    name "Test Subworkflow GENERATE_DOWNSTREAM_SAMPLESHEETS"
+    script "../main.nf"
+    workflow "GENERATE_DOWNSTREAM_SAMPLESHEETS"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "subworkflows/generate_downstream_samplesheets"
+
+    test("reads - taxprofiler") {
+
+        when {
+            params {
+                outdir                          = "$outputDir"
+                generate_pipeline_samplesheets  = 'taxprofiler'
+            }
+            workflow {
+                """
+                input[0] = Channel.of(
+                        [
+                            [id:'test_paired-end_plus_long-reads_longReads', single_end:true, long_reads:true, amount_of_files:1],
+                            file('/workspace/detaxizer/work/4c/9dd808a8f11e655c9002cf8cd18e96/test_paired-end_plus_long-reads_longReads_filtered.fastq.gz')
+                        ],
+                        [
+                            [id:'test_single-end_long_longReads', single_end:true, long_reads:true, amount_of_files:1],
+                            file('/workspace/detaxizer/work/77/93139d711cd3ff3f70aae9448abe1e/test_single-end_long_longReads_filtered.fastq.gz')
+                        ],
+                        [
+                            [id:'test_single-end_short', single_end:true, long_reads:false, amount_of_files:1],
+                            file('/workspace/detaxizer/work/46/60c8e50c0a9f7eeb3031f541d635ba/test_single-end_short_filtered.fastq.gz')
+                        ],
+                        [
+                            [id:'test_paired-end_plus_long-reads', single_end:false, long_reads:false, amount_of_files:2],
+                            [
+                                file('/workspace/detaxizer/work/0e/4910ba06048aca8c83040c928b85a1/test_paired-end_plus_long-reads_R1_filtered.fastq.gz'),
+                                file('/workspace/detaxizer/work/0e/4910ba06048aca8c83040c928b85a1/test_paired-end_plus_long-reads_R2_filtered.fastq.gz')
+                            ]
+                        ],
+                        [
+                            [id:'test_paired-end', single_end:false, long_reads:false, amount_of_files:2],
+                            [
+                                file('/workspace/detaxizer/work/a5/07e1debd2d2f159501460984e82fc5/test_paired-end_R1_filtered.fastq.gz'),
+                                file('/workspace/detaxizer/work/a5/07e1debd2d2f159501460984e82fc5/test_paired-end_R2_filtered.fastq.gz')
+                            ]
+                        ]
+                )
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot("${params.outdir}/downstream_samplesheets/taxprofiler.csv").match() }
+            )
+        }
+    }
+}

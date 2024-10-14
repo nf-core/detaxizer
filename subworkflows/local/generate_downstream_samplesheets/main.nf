@@ -11,6 +11,7 @@ workflow SAMPLESHEET_TAXPROFILER{
     format     = 'csv' // most common format in nf-core
     format_sep = ','
 
+    ch_reads.view()
     // Make your samplesheet channel construct here depending on your downstream
     ch_list_for_samplesheet = ch_reads
                                 .map {
@@ -24,9 +25,9 @@ workflow SAMPLESHEET_TAXPROFILER{
                                         def fasta               = ""
                                     [ sample: sample, run_accession:run_accession, instrument_platform:instrument_platform, fastq_1:fastq_1, fastq_2:fastq_2, fasta:fasta ]
                                 }
-                                .tap{ ch_colnames } //ch_header exists
+                                .tap{ ch_colnames } //ch_header exists using ch_colnames instead
 
-    channelToSamplesheet(ch_colnames, ch_list_for_samplesheet, format, format_sep)
+    channelToSamplesheet(ch_colnames, ch_list_for_samplesheet, 'downstream_samplesheets', 'taxprofiler', format, format_sep)
 
 }
 
@@ -44,7 +45,7 @@ workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
     }
 }
 
-def channelToSamplesheet(ch_header,ch_list_for_samplesheet, format, format_sep) {
+def channelToSamplesheet(ch_header,ch_list_for_samplesheet, outdir_subdir, pipeline, format, format_sep) {
     // Constructs the header string and then the strings of each row, and
     // finally concatenates for saving.
     ch_header
@@ -52,7 +53,7 @@ def channelToSamplesheet(ch_header,ch_list_for_samplesheet, format, format_sep) 
         .map{ it.keySet().join(format_sep) }
         .concat( ch_list_for_samplesheet.map{ it.values().join(format_sep) })
         .collectFile(
-            name:"${params.outdir}/downstream_samplesheet/${params.generate_pipeline_samplesheets}.${format}",
+            name:"${params.outdir}/${outdir_subdir}/${pipeline}.${format}",
             newLine: true,
             sort: false
         )
