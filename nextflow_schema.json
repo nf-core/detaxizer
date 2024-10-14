@@ -139,18 +139,18 @@
                 },
                 "kraken2confidence": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "Confidence in the classification of a read as a certain taxon.",
                     "help_text": "Refer to https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#confidence-scoring for details."
                 },
                 "kraken2confidence_filtered": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "Confidence in the classification of a read as a certain taxon. For the filtered reads."
                 },
                 "kraken2confidence_removed": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "Confidence in the classification of a read as a certain taxon. For the removed reads."
                 },
                 "cutoff_tax2filter": {
@@ -160,7 +160,7 @@
                 },
                 "cutoff_tax2keep": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "minimum": 0,
                     "maximum": 1,
                     "description": "Ratio per read of assigned to tax2filter k-mers to k-mers assigned to any other taxon (except unclassified).",
@@ -168,7 +168,7 @@
                 },
                 "cutoff_unclassified": {
                     "type": "number",
-                    "default": 0.0,
+                    "default": 0,
                     "description": "Ratio per read of assigned to tax2filter k-mers to unclassified k-mers.",
                     "minimum": 0,
                     "maximum": 1,
@@ -195,7 +195,7 @@
                 },
                 "blast_coverage": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step."
                 },
                 "blast_evalue": {
@@ -205,7 +205,7 @@
                 },
                 "blast_identity": {
                     "type": "number",
-                    "default": 40.0,
+                    "default": 40,
                     "description": "Identity is the percentage of the exact matches in the query and the sequence found in the database. The parameter can be used to fine-tune the validation step."
                 }
             },
@@ -292,8 +292,9 @@
                 },
                 "generate_pipeline_samplesheets": {
                     "type": "string",
-                    "default": "taxprofiler",
-                    "description": "Specify which pipeline to generate a samplesheet for."
+                    "default": "taxprofiler,mag",
+                    "description": "Specify which pipeline to generate a samplesheet for.",
+                    "pattern": "^(taxprofiler|mag)(?:,(taxprofiler|mag)){0,1}"
                 }
             }
         },

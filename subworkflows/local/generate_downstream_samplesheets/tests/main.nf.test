@@ -7,12 +7,12 @@ nextflow_workflow {
     tag "subworkflows_local"
     tag "subworkflows/generate_downstream_samplesheets"
 
-    test("reads - taxprofiler") {
+    test("reads - taxprofiler,mag") {
 
         when {
             params {
                 outdir                          = "$outputDir"
-                generate_pipeline_samplesheets  = 'taxprofiler'
+                generate_pipeline_samplesheets  = 'taxprofiler,mag'
             }
             workflow {
                 """
@@ -51,7 +51,12 @@ nextflow_workflow {
         then {
             assertAll(
                 { assert workflow.success},
-                { assert snapshot("${params.outdir}/downstream_samplesheets/taxprofiler.csv").match() }
+                { assert snapshot(
+                    [
+                        "${params.outdir}/downstream_samplesheets/taxprofiler.csv",
+                        "${params.outdir}/downstream_samplesheets/mag.csv"
+                    ]).match()
+                },
             )
         }
     }

@@ -1,12 +1,15 @@
 {
-    "reads - taxprofiler": {
+    "reads - taxprofiler,mag": {
         "content": [
-            "taxprofiler.csv:md5,0e202235bae18c3d6d15e195b9a714b7"
+            [
+                "taxprofiler.csv:md5,3af063f070342c72605b0277a7df4c36",
+                "mag.csv:md5,b7826905be577df908978e0e75f2a288"
+            ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-10-14T07:43:02.365599161"
+        "timestamp": "2024-10-14T10:48:25.402183468"
     }
 }
