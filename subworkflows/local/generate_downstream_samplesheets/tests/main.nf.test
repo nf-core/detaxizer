@@ -11,7 +11,8 @@ nextflow_workflow {
 
         when {
             params {
-                outdir                          = "$outputDir"
+                modules_testdata_base_path      = "https://raw.githubusercontent.com/nf-core/test-datasets/detaxizer/test_data/"
+                outdir                          = "."
                 generate_pipeline_samplesheets  = 'taxprofiler,mag'
             }
             workflow {
@@ -19,28 +20,28 @@ nextflow_workflow {
                 input[0] = Channel.of(
                         [
                             [id:'test_paired-end_plus_long-reads_longReads', single_end:true, long_reads:true, amount_of_files:1],
-                            file('/workspace/detaxizer/work/4c/9dd808a8f11e655c9002cf8cd18e96/test_paired-end_plus_long-reads_longReads_filtered.fastq.gz')
+                            file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
                         ],
                         [
                             [id:'test_single-end_long_longReads', single_end:true, long_reads:true, amount_of_files:1],
-                            file('/workspace/detaxizer/work/77/93139d711cd3ff3f70aae9448abe1e/test_single-end_long_longReads_filtered.fastq.gz')
+                            file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
                         ],
                         [
                             [id:'test_single-end_short', single_end:true, long_reads:false, amount_of_files:1],
-                            file('/workspace/detaxizer/work/46/60c8e50c0a9f7eeb3031f541d635ba/test_single-end_short_filtered.fastq.gz')
+                            file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true)
                         ],
                         [
                             [id:'test_paired-end_plus_long-reads', single_end:false, long_reads:false, amount_of_files:2],
                             [
-                                file('/workspace/detaxizer/work/0e/4910ba06048aca8c83040c928b85a1/test_paired-end_plus_long-reads_R1_filtered.fastq.gz'),
-                                file('/workspace/detaxizer/work/0e/4910ba06048aca8c83040c928b85a1/test_paired-end_plus_long-reads_R2_filtered.fastq.gz')
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
                             ]
                         ],
                         [
                             [id:'test_paired-end', single_end:false, long_reads:false, amount_of_files:2],
                             [
-                                file('/workspace/detaxizer/work/a5/07e1debd2d2f159501460984e82fc5/test_paired-end_R1_filtered.fastq.gz'),
-                                file('/workspace/detaxizer/work/a5/07e1debd2d2f159501460984e82fc5/test_paired-end_R2_filtered.fastq.gz')
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
+                                file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
                             ]
                         ]
                 )

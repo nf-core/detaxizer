@@ -2,14 +2,14 @@
     "reads - taxprofiler,mag": {
         "content": [
             [
-                "taxprofiler.csv:md5,3af063f070342c72605b0277a7df4c36",
-                "mag.csv:md5,cb28c6bbf1ff5028a6c31dcbbc5f815a"
+                "./downstream_samplesheets/taxprofiler.csv",
+                "./downstream_samplesheets/mag.csv"
             ]
         ],
         "meta": {
             "nf-test": "0.9.0",
             "nextflow": "24.04.4"
         },
-        "timestamp": "2024-10-14T11:08:57.333343647"
+        "timestamp": "2024-10-14T13:41:58.647080323"
     }
 }
