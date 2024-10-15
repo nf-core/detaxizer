@@ -7,8 +7,7 @@ workflow SAMPLESHEET_TAXPROFILER {
     ch_reads
 
     main:
-    format     = 'csv' // most common format in nf-core
-    format_sep = ','
+    format = 'csv' // most common format in nf-core
 
     // Make your samplesheet channel construct here depending on your downstream
     ch_list_for_samplesheet = ch_reads
@@ -24,7 +23,7 @@ workflow SAMPLESHEET_TAXPROFILER {
             [ sample: sample, run_accession:run_accession, instrument_platform:instrument_platform, fastq_1:fastq_1, fastq_2:fastq_2, fasta:fasta ]
         }
 
-    channelToSamplesheet(ch_list_for_samplesheet, 'downstream_samplesheets', 'taxprofiler', format, format_sep)
+    channelToSamplesheet(ch_list_for_samplesheet,"${params.outdir}/downstream_samplesheets/taxprofiler", format)
 
 }
 
@@ -36,8 +35,7 @@ workflow SAMPLESHEET_MAG {
     ch_reads
 
     main:
-    format     = 'csv' // most common format in nf-core
-    format_sep = ','
+    format = 'csv' // most common format in nf-core
 
     // Combine the short and long reads belonging to the same sample
     ch_reads
@@ -82,8 +80,8 @@ workflow SAMPLESHEET_MAG {
         .filter{ it.long_reads !="" && it.short_reads_1=="" }
         .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and should be REMOVED from the samplesheet 'mag-se.csv' \n sample: ${it.sample}" )}
 
-    channelToSamplesheet(ch_list_for_samplesheet.pe, 'downstream_samplesheets', 'mag-pe', format, format_sep)
-    channelToSamplesheet(ch_list_for_samplesheet.se, 'downstream_samplesheets', 'mag-se', format, format_sep)
+    channelToSamplesheet(ch_list_for_samplesheet.pe,"${params.outdir}/downstream_samplesheets/mag-pe", format)
+    channelToSamplesheet(ch_list_for_samplesheet.se, "${params.outdir}/downstream_samplesheets/mag-se", format)
 
 }
 
@@ -105,7 +103,9 @@ workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
 
 
 // Constructs the header string and then the strings of each row, and
-def channelToSamplesheet(ch_list_for_samplesheet, outdir_subdir, pipeline, format, format_sep) {
+def channelToSamplesheet(ch_list_for_samplesheet, path, format) {
+    format_sep = ["csv":",", "tsv":"\t", "txt":"\t"][format]
+
     ch_header = ch_list_for_samplesheet
 
     ch_header
@@ -113,7 +113,7 @@ def channelToSamplesheet(ch_list_for_samplesheet, outdir_subdir, pipeline, forma
         .map{ it.keySet().join(format_sep) }
         .concat( ch_list_for_samplesheet.map{ it.values().join(format_sep) })
         .collectFile(
-            name:"${params.outdir}/${outdir_subdir}/${pipeline}.${format}",
+            name:"${path}.${format}",
             newLine: true,
             sort: false
         )
