@@ -55,7 +55,8 @@ nextflow_workflow {
                 { assert snapshot(
                     [
                         "${params.outdir}/downstream_samplesheets/taxprofiler.csv",
-                        "${params.outdir}/downstream_samplesheets/mag.csv"
+                        "${params.outdir}/downstream_samplesheets/mag-pe.csv",
+                        "${params.outdir}/downstream_samplesheets/mag-se.csv"
                     ]).match()
                 },
             )

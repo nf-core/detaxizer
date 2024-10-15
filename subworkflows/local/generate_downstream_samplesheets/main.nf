@@ -84,7 +84,6 @@ workflow SAMPLESHEET_MAG {
 
     channelToSamplesheet(ch_list_for_samplesheet.pe, 'downstream_samplesheets', 'mag-pe', format, format_sep)
     channelToSamplesheet(ch_list_for_samplesheet.se, 'downstream_samplesheets', 'mag-se', format, format_sep)
-    channelToSamplesheet(Channel.empty(), 'downstream_samplesheets', 'my-empy-channel', format, format_sep)
 
 }
 
