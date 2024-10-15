@@ -175,7 +175,8 @@ pipelines:
 
 - `downstream_samplesheets/`
   - `taxprofiler.csv`: Filled out nf-core/taxprofiler `--input` csv with paths to reads relative to the results directory
-  - `mag.csv`: Filled out nf-core/mag `--input` csv with paths to reads relative to the results directory
+  - `mag-pe.csv`: Filled out nf-core/mag `--input` csv for paired-end reads with paths to reads relative to the results directory
+  - `mag-se.csv`: Filled out nf-core/mag `--input` csv for single-end reads with paths to reads relative to the results directory
 
 </details>
 

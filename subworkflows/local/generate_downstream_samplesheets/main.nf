@@ -66,19 +66,20 @@ workflow SAMPLESHEET_MAG {
                 def group          = ""                                                                                       // only used for co-abundance in binning
                 def short_reads_1  = meta.long_reads == (reads.size() > 2) ? out_path + reads[0].getName() : ""               // If long reads, but no short reads, then short_reads_1 is empty
                 def short_reads_2  = meta.long_reads == (reads.size() > 2) && reads[1] ? out_path + reads[1].getName() : ""
-                def long_reads     = meta.long_reads ? out_path + reads.last().getName() : ""                                  // If long reads, take final element
+                def long_reads     = meta.long_reads ? out_path + reads.last().getName() : ""                                 // If long reads, take final element
             [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads]
         }
+        .tap{ ch_list_for_samplesheet_all }
+        .filter{ it.short_reads_1!="" } // MAG doesn't support standalone long reads
         .branch{
             se: it.short_reads_2 ==""
             pe: true
         }
 
     // Throw a warning that only long reads are not supported yet by MAG
-    ch_list_for_samplesheet
-        .pe
+    ch_list_for_samplesheet_all
         .filter{ it.long_reads !="" && it.short_reads_1=="" }
-        .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and should be REMOVED from the samplesheet 'mag-se.csv' \n sample: ${it.sample}" )}
+        .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and ARE REMOVED from the samplesheet 'mag-se.csv' \n sample: ${it.sample}" )}
 
     channelToSamplesheet(ch_list_for_samplesheet.pe,"${params.outdir}/downstream_samplesheets/mag-pe", format)
     channelToSamplesheet(ch_list_for_samplesheet.se, "${params.outdir}/downstream_samplesheets/mag-se", format)
