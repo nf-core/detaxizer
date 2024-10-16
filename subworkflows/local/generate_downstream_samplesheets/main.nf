@@ -79,7 +79,7 @@ workflow SAMPLESHEET_MAG {
     // Throw a warning that only long reads are not supported yet by MAG
     ch_list_for_samplesheet_all
         .filter{ it.long_reads !="" && it.short_reads_1=="" }
-        .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and ARE REMOVED from the samplesheet 'mag-se.csv' \n sample: ${it.sample}" )}
+        .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and ARE REMOVED from the samplesheet 'mag-{se,pe}.csv' \n sample: ${it.sample}" )}
 
     channelToSamplesheet(ch_list_for_samplesheet.pe,"${params.outdir}/downstream_samplesheets/mag-pe", format)
     channelToSamplesheet(ch_list_for_samplesheet.se, "${params.outdir}/downstream_samplesheets/mag-se", format)
