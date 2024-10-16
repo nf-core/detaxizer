@@ -1,6 +1,21 @@
-repository_type: pipeline
-nf_core_version: "2.14.1"
+bump_version: null
 lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
     - .github/PULL_REQUEST_TEMPLATE.md
+nf_core_version: 3.0.2
+org_path: null
+repository_type: pipeline
+template:
+  author: Jannik Seidel
+  description: A pipeline to identify (and remove) certain sequences from raw genomic
+    data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal
+    is optional.
+  force: false
+  is_nfcore: true
+  name: detaxizer
+  org: nf-core
+  outdir: .
+  skip_features: null
+  version: 1.1.0dev
+update: null
