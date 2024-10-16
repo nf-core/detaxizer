@@ -42,9 +42,13 @@ Changed default values of parameters:
 | `cutoff_tax2filter`      | 2                                                                             | 0                                                                             |
 | `cutoff_tax2keep`        | 0.5                                                                           | 0.0                                                                           |
 
+### `Changed`
+
+- [PR #42](https://github.com/nf-core/detaxizer/pull/42) - Template update for nf-core/tools 3.0.2, for details read [this blog post](https://nf-co.re/blog/2024/tools-3_0_0#important-template-updates)
+
 ### `Fixed`
 
-- [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `tax2filter` parameter.
+- [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `tax2filter` parameter
 - [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made validation via blastn optional by default
 - [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Changed parameter `fasta` to `fasta_blastn`
 
@@ -55,6 +59,7 @@ Updated and added dependencies
 | ------- | ---------------- | --------------- |
 | bbmap | - | 39.06 |
 | blastn | 2.14.1 | 2.15.0 |
+| multiQC | 1.21 | 1.25.1 |
 | kraken2 | 2.1.2 | 2.1.3 |
 | seqkit | 2.8.0 | 2.8.2 |
 
@@ -64,6 +69,9 @@ Updated and added dependencies
 | ------------- | ------------------- | ------------------------------------------------------------------------------------ |
 | `fasta`       | `fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters     |
 | `skip_blastn` | `validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting |
+| `max_cpus` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `max_memory` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `max_time` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
 
 ## v1.0.0 - Kobbfarbad - [2024-03-26]
 
