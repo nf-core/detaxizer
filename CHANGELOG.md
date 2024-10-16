@@ -65,13 +65,13 @@ Updated and added dependencies
 
 ### `Deprecated`
 
-| Parameter     | New parameter       | Reason                                                                               |
-| ------------- | ------------------- | ------------------------------------------------------------------------------------ |
-| `fasta`       | `fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters     |
-| `skip_blastn` | `validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting |
-| `max_cpus` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
-| `max_memory` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
-| `max_time` | - | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| Parameter     | New parameter       | Reason                                                                                                                                              |
+| ------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fasta`       | `fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters                                                                    |
+| `skip_blastn` | `validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting                                                                |
+| `max_cpus`    | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `max_memory`  | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `max_time`    | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
 
 ## v1.0.0 - Kobbfarbad - [2024-03-26]
 
