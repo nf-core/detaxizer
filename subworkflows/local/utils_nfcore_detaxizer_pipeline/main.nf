@@ -138,6 +138,10 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+
+    if (params.generate_downstream_samplesheets && !params.generate_pipeline_samplesheets) {
+        error('[nf-core/detaxizer] If supplying `--generate_downstream_samplesheets`, you must also specify which pipeline to generate for with `--generate_pipeline_samplesheets! Check input.')
+    }
 }
 
 //
