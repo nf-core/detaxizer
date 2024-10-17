@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made preprocessing with fastp optional and added a parameter to turn on duplication removal (off as default, was on/not changeable in v1.0.0)
 - [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Optionally the removed reads can now be written to the output folder
 - [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added optional classification of filtered and removed reads via kraken2
+- [PR #39](https://github.com/nf-core/detaxizer/pull/39) - Added generation of samplesheet for MAG, Taxprofiler
 
 #### Parameters
 
