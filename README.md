@@ -68,7 +68,7 @@ To see the results of an example test run with a full size dataset refer to the 
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/detaxizer/output).
 
-Generated samplesheets can be used for the pipelines:
+Generated samplesheets from the directory `/downstream_samplesheets/` can be used for the pipelines:
 
 - [nf-core/mag](https://nf-co.re/mag)
 - [nf-core/taxprofiler](https://nf-co.re/taxprofiler)
