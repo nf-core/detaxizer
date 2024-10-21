@@ -58,7 +58,7 @@ Changed default values of parameters:
 Updated and added dependencies
 | Tool | Previous version | Current version |
 | ------- | ---------------- | --------------- |
-| bbmap | - | 39.06 |
+| bbmap | - | 39.10 |
 | blastn | 2.14.1 | 2.15.0 |
 | multiQC | 1.21 | 1.25.1 |
 | kraken2 | 2.1.2 | 2.1.3 |
