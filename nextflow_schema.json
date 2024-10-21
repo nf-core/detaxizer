@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal is optional.",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxon to identify (and remove) is Homo sapiens. Removal is optional.",
     "type": "object",
     "$defs": {
         "input_output_options": {
