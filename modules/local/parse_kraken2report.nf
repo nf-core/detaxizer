@@ -19,7 +19,7 @@ process PARSE_KRAKEN2REPORT {
 
     script:
     """
-    parse_kraken2report.py -i $kraken2report -t $params.tax2filter
+    parse_kraken2report.py -i $kraken2report -t "$params.tax2filter"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

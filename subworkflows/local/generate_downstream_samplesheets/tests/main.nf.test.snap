@@ -1,0 +1,16 @@
+{
+    "reads - taxprofiler,mag": {
+        "content": [
+            [
+                "./downstream_samplesheets/taxprofiler.csv",
+                "./downstream_samplesheets/mag-pe.csv",
+                "./downstream_samplesheets/mag-se.csv"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "24.04.4"
+        },
+        "timestamp": "2024-10-15T09:05:21.506341802"
+    }
+}

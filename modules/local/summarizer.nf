@@ -28,18 +28,18 @@ process SUMMARIZER {
         version_output = subprocess.getoutput('python --version')
         return version_output.split()[1]
 
-    files_kraken2 = glob.glob('*.kraken2_summary.tsv')
+    files_classified = glob.glob('*.classification_summary.tsv')
     files_blastn = glob.glob('*.blastn_summary.tsv')
 
-    kraken2_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_kraken2]
-    df_kraken2 = pd.concat(kraken2_dfs)
+    classified_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_classified]
+    df_classified = pd.concat(classified_dfs)
     if files_blastn != []:
         blastn_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_blastn]
         df_blastn = pd.concat(blastn_dfs)
-        summary_df = df_kraken2.join(df_blastn)
+        summary_df = df_classified.join(df_blastn)
         summary_df.to_csv("summary.tsv", sep="\\t")
     else:
-        summary_df = df_kraken2
+        summary_df = df_classified
         summary_df.to_csv("summary.tsv", sep="\\t")
 
     # Generate the version.yaml for MultiQC
