@@ -9,7 +9,7 @@ process RENAME_FASTQ_HEADERS_AFTER {
 
     input:
     tuple val(meta) , path(fastqfiltered), path(renamedHeaders)
-    tuple val(meta1), path(fastqremoved)
+    tuple val(meta2), path(fastqremoved)
     output:
     tuple val(meta), path('*_filtered.fastq.gz')                    , emit: fastq
     tuple val(meta), path('*_removed.fastq.gz') , optional: true    , emit: fastq_removed
@@ -23,20 +23,20 @@ process RENAME_FASTQ_HEADERS_AFTER {
     if [ "$meta.single_end" == "true" ]; then
         gzip -f -d $renamedHeaders
         seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers.txt $fastqfiltered -o ${meta.id}_filtered.fastq.gz
-        if [ "$meta1" != "empty" ]; then
+        if [ "$meta2" != "empty" ]; then
             seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers.txt $fastqremoved -o ${meta.id}_removed.fastq.gz
         fi
         rm *_headers.txt
     else
         gzip -f -d ${renamedHeaders[0]}
         seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_fw.txt ${fastqfiltered[0]} -o ${meta.id}_R1_filtered.fastq.gz
-        if [ "$meta1" != "empty" ]; then
+        if [ "$meta2" != "empty" ]; then
             seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_fw.txt ${fastqremoved[0]} -o ${meta.id}_R1_removed.fastq.gz
         fi
         rm *_headers_fw.txt
         gzip -f -d ${renamedHeaders[1]}
         seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_rv.txt ${fastqfiltered[1]} -o ${meta.id}_R2_filtered.fastq.gz
-        if [ "$meta1" != "empty" ]; then
+        if [ "$meta2" != "empty" ]; then
             seqkit replace -p '^(.+)\$' -r '{kv}' -k *_headers_rv.txt ${fastqremoved[1]} -o ${meta.id}_R2_removed.fastq.gz
         fi
         rm *_headers_rv.txt
