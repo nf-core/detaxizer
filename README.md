@@ -19,7 +19,7 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxon classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxonomic classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
 
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
@@ -44,9 +44,6 @@ CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,A
 ```
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end). A third fastq file can be provided if long reads are present in your project. For more detailed information about the samplesheet, see the [usage documentation](docs/usage.md).
-
-> [!NOTE]
-> Be aware that the `tax2filter` (default _Homo sapiens_) has to be in the provided kraken2 database (if kraken2 is used) and that the reference for bbduk (provided by the `fasta_bbduk` parameter) should contain the taxa to filter/assess if it is wanted to assess/remove the same taxa as in `tax2filter`. This overlap in the databases is not checked by the pipeline. To filter out/assess taxa with bbduk only, the `tax2filter` parameter is not needed but a fasta file with references of these taxa has to be provided.
 
 Now, you can run the pipeline using:
 
