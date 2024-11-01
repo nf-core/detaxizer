@@ -234,14 +234,12 @@ workflow NFCORE_DETAXIZER {
 
     } else if (params.classification_kraken2 || (!params.classification_kraken2 && !params.classification_bbduk)){
 
-
         //
         // MODULE: Merge IDs
         //
         MERGE_IDS(
             ISOLATE_KRAKEN2_IDS.out.classified_ids
         )
-
 
     }
 
