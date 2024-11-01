@@ -39,25 +39,25 @@ include { SUMMARIZER                                                } from '../m
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// speficy the fasta_blastn channel if it is not provided via --fasta_blastn
-def fasta_blastn = Channel.empty()
+// specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
+def ch_fasta_blastn = Channel.empty()
 
 if ( !params.fasta_blastn && params.validation_blastn ) {
-    fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
+    ch_fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
 } else if ( params.validation_blastn ){
     // If params.fasta_blastn is there, use it for the creation of the blastn database
-    fasta_blastn = Channel.fromPath(params.fasta_blastn)
+    ch_fasta_blastn = Channel.fromPath(params.fasta_blastn)
 }
 
-// speficy the fasta_bbduk channel if it is not provided via --fasta_bbduk
+// specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
 
-def fasta_bbduk = Channel.empty()
+def ch_fasta_bbduk = Channel.empty()
 
 if ( !params.fasta_bbduk && params.classification_bbduk ) {
-    fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
+    ch_fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
 } else if ( params.classification_bbduk ){
     // If params.fasta_bbduk is there, use it for the creation of the blastn database
-    fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
+    ch_fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
 }
 
 workflow NFCORE_DETAXIZER {
@@ -199,7 +199,7 @@ workflow NFCORE_DETAXIZER {
         //
         BBMAP_BBDUK (
             ch_fastq_for_classification,
-            fasta_bbduk.first()
+            ch_fasta_bbduk.first()
         )
         ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
@@ -301,7 +301,7 @@ workflow NFCORE_DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
-        ch_reference_fasta = fasta_blastn
+        ch_reference_fasta = ch_fasta_blastn
 
         ch_reference_fasta_with_meta = ch_reference_fasta.map {
             item -> [['id': "id-fasta-for-makeblastdb"], item]
