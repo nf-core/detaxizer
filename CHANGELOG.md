@@ -34,8 +34,8 @@ Added parameters:
 
 Changed default values of parameters:
 
-| Parameter                | Old default value                                                             | New default value                                                             |
-| ------------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Parameter                  | Old default value                                                             | New default value                                                             |
+| -------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | `--fastp_cut_mean_quality` | 15                                                                            | 1                                                                             |
 | `--kraken2db`              | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz' | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz' |
 | `--kraken2confidence`      | 0.05                                                                          | 0.00                                                                          |
@@ -57,23 +57,23 @@ Changed default values of parameters:
 
 Updated and added dependencies
 
-| Tool | Previous version | Current version |
+| Tool    | Previous version | Current version |
 | ------- | ---------------- | --------------- |
-| bbmap | - | 39.10 |
-| blastn | 2.14.1 | 2.15.0 |
-| multiQC | 1.21 | 1.25.1 |
-| kraken2 | 2.1.2 | 2.1.3 |
-| seqkit | 2.8.0 | 2.8.2 |
+| bbmap   | -                | 39.10           |
+| blastn  | 2.14.1           | 2.15.0          |
+| multiQC | 1.21             | 1.25.1          |
+| kraken2 | 2.1.2            | 2.1.3           |
+| seqkit  | 2.8.0            | 2.8.2           |
 
 ### `Deprecated`
 
-| Parameter     | New parameter       | Reason                                                                                                                                              |
-| ------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parameter       | New parameter         | Reason                                                                                                                                              |
+| --------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--fasta`       | `--fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters                                                                    |
 | `--skip_blastn` | `--validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting                                                                |
-| `--max_cpus`    | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
-| `--max_memory`  | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
-| `--max_time`    | -                   | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `--max_cpus`    | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `--max_memory`  | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `--max_time`    | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
 
 ## v1.0.0 - Kobbfarbad - [2024-03-26]
 

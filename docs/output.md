@@ -76,7 +76,7 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
 
 bbduk classifies the reads by kmer matching to a reference.
 As soon as one k-mer is in the reference, the read is classified.
-The important files are `*.bbduk.log` and `ids/*.bbduk.txt`. 
+The important files are `*.bbduk.log` and `ids/*.bbduk.txt`.
 `<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
 
 <details markdown="1">
