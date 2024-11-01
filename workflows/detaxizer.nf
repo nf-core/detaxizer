@@ -68,34 +68,22 @@ workflow NFCORE_DETAXIZER {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    ch_samplesheet.branch {
+    ch_short = ch_samplesheet.branch {
         shortReads: it[1]
-        }.set {
-            ch_short
-        }
-
-    ch_short.shortReads.map{
+        }.shortReads.map{
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             if (short_reads_fastq_2){
                 return [meta + [ single_end: false, long_reads: false , amount_of_files: 2 ], [ short_reads_fastq_1, short_reads_fastq_2 ] ]
             } else {
                 return [meta + [ id: "${meta.id}_R1", single_end: true, long_reads: false, amount_of_files: 1 ], short_reads_fastq_1 ]
             }
-    }.set{
-        ch_short
     }
 
-    ch_samplesheet.branch {
+    ch_long = ch_samplesheet.branch {
         longReads: it[3]
-    }.set {
-        ch_long
-    }
-
-    ch_long.longReads.map {
+    }.longReads.map {
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             return [meta + [ id: "${meta.id}_longReads", single_end: true, long_reads: true, amount_of_files: 1 ], long_reads_fastq_1 ]
-    }.set {
-        ch_long
     }
 
     ch_short_long = ch_short.mix(ch_long)
@@ -181,7 +169,7 @@ workflow NFCORE_DETAXIZER {
         //
         ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
 
-        KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
+        ch_combined = KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report)
 
         ISOLATE_KRAKEN2_IDS (
             ch_combined
