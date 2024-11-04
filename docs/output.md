@@ -56,25 +56,28 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
 - `kraken2/`: Contains the output from the kraken2 classification steps.
   - `filtered/`: Contains the classification of the filtered reads (post-filtering).
     - `<sample>.classifiedreads.txt`: The whole kraken2 output for filtered reads.
-    - `<sample>.kraken2.report.txt`: Statistics on how many reads where assigned to which taxon/taxonomic group in the filtered reads.
+    - `<sample>.kraken2.report.txt`: Statistics on how many reads were assigned to which taxon/taxonomic group in the filtered reads.
   - `isolated/`: Contains the isolated lines and ids for the taxon/taxa mentioned in the `tax2filter` parameter.
     - `<sample>.classified.txt`: The whole kraken2 output for the taxon/taxa mentioned in the `tax2filter` parameter.
     - `<sample>.ids.txt`: The ids from the whole kraken2 output assigned to the taxon/taxa mentioned in the `tax2filter` parameter.
   - `removed/`: Contains the classification of the removed reads (post-filtering).
     - `<sample>.classifiedreads.txt`: The whole kraken2 output for removed reads.
-    - `<sample>.kraken2.report.txt`: Statistics on how many reads where assigned to which taxon/taxonomic group in the removed reads.
+    - `<sample>.kraken2.report.txt`: Statistics on how many reads were assigned to which taxon/taxonomic group in the removed reads.
   - `summary/`: Summary of the kraken2 process.
     - `<sample>.kraken2_summary.tsv`: Contains two three columns, column 1 is the sample name, column 2 the amount of lines in the untouched kraken2 output and column 3 the amount of lines in the isolated output.
   - `taxonomy/`: Contains the list of taxa to filter/to assess for.
     - `taxa_to_filter.txt`: Contains the taxon ids of all taxa to assess the data for or to filter out.
   - `<sample>.classifiedreads.txt`: The whole kraken2 output for all reads.
-  - `<sample>.kraken2.report.txt`: Statistics on how many reads where assigned to which taxon/taxonomic group.
+  - `<sample>.kraken2.report.txt`: Statistics on how many reads were assigned to which taxon/taxonomic group.
 
 </details>
 
 ### bbduk
 
-bbduk classifies the reads. The important files are `*.bbduk.log` and `ids/*.bbduk.txt`. `<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
+bbduk classifies the reads by kmer matching to a reference.
+As soon as one k-mer is in the reference, the read is classified.
+The important files are `*.bbduk.log` and `ids/*.bbduk.txt`.
+`<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -88,7 +91,7 @@ bbduk classifies the reads. The important files are `*.bbduk.log` and `ids/*.bbd
 
 ### classification
 
-Either the merged IDs from [bbduk](#bbduk) and [kraken2](#kraken2) or the ones produced by one of the tools are shown in this folder. Also, the summary files of the classification step are shown.
+Either the merged IDs from [bbduk](#bbduk) and [kraken2](#kraken2) or the ones produced by one of the tools are shown in this folder. Also, the summary files of the classification step are included.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -169,14 +172,15 @@ The pipeline can also generate input files for the following downstream
 pipelines:
 
 - [nf-core/taxprofiler](https://nf-co.re/taxprofiler)
+- [nf-core/mag](https://nf-co.re/mag)
 
 <details markdown="1">
 <summary>Output files</summary>
 
 - `downstream_samplesheets/`
-  - `taxprofiler.csv`: Filled out nf-core/taxprofiler `--input` csv with paths to reads relative to the results directory
-  - `mag-pe.csv`: Filled out nf-core/mag `--input` csv for paired-end reads with paths to reads relative to the results directory
-  - `mag-se.csv`: Filled out nf-core/mag `--input` csv for single-end reads with paths to reads relative to the results directory
+  - `taxprofiler.csv`: Filled out nf-core/taxprofiler `--input` csv with paths to reads saved in the results directory
+  - `mag-pe.csv`: Filled out nf-core/mag `--input` csv for paired-end reads with paths to reads saved in the results directory
+  - `mag-se.csv`: Filled out nf-core/mag `--input` csv for single-end reads with paths to reads saved in the results directory
 
 </details>
 
@@ -186,7 +190,7 @@ They may not be complete (e.g. some columns may need to be manually filled in).
 :::
 
 :::warning
-Detaxizer can process long-reads independent from short reads. `nf-core/mag@v3.1.0` can only take short, or short+long but not standalone long-reads as an input (this is being worked on). If you want to use the output of Detaxizer for Mag, you'll have to remove the standalone long reads from the `mag.csv` file.
+Detaxizer can process long-reads independent from short reads. nf-core/mag (as of 3.1.0) can only take short, or short + long but not standalone long-reads as an input (this is being worked on). Standalone long-reads will not be included in the nf-core/mag samplesheets.
 :::
 
 ### Pipeline information

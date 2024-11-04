@@ -9,7 +9,7 @@ repository_type: pipeline
 template:
   author: Jannik Seidel
   description: A pipeline to identify (and remove) certain sequences from raw genomic
-    data. Default taxa to identify (and remove) are Homo and Homo sapiens. Removal
+    data. Default taxon to identify (and remove) is Homo sapiens. Removal
     is optional.
   force: false
   is_nfcore: true
@@ -17,5 +17,5 @@ template:
   org: nf-core
   outdir: .
   skip_features: null
-  version: 1.1.0dev
+  version: 1.1.0
 update: null
