@@ -3,95 +3,95 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { FASTQC                                                    } from '../modules/nf-core/fastqc/main'
+include { MULTIQC                                                   } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                                          } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                                    } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
+include { getGenomeAttribute                                        } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
+include { GENERATE_DOWNSTREAM_SAMPLESHEETS                          } from '../subworkflows/local/generate_downstream_samplesheets/main.nf'
 
+include { FASTP                                                     } from '../modules/nf-core/fastp/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_KRAKEN2                        } from '../modules/nf-core/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_FILTERED   } from '../modules/nf-core/kraken2/kraken2/main'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_REMOVED    } from '../modules/nf-core/kraken2/kraken2/main'
+include { BBMAP_BBDUK                                               } from '../modules/nf-core/bbmap/bbduk/main'
+include { BLAST_BLASTN                                              } from '../modules/nf-core/blast/blastn/main'
+include { BLAST_MAKEBLASTDB                                         } from '../modules/nf-core/blast/makeblastdb/main'
 
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-validation'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
-include { getGenomeAttribute     } from '../subworkflows/local/utils_nfcore_detaxizer_pipeline'
-
-include { FASTP             } from '../modules/nf-core/fastp/main'
-include { KRAKEN2_KRAKEN2   } from '../modules/nf-core/kraken2/kraken2/main'
-include { BLAST_BLASTN      } from '../modules/nf-core/blast/blastn/main'
-include { BLAST_MAKEBLASTDB } from '../modules/nf-core/blast/makeblastdb/main'
-
-include { RENAME_FASTQ_HEADERS_PRE              } from '../modules/local/rename_fastq_headers_pre'
-include { KRAKEN2PREPARATION                    } from '../modules/local/kraken2preparation'
-include { PARSE_KRAKEN2REPORT                   } from '../modules/local/parse_kraken2report'
-include { ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN    } from '../modules/local/isolate_ids_from_kraken2_to_blastn'
-include { PREPARE_FASTA4BLASTN                  } from '../modules/local/prepare_fasta4blastn'
-include { FILTER_BLASTN_IDENTCOV                } from '../modules/local/filter_blastn_identcov'
-include { FILTER                                } from '../modules/local/filter'
-include { RENAME_FASTQ_HEADERS_AFTER            } from '../modules/local/rename_fastq_headers_after'
-include { SUMMARY_KRAKEN2                       } from '../modules/local/summary_kraken2'
-include { SUMMARY_BLASTN                        } from '../modules/local/summary_blastn'
-include { SUMMARIZER                            } from '../modules/local/summarizer'
+include { RENAME_FASTQ_HEADERS_PRE                                  } from '../modules/local/rename_fastq_headers_pre'
+include { KRAKEN2PREPARATION                                        } from '../modules/local/kraken2preparation'
+include { PARSE_KRAKEN2REPORT                                       } from '../modules/local/parse_kraken2report'
+include { ISOLATE_KRAKEN2_IDS                                       } from '../modules/local/isolate_kraken2_ids'
+include { ISOLATE_BBDUK_IDS                                         } from '../modules/local/isolate_bbduk_ids'
+include { MERGE_IDS                                                 } from '../modules/local/merge_ids'
+include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn'
+include { FILTER_BLASTN_IDENTCOV                                    } from '../modules/local/filter_blastn_identcov'
+include { FILTER                                                    } from '../modules/local/filter'
+include { RENAME_FASTQ_HEADERS_AFTER                                } from '../modules/local/rename_fastq_headers_after'
+include { SUMMARY_CLASSIFICATION                                    } from '../modules/local/summary_classification'
+include { SUMMARY_BLASTN                                            } from '../modules/local/summary_blastn'
+include { SUMMARIZER                                                } from '../modules/local/summarizer'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// speficy the fasta channel if it is not provided via --fasta
-def fasta = Channel.empty()
+// specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
+def ch_fasta_blastn = Channel.empty()
 
-if (!params.fasta && !params.skip_blastn) {
-    fasta = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if (!params.skip_blastn){
-    // If params.fasta is there, use it for the creation of the blastn database
-    fasta = Channel.fromPath(params.fasta)
+if ( !params.fasta_blastn && params.validation_blastn ) {
+    ch_fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if ( params.validation_blastn ){
+    // If params.fasta_blastn is there, use it for the creation of the blastn database
+    ch_fasta_blastn = Channel.fromPath(params.fasta_blastn)
 }
 
-workflow DETAXIZER {
+// specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
+
+def ch_fasta_bbduk = Channel.empty()
+
+if ( !params.fasta_bbduk && params.classification_bbduk ) {
+    ch_fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
+} else if ( params.classification_bbduk ){
+    // If params.fasta_bbduk is there, use it for the creation of the blastn database
+    ch_fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
+}
+
+workflow NFCORE_DETAXIZER {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    ch_samplesheet.branch {
+    ch_short = ch_samplesheet.branch {
         shortReads: it[1]
-        }.set {
-            ch_short
-        }
-
-    ch_short.shortReads.map{
+        }.shortReads.map{
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             if (short_reads_fastq_2){
                 return [meta + [ single_end: false, long_reads: false , amount_of_files: 2 ], [ short_reads_fastq_1, short_reads_fastq_2 ] ]
             } else {
                 return [meta + [ id: "${meta.id}_R1", single_end: true, long_reads: false, amount_of_files: 1 ], short_reads_fastq_1 ]
             }
-    }.set{
-        ch_short
     }
 
-    ch_samplesheet.branch {
+    ch_long = ch_samplesheet.branch {
         longReads: it[3]
-    }.set {
-        ch_long
-    }
-
-    ch_long.longReads.map {
+    }.longReads.map {
         meta, short_reads_fastq_1, short_reads_fastq_2, long_reads_fastq_1 ->
             return [meta + [ id: "${meta.id}_longReads", single_end: true, long_reads: true, amount_of_files: 1 ], long_reads_fastq_1 ]
-    }.set {
-        ch_long
     }
 
     ch_short_long = ch_short.mix(ch_long)
-
 
     //
     // MODULE: Rename Fastq headers
     //
     RENAME_FASTQ_HEADERS_PRE(ch_short_long)
-
 
     //
     // MODULE: Run FastQC
@@ -105,95 +105,164 @@ workflow DETAXIZER {
     //
     // MODULE: Run fastp
     //
+    if (params.preprocessing) {
+
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,
+        [],
         [],
         params.fastp_save_trimmed_fail,
         []
     )
+
+    ch_fastq_for_classification = FASTP.out.reads
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
-
-    //
-    // MODULE: Prepare Kraken2 Database
-    //
-    ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
-            item -> [['id': "kraken2_db"], item]
-        }
-    KRAKEN2PREPARATION (
-        ch_kraken2_db
-    )
-    ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions)
-
-    //
-    // MODULE: Run Kraken2
-    //
-
-    KRAKEN2_KRAKEN2 (
-        FASTP.out.reads,
-        KRAKEN2PREPARATION.out.db.first(),
-        params.save_output_fastqs,
-        true
-    )
-    ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
-
-    //
-    // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
-    //
-    PARSE_KRAKEN2REPORT(
-        KRAKEN2_KRAKEN2.out.report.take(1)
-    )
-    ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
-
-    //
-    // MODULE: Isolate the hits for a certain taxa and subclasses
-    //
-    ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
-
-    KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report).set{ ch_combined }
-
-    ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN (
-        ch_combined
-    )
-
-    ch_versions = ch_versions.mix(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.versions.first())
-
-    //
-    // MODULE: Summarize the kraken2 results and the isolated kraken2 hits
-    //
-    ch_prepare_summary_kraken2 = KRAKEN2_KRAKEN2.out.classified_reads_assignment.join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified).map {
-        meta, path1, path2 ->
-            return [ meta, [ path1, path2 ] ]
+    } else {
+        ch_fastq_for_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
     }
+    //////////////////////////////////////////////////
+    //  Classification
+    //////////////////////////////////////////////////
 
-    ch_combined_kraken2 = ch_prepare_summary_kraken2.map {
-        meta, path ->
-            return [ meta +[ id: meta.id.replaceAll("(_R1|_R2)", "") ] , path]
-        }
-        .map {
-            meta, path ->
-                path = path.flatten()
-                return [meta, path]
+    if ( params.classification_kraken2_post_filtering || (!params.classification_kraken2 && !params.classification_bbduk) || (params.classification_kraken2) ){
+        //
+        // MODULE: Prepare Kraken2 Database
+        //
+        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
+                item -> [['id': "kraken2_db"], item]
             }
 
-    ch_kraken2_summary = SUMMARY_KRAKEN2(
-        ch_combined_kraken2
+        KRAKEN2PREPARATION (
+            ch_kraken2_db
+        )
+        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
+    }
+
+
+    if ((!params.classification_bbduk && !params.classification_kraken2) || (params.classification_kraken2)) {
+
+        //
+        // MODULE: Run Kraken2
+        //
+        KRAKEN2_KRAKEN2 (
+            ch_fastq_for_classification,
+            KRAKEN2PREPARATION.out.db.first(),
+            params.save_output_fastqs,
+            true
+        )
+        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
+
+        //
+        // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
+        //
+        PARSE_KRAKEN2REPORT(
+            KRAKEN2_KRAKEN2.out.report.take(1)
+        )
+        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
+
+        //
+        // MODULE: Isolate the hits for a certain taxa and subclasses
+        //
+        ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
+
+        ch_combined = KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report)
+
+        ISOLATE_KRAKEN2_IDS (
+            ch_combined
         )
 
-    ch_versions = ch_versions.mix(ch_kraken2_summary.versions.first())
+        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
+
+    }
+
+    if (params.classification_bbduk) {
+
+        //
+        // MODULE: Run bbduk
+        //
+        BBMAP_BBDUK (
+            ch_fastq_for_classification,
+            ch_fasta_bbduk.first()
+        )
+        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
+
+        //
+        // MODULE: Run ISOLATE_BBDUK_IDS
+        //
+        ISOLATE_BBDUK_IDS(
+            BBMAP_BBDUK.out.contaminated_reads
+        )
+        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
+
+
+    }
+
+    // Prepare MERGE_IDS Channel (with or without merging of IDs)
+
+    if (params.classification_bbduk && params.classification_kraken2){
+
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_KRAKEN2_IDS.out.classified_ids.join(
+                ISOLATE_BBDUK_IDS.out.classified_ids, by: [0]
+            ).map{
+                meta, path1, path2 ->
+                    [meta,[path1,path2]]
+            }
+        )
+
+
+    } else if (params.classification_bbduk && !params.classification_kraken2){
+
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_BBDUK_IDS.out.classified_ids
+        )
+
+
+    } else if (params.classification_kraken2 || (!params.classification_kraken2 && !params.classification_bbduk)){
+
+        //
+        // MODULE: Merge IDs
+        //
+        MERGE_IDS(
+            ISOLATE_KRAKEN2_IDS.out.classified_ids
+        )
+
+    }
+
+    ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
+
+    //
+    // MODULE: Summarize the classification results
+    //
+
+    SUMMARY_CLASSIFICATION(
+        MERGE_IDS.out.classified_ids
+    )
 
     // Drop meta of kraken2_summary as it is not needed for the combination step of summarizer
-    ch_kraken2_summary = ch_kraken2_summary.summary.map {
+    ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
             meta, path -> [path]
-        }
+    }
+    ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
 
-    if (!params.skip_blastn) {
+    //////////////////////////////////////////////////
+    //  Validation
+    //////////////////////////////////////////////////
+
+    if (params.validation_blastn) {
 
         //
         // MODULE: Extract the hits to fasta format
         //
-        ch_combined = FASTP.out.reads
+        ch_combined = ch_fastq_for_classification
         .join(
-            ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by: [0]
+            MERGE_IDS.out.classified_ids, by: [0]
         )
 
 
@@ -206,7 +275,7 @@ workflow DETAXIZER {
         //
         // MODULE: Run BLASTN
         //
-        ch_reference_fasta = fasta
+        ch_reference_fasta = ch_fasta_blastn
 
         ch_reference_fasta_with_meta = ch_reference_fasta.map {
             item -> [['id': "id-fasta-for-makeblastdb"], item]
@@ -289,7 +358,6 @@ workflow DETAXIZER {
                 }
                 return [ meta, blastn[0], blastn[1], filteredblastn[0], filteredblastn[1] ]
             }
-
         ch_blastn_summary = SUMMARY_BLASTN (
             ch_blastn_combined
         )
@@ -306,52 +374,23 @@ workflow DETAXIZER {
     //
     if (
             (
-                ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
+                ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
             ) && !params.filter_trimmed
         ) {
-        ch_kraken2filter = RENAME_FASTQ_HEADERS_PRE.out.fastq
-            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
+
+        ch_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
+            .join(MERGE_IDS.out.classified_ids, by:[0])
+
         FILTER(
-            ch_kraken2filter
+            ch_classification
         )
+
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
 
     } else if (
         params.enable_filter && !params.filter_trimmed
         ) {
-        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }
-        .map{
-            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
-        }
-        .groupTuple(by:[0])
-        ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }
-        ch_blastnfilter = ch_combined_short_long_id.join(
-            ch_blastn2filter, by:[0]
-        )
-        FILTER(
-            ch_blastnfilter
-        )
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    } else if (
-        (
-            ( params.skip_blastn && params.enable_filter ) || params.filter_with_kraken2
-        ) && params.filter_trimmed
-    ){
-        ch_kraken2filter = FASTP.out.reads
-            .join(ISOLATE_IDS_FROM_KRAKEN2_TO_BLASTN.out.classified_ids, by:[0])
-        FILTER(
-            ch_kraken2filter
-        )
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    } else if (
-        params.enable_filter && params.filter_trimmed
-    ){
+
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -361,16 +400,61 @@ workflow DETAXIZER {
         }
         .groupTuple(by:[0])
 
-        ch_combined_short_long_id = FASTP.out.reads.map {
+        ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
         }
+
         ch_blastnfilter = ch_combined_short_long_id.join(
             ch_blastn2filter, by:[0]
         )
+
         FILTER(
             ch_blastnfilter
         )
+
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+
+    } else if (
+        (
+            ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
+        ) && params.filter_trimmed
+    ){
+
+        ch_classification = ch_fastq_for_classification
+            .join(MERGE_IDS.out.classified_ids, by:[0])
+
+        FILTER(
+            ch_classification
+        )
+
+        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+    } else if (
+        params.enable_filter && params.filter_trimmed
+    ){
+
+        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
+            meta, path ->
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        }
+        .map{
+            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
+        }
+        .groupTuple(by:[0])
+
+        ch_combined_short_long_id = ch_fastq_for_classification.map {
+            meta, path ->
+                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        }
+
+        ch_blastnfilter = ch_combined_short_long_id.join(
+            ch_blastn2filter, by:[0]
+        )
+
+        FILTER(
+            ch_blastnfilter
+        )
+
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     }
 
@@ -378,6 +462,7 @@ workflow DETAXIZER {
     // MODULE: Rename headers after filtering
     //
     if ( params.enable_filter ) {
+
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
             return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -388,61 +473,151 @@ workflow DETAXIZER {
             return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
     }
 
+    ch_removed2rename = Channel.empty()
+
+    if ( params.output_removed_reads ){
+        ch_removed2rename = FILTER.out.removed.map {
+        meta, path ->
+            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+    }
+    }
+
     ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
 
-    RENAME_FASTQ_HEADERS_AFTER(
-        ch_rename_filtered
+    ch_removed2rename = ch_removed2rename.ifEmpty(['empty', []])
+
+    if ( params.output_removed_reads ){
+
+        RENAME_FASTQ_HEADERS_AFTER(
+        ch_rename_filtered,
+        ch_removed2rename
+        )
+
+        ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
+
+    } else {
+
+        RENAME_FASTQ_HEADERS_AFTER(
+        ch_rename_filtered,
+        ch_removed2rename.first()
+
     )
+
+    ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
+
     }
+
+    if ( params.classification_kraken2_post_filtering ) {
+
+        KRAKEN2_POST_CLASSIFICATION_FILTERED (
+            RENAME_FASTQ_HEADERS_AFTER.out.fastq,
+            KRAKEN2PREPARATION.out.db.first(),
+            params.save_output_fastqs_filtered,
+            true
+            )
+
+        ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
+
+        if (params.output_removed_reads) {
+
+            KRAKEN2_POST_CLASSIFICATION_REMOVED (
+                RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed,
+                KRAKEN2PREPARATION.out.db.first(),
+                params.save_output_fastqs_removed,
+                true
+                )
+
+            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
+
+        }
+
+    }
+    }
+
     //
     // MODULE: Summarize the classification process
     //
-    if (!params.skip_blastn){
-    ch_summary = ch_kraken2_summary.mix(ch_blastn_summary).collect().map {
-            item -> [['id': "summary_of_kraken2_and_blastn"], item]
+    if (params.validation_blastn){
+
+    ch_summary = ch_classification_summary.mix(ch_blastn_summary).collect().map {
+            item -> [['id': "summary_of_classification_and_blastn"], item]
         }
+
     } else {
-        ch_summary = ch_kraken2_summary.collect().map {
-            item -> [['id': "summary_of_kraken2"], item]
+
+        ch_summary = ch_classification_summary.collect().map {
+            item -> [['id': "summary_of_classification"], item]
         }
+
     }
 
     ch_summary = SUMMARIZER (
         ch_summary
     )
+
     ch_versions = ch_versions.mix(ch_summary.versions)
 
+    if ( params.generate_downstream_samplesheets ) {
+
+        GENERATE_DOWNSTREAM_SAMPLESHEETS ( RENAME_FASTQ_HEADERS_AFTER.out.fastq )
+
+    }
+
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+    ch_multiqc_config        = Channel.fromPath(
+        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config = params.multiqc_config ?
+        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
+        Channel.empty()
+    ch_multiqc_logo          = params.multiqc_logo ?
+        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+        Channel.empty()
+
+    summary_params      = paramsSummaryMap(
+        workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_multiqc_files = ch_multiqc_files.mix(
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+        file(params.multiqc_methods_description, checkIfExists: true) :
+        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description                = Channel.value(
+        methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+    ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files = ch_multiqc_files.mix(
+        ch_methods_description.collectFile(
+            name: 'methods_description_mqc.yaml',
+            sort: true
+        )
+    )
 
     MULTIQC (
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
+        ch_multiqc_logo.toList(),
+        [],
+        []
     )
 
-    emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
 }
 
 /*

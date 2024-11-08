@@ -9,26 +9,26 @@
 [![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/detaxizer)
+[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/detaxizer)
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23detaxizer-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/detaxizer)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp and quality assessment via FastQC, followed by taxon classification with kraken2, and employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing the validation step, a fasta file for creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxonomic classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
 
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
-3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/))
+2. Optional pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
+3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/), and/or [`bbduk`](https://sourceforge.net/projects/bbmap/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
-5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from kraken2 or blastn)
-6. Summary of the processes (how many reads were initially present after preprocessing, how many were classified as the `tax2filter` plus potential taxonomic subtree and optionally how many were validated)
+5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from the classification (kraken2 and/or bbduk) or blastn)
+6. Summary of the processes (how many were classified and optionally how many were validated)
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
@@ -55,8 +55,7 @@ nextflow run nf-core/detaxizer \
 ```
 
 > [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/detaxizer/usage) and the [parameter documentation](https://nf-co.re/detaxizer/parameters).
 
@@ -66,6 +65,11 @@ To see the results of an example test run with a full size dataset refer to the 
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/detaxizer/output).
 
+Generated samplesheets from the directory `/downstream_samplesheets/` can be used for the pipelines:
+
+- [nf-core/mag](https://nf-co.re/mag)
+- [nf-core/taxprofiler](https://nf-co.re/taxprofiler)
+
 ## Credits
 
 nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/jannikseidelQBiC) at the [Quantitative Biology Center (QBiC)](http://qbic.life/).
@@ -73,6 +77,8 @@ nf-core/detaxizer was originally written by [Jannik Seidel](https://github.com/j
 We thank the following people for their extensive assistance in the development of this pipeline:
 
 - [Daniel Straub](https://github.com/d4straub)
+
+This work was initially funded by the German Center for Infection Research (DZIF).
 
 ## Contributions and Support
 

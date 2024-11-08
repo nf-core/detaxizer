@@ -6,7 +6,7 @@
 
 ## Introduction
 
-nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. Default taxa classified as contamination are **_Homo_** and **_Homo sapiens_**.
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. The default taxon classified as contamination is **_Homo sapiens_**.
 
 ## Samplesheet input
 
@@ -46,15 +46,22 @@ The databases used by detaxizer have an influence on the amount of false positiv
 
 The task of decontamination has to be balanced out between false positives and false negatives depending on what is needed in your use case.
 
+> [!NOTE]
+> Be aware that the `tax2filter` (default _Homo sapiens_) has to be in the provided kraken2 database (if kraken2 is used) and that the reference for bbduk (provided by the `fasta_bbduk` parameter) should contain the taxa to filter/assess if it is wanted to assess/remove the same taxa as in `tax2filter`. This overlap in the databases is not checked by the pipeline. To filter out/assess taxa with bbduk only, the `tax2filter` parameter is not needed but a fasta file with references of these taxa has to be provided.
+
 ### kraken2
 
-To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extend.
+To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extent.
 
-Also, pangenome databases of the organism(s) classified as contamination could increase the amount of true positives while reducing the hardware requirements. For human such a database can be found [here](https://zenodo.org/doi/10.5281/zenodo.8339731). Such a database will increase false positives, unless a custom database is built together with the data of the organisms not classified as contamination. To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+
+### bbduk
+
+bbduk uses a fasta file which contains sequences from the taxon/taxa classified as contamination. Default is the `GRCh38` human reference genome. Provide a custom file using the `fasta_bbduk` parameter.
 
 ### blastn
 
-The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta` parameter.
+The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta_blastn` parameter.
 
 ## Running the pipeline
 
@@ -89,9 +96,9 @@ The above pipeline run specified with a params file in yaml format:
 nextflow run nf-core/detaxizer -profile docker -params-file params.yaml
 ```
 
-with `params.yaml` containing:
+with:
 
-```yaml
+```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
 <...>
@@ -101,13 +108,21 @@ You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-c
 
 Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
 
-To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo sapiens`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
 
-To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta` parameter. Also, if just one reference genome is needed for blastn and it is in [igenomes.config](../conf/igenomes.config) use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+To change what is classified by `bbduk`, a fasta containing the sequences of the contaminant taxon/taxa has to be provided using the `fasta_bbduk` parameter.
 
-Skipping blastn can be done by using `--skip_blastn`.
+If you want to run `bbduk` use the `--classification_bbduk` flag. For running both classification steps and use the merged output for filtering, use both flags (`--classification_kraken2` and `--classification_bbduk`).
 
-Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the `blastn` step, or using the output from the `kraken2` step. If `blastn` is skipped, the classified read IDs of `kraken2` are automatically used in the filtering step.
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. Also, if just one reference genome is needed for blastn and it is in `igenomes.config` use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+
+blastn can be turned on using the `validation_blastn` parameter.
+
+Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step.
+
+If you want to output the removed reads, use `--output_removed_reads`.
+
+Optional classification of the filtered (and removed) reads can be done using `--classification_kraken2_post_filtering`. This uses the kraken2 database provided by `kraken2db`.
 
 ### Updating the pipeline
 
@@ -169,6 +184,8 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
+- `wave`
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
@@ -209,14 +226,6 @@ In most cases, you will only need to create a custom config as a one-off but if 
 See the main [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for more information about creating your own configuration files.
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
-
-## Azure Resource Requests
-
-To be used with the `azurebatch` profile by specifying the `-profile azurebatch`.
-We recommend providing a compute `params.vm_type` of `Standard_D16_v3` VMs by default but these options can be changed if required.
-
-Note that the choice of VM size depends on your quota and the overall workload during the analysis.
-For a thorough list, please refer the [Azure Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes).
 
 ## Running in the background
 
