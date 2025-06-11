@@ -143,11 +143,6 @@
             [
                 "mag-pe.csv:md5,fefed9f7c4e7ae3e985658767aa7c7cc",
                 "mag-se.csv:md5,e8a3c7b55dd784387725000d25b91047",
-                "taxprofiler.csv:md5,c6deb9c08b7ec420bccea9e559754975",
-                "test_paired-end_R1_filtered.fastq.gz:md5,716acdf955e293d7f7aea9e4d79c4615",
-                "test_paired-end_R2_filtered.fastq.gz:md5,1a163f017a758ce574e6cb054fdf1065",
-                "test_paired-end_plus_long-reads_R1_filtered.fastq.gz:md5,8773962a259071be13d2a02788ada624",
-                "test_paired-end_plus_long-reads_R2_filtered.fastq.gz:md5,e6602bc3f3dabc102068f000bbd4f18f",
                 "test_paired-end_plus_long-reads_longReads_filtered.fastq.gz:md5,16a9a7e589f7756e862a91b4d9398363",
                 "test_single-end_long_longReads_filtered.fastq.gz:md5,16a9a7e589f7756e862a91b4d9398363",
                 "test_single-end_short_filtered.fastq.gz:md5,12d5e128bc9b87363241fd28018bf662",

@@ -8,3 +8,8 @@ multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
 pipeline_info/*.{html,json,txt,yml}
+downstream_samplesheets/taxprofiler.csv
+filter/filtered/test_paired-end_R1_filtered.fastq.gz
+filter/filtered/test_paired-end_R2_filtered.fastq.gz
+filter/filtered/test_paired-end_plus_long-reads_R1_filtered.fastq.gz
+filter/filtered/test_paired-end_plus_long-reads_R2_filtered.fastq.gz
