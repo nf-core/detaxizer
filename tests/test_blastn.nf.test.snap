@@ -141,8 +141,6 @@
                 "summary/summary.tsv"
             ],
             [
-                "mag-pe.csv:md5,fefed9f7c4e7ae3e985658767aa7c7cc",
-                "mag-se.csv:md5,e8a3c7b55dd784387725000d25b91047",
                 "test_paired-end_plus_long-reads_longReads_filtered.fastq.gz:md5,16a9a7e589f7756e862a91b4d9398363",
                 "test_single-end_long_longReads_filtered.fastq.gz:md5,16a9a7e589f7756e862a91b4d9398363",
                 "test_single-end_short_filtered.fastq.gz:md5,12d5e128bc9b87363241fd28018bf662",
@@ -158,8 +156,7 @@
                 "fastqc_sequence_length_distribution_plot.txt:md5,6fa1d187e3f51cc9ca43428af0c80193",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "multiqc_fastqc.txt:md5,d3d743ade0aaa9293c8a1810f6a4143f",
-                "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14",
-                "summary.tsv:md5,2ceabba1b66c093156a97523389c6d12"
+                "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
         "meta": {
