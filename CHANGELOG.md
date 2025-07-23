@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.27             | 1.29        |
+
 ### `Deprecated`
 
 ## v1.1.0 - Kombjuudr - [2024-11-08]

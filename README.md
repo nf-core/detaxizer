@@ -5,8 +5,10 @@
   </picture>
 </h1>
 
-[![GitHub Actions CI Status](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)[![Cite Preprint](https://img.shields.io/badge/Cite%20Us!-Cite%20Publication-important?labelColor=000000)](https://doi.org/10.1101/2025.03.27.645632)
+[![Cite Preprint](https://img.shields.io/badge/Cite%20Us!-Cite%20Publication-important?labelColor=000000)](https://doi.org/10.1101/2025.03.27.645632)
+[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)
+
+[![GitHub Actions CI Status](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml)[![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
