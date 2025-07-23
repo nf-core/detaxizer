@@ -105,7 +105,7 @@ workflow NFCORE_DETAXIZER {
     //
     // MODULE: Run fastp
     //
-    if (params.preprocessing) {
+    if (params.filter_trimmed || params.preprocessing) {
 
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,

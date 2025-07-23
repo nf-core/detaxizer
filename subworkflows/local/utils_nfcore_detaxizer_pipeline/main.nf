@@ -192,7 +192,7 @@ def toolCitationText() {
     def citation_text = [
             "Tools used in the workflow included:",
             "FastQC (Andrews 2010),",
-            params["preprocessing"] ? "fastp (Chen et al. 2018),": "",
+            params["preprocessing"] | params["filter_trimmed"] ? "fastp (Chen et al. 2018),": "",
             params["classification_kraken2"] | !params["classification_bbduk"] & !params["classification_kraken2"] ? "Kraken2 (Wood et al. 2019)," : "",
             params["classification_bbduk"] ? "BBMap (Bushnell B. 2022)," : "",
             params["validation_blastn"] ? "BLAST (Altschul et al. 1990)," : "",
@@ -208,7 +208,7 @@ def toolBibliographyText() {
 
     def reference_text = [
             "<li>Andrews, S. (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/</li>",
-            params["preprocessing"] ? "<li>Chen, S., Zhou, Y., Chen, Y. & Gu, J. (2018) fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890. doi: 10.1093/bioinformatics/bty560</li>" : "",
+            params["preprocessing"] | params["filter_trimmed"] ? "<li>Chen, S., Zhou, Y., Chen, Y. & Gu, J. (2018) fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890. doi: 10.1093/bioinformatics/bty560</li>" : "",
             params["classification_kraken2"] | !params["classification_bbduk"] & !params["classification_kraken2"] ? "<li>Wood, D. E., Lu, J. & Langmead, B. (2019) Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257. doi: 10.1186/s13059-019-1891-0</li>" : "",
             params["classification_bbduk"] ? "<li>Bushnell, B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/</li>" : "",
             params["validation_blastn"] ? "<li>Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. (1990) Basic local alignment search tool. Journal of Molecular Biology 215, 403–410. doi: 10.1016/s0022-2836(05)80360-2.</li>" : "",
