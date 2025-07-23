@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [PR #65](https://github.com/nf-core/detaxizer/pull/65) - Template update for nf-core/tools 3.3.1 (by @d4straub)
+- [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
 
 ### `Fixed`
 
 ### `Dependencies`
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.27             | 1.29        |
 
 ### `Deprecated`
 
