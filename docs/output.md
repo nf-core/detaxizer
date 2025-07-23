@@ -16,7 +16,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [bbduk](#bbduk) - Classification of the (preprocessed) reads
 - [classification](#classification) - Preparation of the read IDs for filtering and/or validation
 - [blastn](#blastn) - (Optional) validation of the reads classified as the searched taxa and extracting ids of validated reads
-- [filter](#filter) - (Optional) filtering of the raw or preprocessed reads using either the read ids from kraken2 and/or bbduk output or blastn output
+- [filter](#filter) - Filtering of the raw or preprocessed reads using either the read ids from kraken2 and/or bbduk output or blastn output
 - [summary](#summary) - The summary of the classification and the optional validation
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution

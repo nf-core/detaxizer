@@ -73,10 +73,10 @@
                     "type": "boolean",
                     "description": "When a validation via blastn is wanted but the filtering should use the IDs from the classification process."
                 },
-                "enable_filter": {
+                "skip_filter": {
                     "type": "boolean",
-                    "description": "If the filtering step should be carried out.",
-                    "help_text": "If set to `True` the filter is used. Otherwise only assessing is performed."
+                    "description": "If the filtering step should be skipped.",
+                    "help_text": "If set the filtering step is skipped and only assessing is performed."
                 },
                 "output_removed_reads": {
                     "type": "boolean",

@@ -22,7 +22,7 @@
 
 ## Introduction
 
-**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and offers the option to filter out this taxon or taxonomic subtree. The process begins with quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxonomic classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
+**nf-core/detaxizer** is a bioinformatics pipeline that checks for the presence of a specific taxon in (meta)genomic fastq files and to filter out this taxon or taxonomic subtree. The process begins with quality assessment via FastQC and optional preprocessing (adapter trimming, quality cutting and optional length and quality filtering) using fastp, followed by taxonomic classification with kraken2 and/or bbduk, and optionally employs blastn for validation of the reads associated with the identified taxa. Users must provide a samplesheet to indicate the fastq files and, if utilizing bbduk in the classification and/or the validation step, fasta files for usage of bbduk and creating the blastn database to verify the targeted taxon.
 
 ![detaxizer metro workflow](docs/images/Detaxizer_metro_workflow.png)
 
@@ -30,7 +30,7 @@
 2. Optional pre-processing ([`fastp`](https://github.com/OpenGene/fastp))
 3. Classification of reads ([`Kraken2`](https://ccb.jhu.edu/software/kraken2/), and/or [`bbduk`](https://sourceforge.net/projects/bbmap/))
 4. Optional validation of searched taxon/taxa ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi))
-5. Optional filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from the classification (kraken2 and/or bbduk) or blastn)
+5. Filtering of the searched taxon/taxa from the reads (either from the raw files or the preprocessed reads, using either the output from the classification (kraken2 and/or bbduk) or blastn)
 6. Summary of the processes (how many were classified and optionally how many were validated)
 7. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
