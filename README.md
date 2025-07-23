@@ -6,7 +6,7 @@
 </h1>
 
 [![GitHub Actions CI Status](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)
+[![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)[![Cite Preprint](https://img.shields.io/badge/Cite%20Us!-Cite%20Publication-important?labelColor=000000)](https://doi.org/10.1101/2025.03.27.645632)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
@@ -89,7 +89,15 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/detaxizer for your analysis, please cite it using the following doi: [10.5281/zenodo.10877147](https://doi.org/10.5281/zenodo.10877147)
+If you use nf-core/detaxizer for your analysis, please cite it using the following preprint:
+
+> **nf-core/detaxizer: A Benchmarking Study for Decontamination from Human Sequences**
+>
+> Jannik Seidel, Camill Kaipf, Daniel Straub, Sven Nahnsen
+>
+> bioRxiv 2025.03.27.645632 [doi: 10.1101/2025.03.27.645632](https://doi.org/10.1101/2025.03.27.645632).
+
+Additionally, the following doi can be cited: [10.5281/zenodo.10877147](https://doi.org/10.5281/zenodo.10877147)
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
