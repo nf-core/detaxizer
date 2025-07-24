@@ -54,6 +54,8 @@ Now, you can run the pipeline using:
 nextflow run nf-core/detaxizer \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
+   --classification_bbduk \
+   --classification_kraken2 \
    --outdir <OUTDIR>
 ```
 
