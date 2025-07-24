@@ -1,6 +1,6 @@
 process ISOLATE_BBDUK_IDS {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_low'
 
     conda "bioconda::seqkit=2.8.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
