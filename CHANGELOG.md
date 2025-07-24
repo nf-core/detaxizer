@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
 - [PR #72](https://github.com/nf-core/detaxizer/pull/72) - Default for `--kraken2db` was changed from 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz' to 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'. That database is much larger (60GB) but default settings will therefore reflect best decontamination performance in benchmarks (by @d4straub)
 - [PR #73](https://github.com/nf-core/detaxizer/pull/73) - Doubled memory allocation for ISOLATE_BBDUK_IDS (by @d4straub)
+- [PR #62](https://github.com/nf-core/detaxizer/pull/62) - Use dnaio to reduce memory spikes during renaming (by @bede and @d4straub)
 
 ### `Fixed`
 

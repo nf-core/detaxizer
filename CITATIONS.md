@@ -38,6 +38,11 @@
 
   > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi:10.1371/journal.pone.0163962
 
+- [dnaio](https://github.com/marcelm/dnaio/)
+
+  > Martin, M., & Vorderman, R. H. P. (2023). dnaio: Efficiently read and write sequencing data from Python. Zenodo. https://doi.org/10.5281/zenodo.10548865
+
+
 ## Python
 
 - [Python](https://www.python.org/)
