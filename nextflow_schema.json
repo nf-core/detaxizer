@@ -120,9 +120,9 @@
             "properties": {
                 "kraken2db": {
                     "type": "string",
-                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz",
-                    "help_text": "For input how to use this parameter to fine-tune the step see the kraken2 section in the [usage documentation](https://nf-co.re/detaxizer/docs/usage#kraken2)",
-                    "description": "The database which is used in the classification step."
+                    "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz",
+                    "help_text": "For input how to use this parameter to fine-tune the step see the kraken2 section in the [usage documentation](https://nf-co.re/detaxizer/docs/usage#kraken2). To reduce the required download and RAM by around 10 fold, rather use a database capped at e.g. 8 GB, for example https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz.",
+                    "description": "The database which is used in the classification step. Please be aware that this default database will require ~60GB download and ~80GB RAM."
                 },
                 "save_output_fastqs": {
                     "type": "boolean",
