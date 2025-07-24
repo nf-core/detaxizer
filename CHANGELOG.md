@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--skip_filter` was added
+- [PR #71](https://github.com/nf-core/detaxizer/pull/71) - Add usage information learned from our benchmarking
 
 ### `Changed`
 
