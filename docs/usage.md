@@ -74,7 +74,7 @@ The task of decontamination has to be balanced out between false positives and f
 
 ### kraken2
 
-To reduce false negatives a larger kraken2 database should be used. This comes at costs in terms of hardware requirements. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database can be used (which is the default), but it should always be kept in mind that this may lead to false negatives to some extent.
+For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. caped at 8GB) can be used, but it should always be kept in mind that this may lead to more false negatives (but conversely potentially less false positives).
 
 To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
 
