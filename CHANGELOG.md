@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
+- [PR #74](https://github.com/nf-core/detaxizer/pull/74) - Use dnaio to reduce memory spikes during renaming (devised & implemented by @bede, added by @d4straub)
 
 ### `Fixed`
 
