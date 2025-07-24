@@ -10,19 +10,16 @@ nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminati
 
 ## Benchmark
 
-Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org/10.5281/zenodo.10472795) is described in this [publication](https://doi.org/10.1101/2025.03.27.645632). The best performing decontamination was achieved by nf-core/detaxizer with the combination of bbduk with GRCh38 AWS igenome and Kraken2 with the Kraken2 Standard database. This setting reached a recall of 0.99962 (3,770 false negatives of 10,000,002 human read pairs) but a precision of 0.99150 (85,741 false positives of 21,172,961 microbial read pairs). The following settings were used with nf-core/detaxizer 1.1.0:
+Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org/10.5281/zenodo.10472795) is described in this [publication](https://doi.org/10.1101/2025.03.27.645632) with nf-core/detaxizer 1.1.0. The best performing decontamination was achieved by nf-core/detaxizer with the combination of bbduk with GRCh38 AWS igenome and Kraken2 with the Kraken2 Standard database. This setting reached a recall of 0.99962 (3,770 false negatives of 10,000,002 human read pairs) but a precision of 0.99150 (85,741 false positives of 21,172,961 microbial read pairs). The following command mirrors the settings in the benchmark (but with version 1.2.0 instead of 1.1.0):
 
 ```bash
-`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.1.0 -profile singularity --input samplesheet.csv --enable_filter --output_removed_reads --tax2filter "Homo sapiens" --classification_bbduk --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz --outdir results`
+`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_bbduk --classification_kraken2 --outdir results_recall`
 ```
 
-> [!NOTE]
-> From version 1.2.0 on filtering is enabled by default and therefore `--enable_filter` is neither required nor allowed.
-
-To best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) at the cost of higher non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs) was achieved in the [benchmark](https://doi.org/10.1101/2025.03.27.645632) with the following settings:
+To best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) at the cost of higher non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs) was achieved in the [benchmark](https://doi.org/10.1101/2025.03.27.645632) with the following settings (translated from version 1.1.0 to version 1.2.0):
 
 ```bash
-`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.1.0 -profile singularity --input samplesheet.csv --enable_filter --output_removed_reads --tax2filter "Homo sapiens" --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results`
+`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results_precision`
 ```
 
 > [!TIP]

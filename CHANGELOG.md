@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--skip_filter` was added
-- [PR #71](https://github.com/nf-core/detaxizer/pull/71) - Add usage information learned from our benchmarking
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--skip_filter` was added (by @d4straub)
+- [PR #71](https://github.com/nf-core/detaxizer/pull/71) - Add usage information learned from our benchmarking (by @d4straub)
 
 ### `Changed`
 
 - [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
+- [PR #72](https://github.com/nf-core/detaxizer/pull/72) - Default for `--kraken2db` was changed from 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz' to 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'. That new database is much larger (60GB) but default settings will therefore reflect best decontamination performance in benchmarks (by @d4straub)
 
 ### `Fixed`
 
@@ -24,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Deprecated`
 
-- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--enable_filter` was removed and replaced by `--skip_filter`
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--enable_filter` was removed and replaced by `--skip_filter` (by @d4straub)
 
 ## v1.1.0 - Kombjuudr - [2024-11-08]
 
