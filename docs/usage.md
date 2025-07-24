@@ -8,6 +8,26 @@
 
 nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and filter reads which were classified as contamination. The default taxon classified as contamination is **_Homo sapiens_**.
 
+## Benchmark
+
+Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org/10.5281/zenodo.10472795) is described in this [publication](https://doi.org/10.1101/2025.03.27.645632). The best performing decontamination was achieved by nf-core/detaxizer with the combination of bbduk with GRCh38 AWS igenome and Kraken2 with the Kraken2 Standard database. This setting reached a recall of 0.99962 (3,770 false negatives of 10,000,002 human read pairs) but a precision of 0.99150 (85,741 false positives of 21,172,961 microbial read pairs). The following settings were used with nf-core/detaxizer 1.1.0:
+
+```bash
+`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.1.0 -profile singularity --input samplesheet.csv --enable_filter --output_removed_reads --tax2filter "Homo sapiens" --classification_bbduk --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz --outdir results`
+```
+
+> [!NOTE]
+> From version 1.2.0 on filtering is enabled by default and therefore `--enable_filter` is neither required nor allowed.
+
+To best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) at the cost of higher non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs) was achieved in the [benchmark](https://doi.org/10.1101/2025.03.27.645632) with the following settings:
+
+```bash
+`NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.1.0 -profile singularity --input samplesheet.csv --enable_filter --output_removed_reads --tax2filter "Homo sapiens" --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results`
+```
+
+> [!TIP]
+> Remote databases can complicate caching, so that resuming or repeating will re-download large database files. It is recommended instead to pre-download remote databases and refer to local copies.
+
 ## Samplesheet input
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
@@ -48,6 +68,12 @@ The task of decontamination has to be balanced out between false positives and f
 
 > [!NOTE]
 > Be aware that the `tax2filter` (default _Homo sapiens_) has to be in the provided kraken2 database (if kraken2 is used) and that the reference for bbduk (provided by the `fasta_bbduk` parameter) should contain the taxa to filter/assess if it is wanted to assess/remove the same taxa as in `tax2filter`. This overlap in the databases is not checked by the pipeline. To filter out/assess taxa with bbduk only, the `tax2filter` parameter is not needed but a fasta file with references of these taxa has to be provided.
+
+> [!TIP]
+> The choice of database matters for performance and computational requirements as described in our [benchmarking study](https://doi.org/10.1101/2025.03.27.645632).
+
+> [!TIP]
+> Local and remote databases can be used. However, remote databases can complicate caching, so that resuming or repeating will re-download large database files (indicated by `staging foreign file`). It is recommended instead to pre-download remote databases and refer to local copies.
 
 ### kraken2
 
