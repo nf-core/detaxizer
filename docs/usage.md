@@ -6,7 +6,7 @@
 
 ## Introduction
 
-nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and optionally filter reads which were classified as contamination. The default taxon classified as contamination is **_Homo sapiens_**.
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and filter reads which were classified as contamination. The default taxon classified as contamination is **_Homo sapiens_**.
 
 ## Samplesheet input
 
@@ -105,7 +105,7 @@ outdir: './results/'
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
-Before and after (if using the filter) the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
+Before and after the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
 
 To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo sapiens`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
 
@@ -117,7 +117,7 @@ To change the organism(s) which should be validated as contamination(s) by blast
 
 blastn can be turned on using the `validation_blastn` parameter.
 
-Optionally enabling the filter can be done by using `--enable_filter`. There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step.
+There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step. The filtering step can be omitted altogether with `--skip_filter`.
 
 If you want to output the removed reads, use `--output_removed_reads`.
 
