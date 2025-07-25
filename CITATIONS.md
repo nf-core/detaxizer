@@ -42,7 +42,6 @@
 
   > Martin, M., & Vorderman, R. H. P. (2023). dnaio: Efficiently read and write sequencing data from Python. Zenodo. https://doi.org/10.5281/zenodo.10548865
 
-
 ## Python
 
 - [Python](https://www.python.org/)
