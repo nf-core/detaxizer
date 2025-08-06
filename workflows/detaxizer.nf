@@ -19,7 +19,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_REMOVED    } from '../m
 include { BBMAP_BBDUK                                               } from '../modules/nf-core/bbmap/bbduk/main'
 include { BLAST_BLASTN                                              } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_MAKEBLASTDB                                         } from '../modules/nf-core/blast/makeblastdb/main'
-include { BBMAP_FILTERBYNAME                                       } from '../modules/nf-core/bbmap/filterbyname/main'
+include { BBMAP_FILTERBYNAME                                        } from '../modules/nf-core/bbmap/filterbyname/main'
 include { BBMAP_FILTERBYNAME as BBMAP_FILTERBYNAME_REMOVED          } from '../modules/nf-core/bbmap/filterbyname/main'
 
 include { RENAME_FASTQ_HEADERS_PRE                                  } from '../modules/local/rename_fastq_headers_pre'
