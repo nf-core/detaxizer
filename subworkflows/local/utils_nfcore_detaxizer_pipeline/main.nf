@@ -196,7 +196,7 @@ def toolCitationText() {
             params["classification_kraken2"] | !params["classification_bbduk"] & !params["classification_kraken2"] ? "Kraken2 (Wood et al. 2019)," : "",
             params["classification_bbduk"] ? "BBMap (Bushnell B. 2022)," : "",
             params["validation_blastn"] ? "BLAST (Altschul et al. 1990)," : "",
-            params["validation_blastn"] | !params["skip_filter"] | params["classification_bbduk"] ? "seqkit (Shen et al. 2016)," : "",
+            params["validation_blastn"] | (!params["skip_filter"] & params["filtering_tool"] == "seqkit") | params["classification_bbduk"] ? "seqkit (Shen et al. 2016)," : "",
             "MultiQC (Ewels et al. 2016)",
             "."
         ].join(' ').trim()

@@ -19,6 +19,8 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_POST_CLASSIFICATION_REMOVED    } from '../m
 include { BBMAP_BBDUK                                               } from '../modules/nf-core/bbmap/bbduk/main'
 include { BLAST_BLASTN                                              } from '../modules/nf-core/blast/blastn/main'
 include { BLAST_MAKEBLASTDB                                         } from '../modules/nf-core/blast/makeblastdb/main'
+include { BBMAP_FILTERBYNAME                                       } from '../modules/nf-core/bbmap/filterbyname/main'
+include { BBMAP_FILTERBYNAME as BBMAP_FILTERBYNAME_REMOVED          } from '../modules/nf-core/bbmap/filterbyname/main'
 
 include { RENAME_FASTQ_HEADERS_PRE                                  } from '../modules/local/rename_fastq_headers_pre'
 include { KRAKEN2PREPARATION                                        } from '../modules/local/kraken2preparation'
@@ -67,6 +69,8 @@ workflow NFCORE_DETAXIZER {
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+    ch_filtered_reads = Channel.empty()
+    ch_removed_reads  = Channel.empty()
 
     ch_short = ch_samplesheet.branch {
         shortReads: it[1]
@@ -91,13 +95,18 @@ workflow NFCORE_DETAXIZER {
     //
     // MODULE: Rename Fastq headers
     //
-    RENAME_FASTQ_HEADERS_PRE(ch_short_long)
+    if ( params.filtering_tool == 'seqkit' ) {
+        RENAME_FASTQ_HEADERS_PRE(ch_short_long)
+        ch_fastq_input = RENAME_FASTQ_HEADERS_PRE.out.fastq
+    } else {
+        ch_fastq_input = ch_short_long
+    }
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        RENAME_FASTQ_HEADERS_PRE.out.fastq
+        ch_fastq_input
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
@@ -108,7 +117,7 @@ workflow NFCORE_DETAXIZER {
     if (params.filter_trimmed || params.preprocessing) {
 
     FASTP (
-        RENAME_FASTQ_HEADERS_PRE.out.fastq,
+        ch_fastq_input,
         [],
         [],
         params.fastp_save_trimmed_fail,
@@ -118,7 +127,7 @@ workflow NFCORE_DETAXIZER {
     ch_fastq_for_classification = FASTP.out.reads
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
     } else {
-        ch_fastq_for_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
+        ch_fastq_for_classification = ch_fastq_input
     }
     //////////////////////////////////////////////////
     //  Classification
@@ -372,166 +381,127 @@ workflow NFCORE_DETAXIZER {
     //
     // MODULE: Filter out the classified or validated reads
     //
-    if (
-            (
-                ( !params.validation_blastn && !params.skip_filter ) || params.filter_with_classification
-            ) && !params.filter_trimmed
-        ) {
+    if ( !params.skip_filter ) {
 
-        ch_classification = RENAME_FASTQ_HEADERS_PRE.out.fastq
-            .join(MERGE_IDS.out.classified_ids, by:[0])
+        ch_reads_for_filter = params.filter_trimmed ? ch_fastq_for_classification : ch_fastq_input
 
-        FILTER(
-            ch_classification
-        )
+        if ( params.validation_blastn && !params.filter_with_classification ) {
 
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
+            ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map { meta, path ->
+                [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+            }
+            .map { meta, path -> tuple(groupKey(meta, meta.amount_of_files), path) }
+            .groupTuple(by:[0])
 
-    } else if (
-        !params.skip_filter && !params.filter_trimmed
-        ) {
+            ch_reads_with_id = ch_reads_for_filter.map { meta, path ->
+                [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+            }
 
-        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }
-        .map{
-            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
-        }
-        .groupTuple(by:[0])
+            ch_to_filter = ch_reads_with_id.join(ch_blastn2filter, by:[0])
 
-        ch_combined_short_long_id = RENAME_FASTQ_HEADERS_PRE.out.fastq.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+        } else {
+
+            ch_to_filter = ch_reads_for_filter.join(MERGE_IDS.out.classified_ids, by:[0])
+
         }
 
-        ch_blastnfilter = ch_combined_short_long_id.join(
-            ch_blastn2filter, by:[0]
-        )
-
-        FILTER(
-            ch_blastnfilter
-        )
-
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
-
-    } else if (
-        (
-            ( !params.validation_blastn && !params.skip_filter ) || params.filter_with_classification
-        ) && params.filter_trimmed
-    ){
-
-        ch_classification = ch_fastq_for_classification
-            .join(MERGE_IDS.out.classified_ids, by:[0])
-
-        FILTER(
-            ch_classification
-        )
-
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    } else if (
-        !params.skip_filter && params.filter_trimmed
-    ){
-
-        ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }
-        .map{
-            meta, path -> tuple(groupKey(meta, meta.amount_of_files), path)
-        }
-        .groupTuple(by:[0])
-
-        ch_combined_short_long_id = ch_fastq_for_classification.map {
-            meta, path ->
-                return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-        }
-
-        ch_blastnfilter = ch_combined_short_long_id.join(
-            ch_blastn2filter, by:[0]
-        )
-
-        FILTER(
-            ch_blastnfilter
-        )
-
-        ch_versions = ch_versions.mix(FILTER.out.versions.first())
-    }
-
+        if ( params.filtering_tool == 'seqkit' ) {
+            FILTER(
+                ch_to_filter
+            )
+            ch_versions = ch_versions.mix(FILTER.out.versions.first())
+            ch_filter_filtered = FILTER.out.filtered
+            ch_filter_removed  = FILTER.out.removed
+        } else {
+            BBMAP_FILTERBYNAME(
+                ch_to_filter.map { meta, reads, ids -> [ meta, reads, ids.toString(), 'fastq.gz', false ] }
+            )
+            ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME.out.versions.first())
+            ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
+            if ( params.output_removed_reads ) {
+                BBMAP_FILTERBYNAME_REMOVED(
+                    ch_to_filter.map { meta, reads, ids -> [ meta, reads, ids.toString(), 'fastq.gz', false ] },
+                    task: [ ext: [ args: 'include=t' ] ]
+                )
+                ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
+                ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
+            } else {
+                ch_filter_removed = Channel.empty()
     //
     // MODULE: Rename headers after filtering
     //
     if ( !params.skip_filter ) {
 
-    ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
-        meta, path ->
-            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-    }
+        if ( params.filtering_tool == 'seqkit' ) {
+            ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map { meta, path ->
+                [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+            }
 
-    ch_filtered2rename = FILTER.out.filtered.map {
-        meta, path ->
-            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-    }
+            ch_filtered2rename = ch_filter_filtered.map { meta, path ->
+                [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+            }
 
-    ch_removed2rename = Channel.empty()
+            ch_removed2rename = Channel.empty()
+            if ( params.output_removed_reads ) {
+                ch_removed2rename = ch_filter_removed.map { meta, path ->
+                    [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+                }
+            }
 
-    if ( params.output_removed_reads ){
-        ch_removed2rename = FILTER.out.removed.map {
-        meta, path ->
-            return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
-    }
-    }
+            ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
+            ch_removed2rename = ch_removed2rename.ifEmpty(['empty', []])
 
-    ch_rename_filtered = ch_filtered2rename.join(ch_headers, by:[0])
+            if ( params.output_removed_reads ) {
+                RENAME_FASTQ_HEADERS_AFTER(
+                    ch_rename_filtered,
+                    ch_removed2rename
+                )
+            } else {
+                RENAME_FASTQ_HEADERS_AFTER(
+                    ch_rename_filtered,
+                    ch_removed2rename.first()
+                )
+            }
+            ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
+            ch_filtered_reads = RENAME_FASTQ_HEADERS_AFTER.out.fastq
+            ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : Channel.empty()
+        } else {
+            ch_filtered_reads = ch_filter_filtered.map { meta, path ->
+                [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+            }
+            ch_removed_reads = Channel.empty()
+            if ( params.output_removed_reads ) {
+                ch_removed_reads = ch_filter_removed.map { meta, path ->
+                    [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
+                }
+            }
+        }
 
-    ch_removed2rename = ch_removed2rename.ifEmpty(['empty', []])
+        if ( params.classification_kraken2_post_filtering ) {
 
-    if ( params.output_removed_reads ){
-
-        RENAME_FASTQ_HEADERS_AFTER(
-        ch_rename_filtered,
-        ch_removed2rename
-        )
-
-        ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
-
-    } else {
-
-        RENAME_FASTQ_HEADERS_AFTER(
-        ch_rename_filtered,
-        ch_removed2rename.first()
-
-    )
-
-    ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
-
-    }
-
-    if ( params.classification_kraken2_post_filtering ) {
-
-        KRAKEN2_POST_CLASSIFICATION_FILTERED (
-            RENAME_FASTQ_HEADERS_AFTER.out.fastq,
-            KRAKEN2PREPARATION.out.db.first(),
-            params.save_output_fastqs_filtered,
-            true
-            )
-
-        ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
-
-        if (params.output_removed_reads) {
-
-            KRAKEN2_POST_CLASSIFICATION_REMOVED (
-                RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed,
+            KRAKEN2_POST_CLASSIFICATION_FILTERED (
+                ch_filtered_reads,
                 KRAKEN2PREPARATION.out.db.first(),
-                params.save_output_fastqs_removed,
+                params.save_output_fastqs_filtered,
                 true
                 )
 
-            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
+            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
+
+            if (params.output_removed_reads) {
+
+                KRAKEN2_POST_CLASSIFICATION_REMOVED (
+                    ch_removed_reads,
+                    KRAKEN2PREPARATION.out.db.first(),
+                    params.save_output_fastqs_removed,
+                    true
+                    )
+
+                ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
+
+            }
 
         }
-
-    }
     }
 
     //
@@ -559,7 +529,7 @@ workflow NFCORE_DETAXIZER {
 
     if ( params.generate_downstream_samplesheets ) {
 
-        GENERATE_DOWNSTREAM_SAMPLESHEETS ( RENAME_FASTQ_HEADERS_AFTER.out.fastq )
+        GENERATE_DOWNSTREAM_SAMPLESHEETS ( ch_filtered_reads )
 
     }
 
