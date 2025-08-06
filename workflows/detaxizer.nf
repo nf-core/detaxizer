@@ -376,7 +376,7 @@ workflow NFCORE_DETAXIZER {
         ch_blastn_summary = ch_blastn_summary.summary.map {
                 meta, path -> [path]
             }
-        }
+    }
 
     //
     // MODULE: Filter out the classified or validated reads
@@ -429,6 +429,7 @@ workflow NFCORE_DETAXIZER {
                 ch_filter_removed = Channel.empty()
             }
         }
+    }
     //
     // MODULE: Rename headers after filtering
     //
