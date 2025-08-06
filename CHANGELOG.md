@@ -20,12 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [PR #62](https://github.com/nf-core/detaxizer/pull/62) - Use dnaio to reduce memory spikes during renaming (by @bede)
+- [PR #77](https://github.com/nf-core/detaxizer/pull/77) - Fixed conda versions to exactly follow container versions (by @d4straub)
 
 ### `Dependencies`
 
 | Software | Previous version | New version |
 | -------- | ---------------- | ----------- |
 | MultiQC  | 1.27             | 1.29        |
+| tar      | 1.3              | 1.34        |
 
 ### `Removed`
 
