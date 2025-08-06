@@ -427,6 +427,8 @@ workflow NFCORE_DETAXIZER {
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
                 ch_filter_removed = Channel.empty()
+            }
+        }
     //
     // MODULE: Rename headers after filtering
     //
