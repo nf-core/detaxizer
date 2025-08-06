@@ -426,8 +426,7 @@ workflow NFCORE_DETAXIZER {
                     ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
                     ch_to_filter.map { meta, reads, ids -> ids.toString() },
                     Channel.value('fastq.gz'),
-                    Channel.value(false),
-                    task: [ ext: [ args: 'include=t' ] ]
+                    Channel.value(false)
                 )
                 ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
