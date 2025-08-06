@@ -6,11 +6,12 @@ nf_core_version: 3.3.2
 repository_type: pipeline
 template:
   author: Jannik Seidel
-  description: A pipeline to identify (and remove) certain sequences from raw genomic
-    data. Default taxon to identify (and remove) is Homo sapiens. Removal is optional.
+  description: A pipeline to identify (and remove) certain sequences from raw
+    genomic data. Default taxon to identify (and remove) is Homo sapiens.
+    Removal is optional.
   force: false
   is_nfcore: true
   name: detaxizer
   org: nf-core
   outdir: .
-  version: 1.2.0dev
+  version: 1.2.0
