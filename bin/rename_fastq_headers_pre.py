@@ -23,15 +23,15 @@ def parse_args(args=None):
 def process_read_header(header, is_forward=None, filename=None):
     """Process a single read header and return the renamed version."""
     # Illumina format pre-CASAVA 1.8
-    pattern1 = r"^\S+/[1,2]$"
+    pattern1 = r"^\S+/[1,2]$" # matches for example the following header 'example.1/1
     # Illumina format pre-CASAVA 1.8 with additional information
-    pattern2 = r"^\S+/[1,2]\s"
+    pattern2 = r"^\S+/[1,2]\s" # matches for example the following header 'example.1/1 additionalInformation'
     # Illumina format post-CASAVA 1.8
-    pattern3 = r"^\S+\s\S+$"
+    pattern3 = r"^\S+\s\S+$" # matches for example the following header 'readID1 additionalTechnicalInformation'
     # Illumina format post-CASAVA 1.8 with additional Information
-    pattern4 = r"^\S+\s\S+\s\S+"
+    pattern4 = r"^\S+\s\S+\s\S+" # matches for example the following header 'readID1 additionalTechnicalInformation additionalInformation'
     # Any other pattern without spaces
-    pattern5 = r"^\S+$"
+    pattern5 = r"^\S+$" # matches for example the following header 'readID1'
 
     if bool(re.match(pattern1, header)):
         return header[:-2]  # Remove /1 or /2

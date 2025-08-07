@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.2.0 - kunschd - [2025-08-07]
+## v1.2.0 - Kunschd - [2025-08-07]
 
 ### `Added`
 
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PR #62](https://github.com/nf-core/detaxizer/pull/62) - Use dnaio to reduce memory spikes during renaming (by @bede)
 - [PR #77](https://github.com/nf-core/detaxizer/pull/77) - Fixed conda versions to exactly follow container versions (by @d4straub)
+- [PR #78](https://github.com/nf-core/detaxizer/pull/78) - Update typos, re-add code comments (by @d4straub)
 
 ### `Dependencies`
 
