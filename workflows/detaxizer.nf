@@ -105,7 +105,7 @@ workflow NFCORE_DETAXIZER {
     //
     // MODULE: Run fastp
     //
-    if (params.preprocessing) {
+    if (params.filter_trimmed || params.preprocessing) {
 
     FASTP (
         RENAME_FASTQ_HEADERS_PRE.out.fastq,
@@ -374,7 +374,7 @@ workflow NFCORE_DETAXIZER {
     //
     if (
             (
-                ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
+                ( !params.validation_blastn && !params.skip_filter ) || params.filter_with_classification
             ) && !params.filter_trimmed
         ) {
 
@@ -388,7 +388,7 @@ workflow NFCORE_DETAXIZER {
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
 
     } else if (
-        params.enable_filter && !params.filter_trimmed
+        !params.skip_filter && !params.filter_trimmed
         ) {
 
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
@@ -417,7 +417,7 @@ workflow NFCORE_DETAXIZER {
 
     } else if (
         (
-            ( !params.validation_blastn && params.enable_filter ) || params.filter_with_classification
+            ( !params.validation_blastn && !params.skip_filter ) || params.filter_with_classification
         ) && params.filter_trimmed
     ){
 
@@ -430,7 +430,7 @@ workflow NFCORE_DETAXIZER {
 
         ch_versions = ch_versions.mix(FILTER.out.versions.first())
     } else if (
-        params.enable_filter && params.filter_trimmed
+        !params.skip_filter && params.filter_trimmed
     ){
 
         ch_blastn2filter = FILTER_BLASTN_IDENTCOV.out.classified_ids.map {
@@ -461,7 +461,7 @@ workflow NFCORE_DETAXIZER {
     //
     // MODULE: Rename headers after filtering
     //
-    if ( params.enable_filter ) {
+    if ( !params.skip_filter ) {
 
     ch_headers = RENAME_FASTQ_HEADERS_PRE.out.headers.map {
         meta, path ->
@@ -569,7 +569,7 @@ workflow NFCORE_DETAXIZER {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            name: 'nf_core_'  +  'detaxizer_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }

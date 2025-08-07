@@ -1,181 +1,129 @@
 #!/usr/bin/env python
 
 # Written by Jannik Seidel and released under MIT license.
+# Modified for low memory buffered writing
 
-from Bio import SeqIO, bgzf
+import dnaio
 import gzip
 import sys
 import argparse
 import re
+from io import StringIO
+
+# Number of reads to buffer before writing
+BUFFER_SIZE = 100000
 
 def parse_args(args=None):
-
     parser = argparse.ArgumentParser(description="Renaming of the headers before running the core processes of the detaxizer pipeline.")
-
     parser.add_argument("-i", "--input", help="Path to input files.", type=str, required=True, nargs="+")
-
     parser.add_argument("-o", "--output", help="Prefix of output files.", type=str, required=True)
-
+    parser.add_argument("-b", "--buffer", help="Number of reads to buffer before writing to disk.", type=int, default=BUFFER_SIZE)
     return parser.parse_args()
 
-def renameReadsPaired(reads: tuple, filenames: str) -> tuple:
-    read_fw = reads[0]
-    read_rv = reads[1]
-    read_dict = {}
+def process_read_header(header, is_forward=None, filename=None):
+    """Process a single read header and return the renamed version."""
     # Illumina format pre-CASAVA 1.8
-    pattern1 = r"^\S+/[1,2]$"       # matches for example the following header 'example.1/1'
+    pattern1 = r"^\S+/[1,2]$" # matches for example the following header 'example.1/1
     # Illumina format pre-CASAVA 1.8 with additional information
-    pattern2 = r"^\S+/[1,2]\s"      # matches for example the following header 'example.1/1 additionalInformation'
+    pattern2 = r"^\S+/[1,2]\s" # matches for example the following header 'example.1/1 additionalInformation'
     # Illumina format post-CASAVA 1.8
-    pattern3 = r"^\S+\s\S+$"        # matches for example the following header 'readID1 additionalTechnicalInformation'
+    pattern3 = r"^\S+\s\S+$" # matches for example the following header 'readID1 additionalTechnicalInformation'
     # Illumina format post-CASAVA 1.8 with additional Information
-    pattern4 = r"^\S+\s\S+\s\S+"    # matches for example the following header 'readID1 additionalTechnicalInformation additionalInformation'
+    pattern4 = r"^\S+\s\S+\s\S+" # matches for example the following header 'readID1 additionalTechnicalInformation additionalInformation'
     # Any other pattern without spaces
-    pattern5 = r"^\S+$"             # matches for example the following header 'readID1'
-    if bool(re.match(pattern1,read_fw)) and bool(re.match(pattern1,read_rv)):
-        if read_fw.endswith("/1"):
-            read_fw_stripped = read_fw[:-2]
-        else:
-            raise ValueError("Please provide the forward reads in short_reads_fastq_1 (where the headers are as follows: 'example.1/1').")
+    pattern5 = r"^\S+$" # matches for example the following header 'readID1'
 
-        if read_rv.endswith("/2"):
-            read_rv_stripped = read_rv[:-2]
-        else:
-            raise ValueError("Please provide the reverse reads in short_reads_fastq_2 (where the headers are as follows: 'example.1/2').")
-
-        if read_fw_stripped != read_rv_stripped:
-            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
-            raise ValueError(msg)
-        else:
-            read_dict[read_fw_stripped] = [read_fw, read_rv]
-            read_renamed = [read_fw_stripped,read_rv_stripped]
-    elif bool(re.match(pattern2,read_fw)) and bool(re.match(pattern2,read_rv)):
-        read_fw_split = read_fw.split(" ")[0]
-        read_rv_split = read_rv.split(" ")[0]
-        if read_fw_split.endswith("/1"):
-            read_fw_stripped = read_fw_split[:-2]
-        else:
-            raise ValueError("Please provide the forward reads in short_reads_fastq_1 (where the headers are as follows: 'example.1/1 additionalInformation').")
-
-        if read_rv_split.endswith("/2"):
-            read_rv_stripped = read_rv_split[:-2]
-        else:
-            raise ValueError("Please provide the reverse reads in short_reads_fastq_2 (where the headers are as follows: 'example.1/2 additionalInformation').")
-
-        if read_fw_stripped != read_rv_stripped:
-            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
-            raise ValueError(msg)
-        else:
-            read_dict[read_fw_stripped] = [read_fw, read_rv]
-            read_renamed = [read_fw_stripped,read_rv_stripped]
-    elif bool(re.match(pattern3,read_fw)) and bool(re.match(pattern3,read_rv)):
-        read_fw_split = read_fw.split(" ")[0]
-        read_rv_split = read_rv.split(" ")[0]
-
-        if read_fw_split != read_rv_split:
-            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
-            raise ValueError(msg)
-        else:
-            read_dict[read_fw_split] = [read_fw, read_rv]
-            read_renamed = [read_fw_split,read_rv_split]
-    elif bool(re.match(pattern4,read_fw)) and bool(re.match(pattern4,read_rv)):
-        read_fw_split = read_fw.split(" ")[0]
-        read_rv_split = read_rv.split(" ")[0]
-
-        if read_fw_split != read_rv_split:
-            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
-            raise ValueError(msg)
-        else:
-            read_dict[read_fw_split] = [read_fw, read_rv]
-            read_renamed = [read_fw_split,read_rv_split]
-    elif bool(re.match(pattern5,read_fw)) and bool(re.match(pattern5,read_rv)):
-        if read_fw != read_rv:
-            msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {read_fw} and {read_rv} in the files {filenames}."
-            raise ValueError(msg)
-        else:
-            read_dict[read_fw] = [read_fw, read_rv]
-            read_renamed = [read_fw,read_rv]
+    if bool(re.match(pattern1, header)):
+        return header[:-2]  # Remove /1 or /2
+    elif bool(re.match(pattern2, header)):
+        return header.split(" ")[0][:-2]  # Remove /1 or /2 from first part
+    elif bool(re.match(pattern3, header)) or bool(re.match(pattern4, header)):
+        return header.split(" ")[0]  # Return first part before space
+    elif bool(re.match(pattern5, header)):
+        return header  # Return as is
     else:
-        msg = f"The provided files, {filenames}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported."
+        msg = f"The provided file contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported."
         raise ValueError(msg)
-    return (read_dict,read_renamed)
 
-def renameReadSingle(read: str, filename: str) -> tuple:
-    read_dict = {}
-    # Illumina format pre-CASAVA 1.8
-    pattern1 = r"^\S+/[1,2]$"       # matches for example the following header 'example.1/1'
-    # Illumina format pre-CASAVA 1.8 with additional information
-    pattern2 = r"^\S+/[1,2]\s"      # matches for example the following header 'example.1/1 additionalInformation'
-    # Illumina format post-CASAVA 1.8
-    pattern3 = r"^\S+\s\S+$"        # matches for example the following header 'readID1 additionalTechnicalInformation'
-    # Illumina format post-CASAVA 1.8 with additional Information
-    pattern4 = r"^\S+\s\S+\s\S+"    # matches for example the following header 'readID1 additionalTechnicalInformation additionalInformation'
-    # Any other pattern without spaces
-    pattern5 = r"^\S+$"             # matches for example the following header 'readID1'
-    if bool(re.match(pattern1,read)):
-        read_stripped = read[:-2]
-        read_dict[read_stripped] = [read]
-        read_renamed = [read_stripped]
-    elif bool(re.match(pattern2,read)):
-        read_split = read.split(" ")[0]
-        read_stripped = read_split[:-2]
-        read_dict[read_stripped] = [read]
-        read_renamed = [read_stripped]
-    elif bool(re.match(pattern3,read)):
-        read_split = read.split(" ")[0]
-        read_dict[read_split] = [read]
-        read_renamed = [read_split]
-    elif bool(re.match(pattern4,read)):
-        read_split = read.split(" ")[0]
-        read_dict[read_split] = [read]
-        read_renamed = [read_split]
-    elif bool(re.match(pattern5,read)):
-            read_dict[read] = [read]
-            read_renamed = [read]
-    else:
-        msg = f"The provided file, {filename}, contained reads with headers not supported by the pipeline.\n  Please use one of the formats:\n    example.1/1\n    example.1/1 additionalInformation\n    readID1 additionalTechnicalInformation\n    readID1 additionalTechnicalInformation additionalInformation\n    readID1\nAny other format is not supported."
-        raise ValueError(msg)
-    return (read_dict,read_renamed)
+def write_buffer(buffer, output_file):
+    """Write buffer contents to file and clear the buffer."""
+    if buffer.getvalue():
+        output_file.write(buffer.getvalue())
+        buffer.seek(0)
+        buffer.truncate(0)
 
 def main():
     args = parse_args()
-
     fastq = args.input
+    buffer_size = args.buffer
 
     if len(fastq) == 2:
-        renamed = {}
-        with gzip.open(fastq[0], "rt") as handle1, gzip.open(fastq[1], "rt") as handle2:
-            with bgzf.BgzfWriter(args.output + "_R1_renamed.fastq.gz", "wb") as outgz1, bgzf.BgzfWriter(args.output + "_R2_renamed.fastq.gz", "wb") as outgz2:
-                for i,j in zip(SeqIO.parse(handle1, "fastq"),SeqIO.parse(handle2, "fastq")):
-                    header_fw = i.description
-                    header_rv = j.description
-                    headers = (header_fw,header_rv)
-                    renamedHeaders = renameReadsPaired(headers, " and ".join(fastq))
-                    renamed.update(renamedHeaders[0])
-                    i.description = renamedHeaders[1][0]
-                    i.id = renamedHeaders[1][0]
-                    j.description = renamedHeaders[1][1]
-                    j.id = renamedHeaders[1][1]
-                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
-                    SeqIO.write(sequences=j, handle=outgz2, format="fastq")
-        with gzip.open(args.output + "_headers_fw.txt.gz", "wt", encoding="utf-8") as outfile1, gzip.open(args.output + "_headers_rv.txt.gz", "wt", encoding="utf-8") as outfile2:
-            for key in renamed.keys():
-                outfile1.write(key + "\t" + renamed[key][0] + "\n")
-                outfile2.write(key + "\t" + renamed[key][1] + "\n")
+        # Create buffers for header mappings
+        fw_buffer = StringIO()
+        rv_buffer = StringIO()
+        read_count = 0
+
+        # Paired-end processing with buffered writes
+        with dnaio.open(fastq[0], fastq[1], mode="r", fileformat="fastq") as reader, \
+             dnaio.open(args.output + "_R1_renamed.fastq.gz", args.output + "_R2_renamed.fastq.gz",
+                      mode="w", fileformat="fastq", compression_level=6) as writer, \
+             gzip.open(args.output + "_headers_fw.txt.gz", "wt", encoding="utf-8") as outfile1, \
+             gzip.open(args.output + "_headers_rv.txt.gz", "wt", encoding="utf-8") as outfile2:
+
+            for record_fw, record_rv in reader:
+                header_fw = record_fw.name
+                header_rv = record_rv.name
+
+                renamed_fw = process_read_header(header_fw, is_forward=True, filename=fastq[0])
+                renamed_rv = process_read_header(header_rv, is_forward=False, filename=fastq[1])
+
+                # Check if base IDs match
+                if renamed_fw != renamed_rv:
+                    msg = f"Read IDs were not matching! Please provide matching IDs in the headers. The problematic reads were {header_fw} and {header_rv} in the files {' and '.join(fastq)}."
+                    raise ValueError(msg)
+
+                fw_buffer.write(f"{renamed_fw}\t{header_fw}\n")
+                rv_buffer.write(f"{renamed_rv}\t{header_rv}\n")
+
+                record_fw.name = renamed_fw
+                record_rv.name = renamed_rv
+
+                writer.write(record_fw, record_rv)
+                read_count += 1
+
+                if read_count >= buffer_size:
+                    write_buffer(fw_buffer, outfile1)
+                    write_buffer(rv_buffer, outfile2)
+                    read_count = 0
+
+            # Write any remaining data in buffers
+            write_buffer(fw_buffer, outfile1)
+            write_buffer(rv_buffer, outfile2)
     else:
-        renamed = {}
-        with gzip.open(fastq[0], "rt") as handle1:
-            with bgzf.BgzfWriter(args.output + "_renamed.fastq.gz", "wb") as outgz1:
-                for i in SeqIO.parse(handle1, "fastq"):
-                    header_fw = i.description
-                    renamedHeader = renameReadSingle(header_fw, fastq)
-                    renamed.update(renamedHeader[0])
-                    i.description = renamedHeader[1][0]
-                    i.id = renamedHeader[1][0]
-                    SeqIO.write(sequences=i, handle=outgz1, format="fastq")
-        with gzip.open(args.output + "_headers.txt.gz", "wt", encoding="utf-8") as outfile:
-            for key in renamed.keys():
-                outfile.write(key + "\t" + renamed[key][0] + "\n")
+        header_buffer = StringIO()
+        read_count = 0
+
+        # Single-end processing with buffered writes
+        with dnaio.open(fastq[0], mode="r", fileformat="fastq") as reader, \
+             dnaio.open(args.output + "_renamed.fastq.gz", mode="w", fileformat="fastq", compression_level=6) as writer, \
+             gzip.open(args.output + "_headers.txt.gz", "wt", encoding="utf-8") as outfile:
+
+            for record in reader:
+                header = record.name
+                renamed = process_read_header(header, filename=fastq[0])
+
+                header_buffer.write(f"{renamed}\t{header}\n")
+                record.name = renamed
+                writer.write(record)
+                read_count += 1
+
+                # Write buffer if it reaches the threshold
+                if read_count >= buffer_size:
+                    write_buffer(header_buffer, outfile)
+                    read_count = 0
+
+            # Write any remaining data in buffer
+            write_buffer(header_buffer, outfile)
 
 if __name__ == "__main__":
     sys.exit(main())

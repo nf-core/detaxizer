@@ -3,6 +3,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.2.0 - Kunschd - [2025-08-07]
+
+### `Added`
+
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--skip_filter` was added (by @d4straub)
+- [PR #71](https://github.com/nf-core/detaxizer/pull/71) - Add usage information learned from our benchmarking (by @d4straub)
+
+### `Changed`
+
+- [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
+- [PR #72](https://github.com/nf-core/detaxizer/pull/72) - Default for `--kraken2db` was changed from 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz' to 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'. That database is much larger (60GB) but default settings will therefore reflect best decontamination performance in benchmarks (by @d4straub)
+- [PR #73](https://github.com/nf-core/detaxizer/pull/73) - Doubled memory allocation for ISOLATE_BBDUK_IDS (by @d4straub)
+- [PR #75](https://github.com/nf-core/detaxizer/pull/75) - Updated version and contributors (by @d4straub)
+
+### `Fixed`
+
+- [PR #62](https://github.com/nf-core/detaxizer/pull/62) - Use dnaio to reduce memory spikes during renaming (by @bede)
+- [PR #77](https://github.com/nf-core/detaxizer/pull/77) - Fixed conda versions to exactly follow container versions (by @d4straub)
+- [PR #78](https://github.com/nf-core/detaxizer/pull/78) - Update typos, re-add code comments (by @d4straub)
+
+### `Dependencies`
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.27             | 1.29        |
+| tar      | 1.3              | 1.34        |
+
+### `Removed`
+
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--enable_filter` was removed and replaced by `--skip_filter` (by @d4straub)
+
 ## v1.1.0 - Kombjuudr - [2024-11-08]
 
 ### `Added`
