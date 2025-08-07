@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.0dev - [date]
+
+### `Added`
+
+### `Changed`
+
+- [PR #79](https://github.com/nf-core/detaxizer/pull/79) - Update version to 1.3.0dev (by @d4straub)
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Removed`
+
 ## v1.2.0 - Kunschd - [2025-08-07]
 
 ### `Added`
