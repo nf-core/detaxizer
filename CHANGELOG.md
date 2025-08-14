@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [PR #80](https://github.com/nf-core/detaxizer/pull/80) - bbmap/filterbyname.sh natively handles pair-end reads, eliminating the steps required to modify fastq headers, improves run time, choose via `--filtering_tool` (by @m3hdad)
+
 ### `Changed`
 
 - [PR #79](https://github.com/nf-core/detaxizer/pull/79) - Update version to 1.3.0dev (by @d4straub)
