@@ -78,6 +78,12 @@
                     "description": "If the filtering step should be skipped.",
                     "help_text": "If set the filtering step is skipped and only assessing is performed."
                 },
+                "filtering_tool": {
+                    "type": "string",
+                    "default": "seqkit",
+                    "enum": ["seqkit", "bbmap"],
+                    "description": "Select the read-filtering tool: seqkit or bbmap. seqkit normalizes FASTQ headers by temporarily renaming them; bbmap uses filterbyname.sh for exact header matching -- Note: BBTools I/O forces any base that is N to Q=0 (!)."
+                },
                 "output_removed_reads": {
                     "type": "boolean",
                     "description": "If the removed reads should also be written to the output folder."
