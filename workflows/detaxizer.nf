@@ -165,6 +165,8 @@ workflow NFCORE_DETAXIZER {
         if ( params.filtering_tool == 'bbmap' ) {
             MAP_KRAKEN2SEQIDS_TO_FQHEADERS(
                 ch_fastq_for_classification
+                    .join(KRAKEN2_KRAKEN2.out.classified_reads_assignment, by: 0)
+                    .map { meta, reads, classification -> [meta, reads, classification] }
             )
             ch_versions = ch_versions.mix(MAP_KRAKEN2SEQIDS_TO_FQHEADERS.out.versions.first())
         }
