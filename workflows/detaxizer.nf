@@ -201,7 +201,7 @@ workflow NFCORE_DETAXIZER {
 
         ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
 
-    }
+        }
 
     if (params.classification_bbduk) {
 

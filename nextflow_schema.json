@@ -82,7 +82,7 @@
                     "type": "string",
                     "default": "seqkit",
                     "enum": ["seqkit", "bbmap"],
-                    "description": "Tool used for read filtering. Available options: 'seqkit' or 'bbmap'."
+                    "description": "Select the read-filtering tool: seqkit or bbmap. seqkit normalizes FASTQ headers by temporarily renaming them; bbmap uses filterbyname.sh for exact header matching -- Note: BBTools I/O forces any base that is N to Q=0 (!)."
                 },
                 "output_removed_reads": {
                     "type": "boolean",

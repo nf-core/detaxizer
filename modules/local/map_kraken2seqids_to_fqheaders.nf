@@ -12,7 +12,7 @@ process MAP_KRAKEN2SEQIDS_TO_FQHEADERS {
 
     output:
     tuple val(meta), path('*kraken2.map.txt'), emit: mapping
-    path "versions.yml"                     , emit: versions
+    path "versions.yml"                      , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,7 +30,6 @@ def open_file(p):
 reads = sys.argv[1:-2]
 classification = sys.argv[-2]
 output = sys.argv[-1]
-
 
 with open_file(classification) as kc, open(output, 'w') as out:
     if len(reads) == 2:
