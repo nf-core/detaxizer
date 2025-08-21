@@ -39,7 +39,7 @@ with open_file(classification) as kc, open(output, 'w') as out:
                 line = kc.readline()
                 if not line:
                     break
-                kid = line.split('\t', 2)[1].strip()
+                kid = line.split('\\t', 2)[1].strip()
                 h1 = f1.readline().rstrip()
                 f1.readline(); f1.readline(); f1.readline()
                 h2 = f2.readline().rstrip()
@@ -51,7 +51,7 @@ with open_file(classification) as kc, open(output, 'w') as out:
                 line = kc.readline()
                 if not line:
                     break
-                kid = line.split('\t', 2)[1].strip()
+                kid = line.split('\\t', 2)[1].strip()
                 h1 = f1.readline().rstrip()
                 f1.readline(); f1.readline(); f1.readline()
                 out.write(f"{kid}\\t{h1[1:]}\\n")
