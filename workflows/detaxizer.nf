@@ -26,6 +26,7 @@ include { RENAME_FASTQ_HEADERS_PRE                                  } from '../m
 include { KRAKEN2PREPARATION                                        } from '../modules/local/kraken2preparation'
 include { PARSE_KRAKEN2REPORT                                       } from '../modules/local/parse_kraken2report'
 include { ISOLATE_KRAKEN2_IDS                                       } from '../modules/local/isolate_kraken2_ids'
+include { MAP_KRAKEN2SEQIDS_TO_FQHEADERS                            } from '../modules/local/map_kraken2seqids_to_fqheaders'
 include { ISOLATE_BBDUK_IDS                                         } from '../modules/local/isolate_bbduk_ids'
 include { MERGE_IDS                                                 } from '../modules/local/merge_ids'
 include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn'
@@ -161,6 +162,13 @@ workflow NFCORE_DETAXIZER {
         )
         ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
+        if ( params.filtering_tool == 'bbmap' ) {
+            MAP_KRAKEN2SEQIDS_TO_FQHEADERS(
+                ch_fastq_for_classification
+            )
+            ch_versions = ch_versions.mix(MAP_KRAKEN2SEQIDS_TO_FQHEADERS.out.versions.first())
+        }
+
         //
         // MODULE: Parse the taxonomy from the kraken2 report and return all subclasses of the tax2filter
         //
@@ -174,7 +182,16 @@ workflow NFCORE_DETAXIZER {
         //
         ch_parsed_kraken2_report = PARSE_KRAKEN2REPORT.out.to_filter.map {meta, path -> path}
 
-        ch_combined = KRAKEN2_KRAKEN2.out.classified_reads_assignment.combine(ch_parsed_kraken2_report)
+        if ( params.filtering_tool == 'bbmap' ) {
+            ch_combined = KRAKEN2_KRAKEN2.out.classified_reads_assignment
+                .combine(ch_parsed_kraken2_report)
+                .join(MAP_KRAKEN2SEQIDS_TO_FQHEADERS.out.mapping, by:[0])
+                .map { meta, kraken2results, tax, mapping -> [meta, kraken2results, tax, mapping] }
+        } else {
+            ch_combined = KRAKEN2_KRAKEN2.out.classified_reads_assignment
+                .combine(ch_parsed_kraken2_report)
+                .map { meta, kraken2results, tax -> [meta, kraken2results, tax, null] }
+        }
 
         ISOLATE_KRAKEN2_IDS (
             ch_combined
