@@ -1,5 +1,9 @@
 # nf-core/detaxizer: Citations
 
+## [nf-core/detaxizer](https://doi.org/10.1093/nargab/lqaf125)
+
+> Seidel J, Kaipf C, Straub D, Nahnsen S. nf-core/detaxizer: a benchmarking study for decontamination from human sequences. NAR Genom and Bioinform. 2025;7(3):lqaf125, doi:10.1093/nargab/lqaf125
+
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
 > Ewels PA, Peltzer A, Fillinger S, Patel H, Alneberg J, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol. 2020 Mar;38(3):276-278. doi: 10.1038/s41587-020-0439-x. PubMed PMID: 32055031.

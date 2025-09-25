@@ -5,7 +5,7 @@
   </picture>
 </h1>
 
-[![Cite Preprint](https://img.shields.io/badge/Cite%20Us!-Cite%20Publication-important?labelColor=000000)](https://doi.org/10.1101/2025.03.27.645632)
+[![Cite Publication](https://img.shields.io/badge/Cite%20Us!-Cite%20Publication-important?labelColor=000000)](https://doi.org/10.1093/nargab/lqaf125)
 [![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.10877147-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.10877147)
 
 [![GitHub Actions CI Status](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/nf-test.yml)[![GitHub Actions Linting Status](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/detaxizer/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/detaxizer/results)
@@ -93,13 +93,13 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/detaxizer for your analysis, please cite it using the following preprint:
+If you use nf-core/detaxizer for your analysis, please cite it using the following publication:
 
-> **nf-core/detaxizer: A Benchmarking Study for Decontamination from Human Sequences**
+> **nf-core/detaxizer: a benchmarking study for decontamination from human sequences.**
 >
 > Jannik Seidel, Camill Kaipf, Daniel Straub, Sven Nahnsen
 >
-> bioRxiv 2025.03.27.645632 [doi: 10.1101/2025.03.27.645632](https://doi.org/10.1101/2025.03.27.645632).
+> _NAR Genom and Bioinform._ 2025;7(3):lqaf125, doi: [10.1093/nargab/lqaf125](https://doi.org/10.1093/nargab/lqaf125).
 
 Additionally, the following doi can be cited: [10.5281/zenodo.10877147](https://doi.org/10.5281/zenodo.10877147)
 

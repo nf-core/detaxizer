@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - [PR #79](https://github.com/nf-core/detaxizer/pull/79) - Update version to 1.3.0dev (by @d4straub)
+- [PR #81](https://github.com/nf-core/detaxizer/pull/81) - Update citation from preprint to peer-reviewed publication (by @d4straub)
 
 ### `Fixed`
 
