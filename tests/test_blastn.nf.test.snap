@@ -1,7 +1,6 @@
 {
     "-profile test_blastn": {
         "content": [
-            69,
             {
                 "BLAST_BLASTN": {
                     "blast": "2.15.0+"

@@ -1,7 +1,6 @@
 {
     "-profile test_filter_preprocessed": {
         "content": [
-            49,
             {
                 "FASTP": {
                     "fastp": "0.23.4"

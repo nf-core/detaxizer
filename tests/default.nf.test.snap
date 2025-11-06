@@ -1,7 +1,6 @@
 {
     "-profile test": {
         "content": [
-            54,
             {
                 "BBMAP_BBDUK": {
                     "bbmap": 39.1
