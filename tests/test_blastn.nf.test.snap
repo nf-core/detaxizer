@@ -3,10 +3,10 @@
         "content": [
             {
                 "BLAST_BLASTN": {
-                    "blast": "2.15.0+"
+                    "blast": "2.17.0+"
                 },
                 "BLAST_MAKEBLASTDB": {
-                    "blast": "2.15.0+"
+                    "blast": "2.17.0+"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -24,7 +24,7 @@
                     "tar": 1.34
                 },
                 "KRAKEN2_KRAKEN2": {
-                    "kraken2": "2.1.3",
+                    "kraken2": "2.1.6",
                     "pigz": 2.8
                 },
                 "MERGE_IDS": {

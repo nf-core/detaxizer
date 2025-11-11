@@ -3,7 +3,7 @@
         "content": [
             {
                 "BBMAP_BBDUK": {
-                    "bbmap": 39.1
+                    "bbmap": "39.18"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -21,7 +21,7 @@
                     "tar": 1.34
                 },
                 "KRAKEN2_KRAKEN2": {
-                    "kraken2": "2.1.3",
+                    "kraken2": "2.1.6",
                     "pigz": 2.8
                 },
                 "MERGE_IDS": {

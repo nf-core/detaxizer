@@ -333,7 +333,10 @@ workflow NFCORE_DETAXIZER {
 
         BLAST_BLASTN (
             ch_fasta4blastn,
-            ch_blastn_db
+            ch_blastn_db,
+            [],
+            [],
+            []
         )
 
         ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
