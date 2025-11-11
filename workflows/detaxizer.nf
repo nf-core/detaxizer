@@ -118,8 +118,7 @@ workflow NFCORE_DETAXIZER {
     if (params.filter_trimmed || params.preprocessing) {
 
     FASTP (
-        ch_fastq_input,
-        [],
+        ch_fastq_input.map { meta, reads -> [meta, reads, []] },
         [],
         params.fastp_save_trimmed_fail,
         []
