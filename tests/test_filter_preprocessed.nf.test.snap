@@ -40,7 +40,7 @@
                     "pandas": "1.5.2"
                 },
                 "Workflow": {
-                    "nf-core/detaxizer": "v1.3.0dev"
+                    "nf-core/detaxizer": "v1.3.0"
                 }
             },
             [

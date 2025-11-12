@@ -3,17 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.3.0dev - [date]
+## v1.3.0 - rausgruschdla - [2025-11-13]
 
 ### `Added`
 
-- [PR #80](https://github.com/nf-core/detaxizer/pull/80) - bbmap/filterbyname.sh natively handles pair-end reads, eliminating the steps required to modify fastq headers, improves run time, choose via `--filtering_tool` (by @m3hdad)
+- [PR #80](https://github.com/nf-core/detaxizer/pull/80) - bbmap/filterbyname.sh natively handles pair-end reads, eliminating the steps required to modify fastq headers, improves run time, choose via `--filtering_tool bbmap` (by @m3hdad)
 
 ### `Changed`
 
 - [PR #79](https://github.com/nf-core/detaxizer/pull/79) - Update version to 1.3.0dev (by @d4straub)
 - [PR #81](https://github.com/nf-core/detaxizer/pull/81) - Update citation from preprint to peer-reviewed publication (by @d4straub)
 - [PR #84](https://github.com/nf-core/detaxizer/pull/84) - Template update for nf-core/tools 3.4.1 (by @d4straub)
+- [PR #86](https://github.com/nf-core/detaxizer/pull/86) - Update version to 1.3.0 (by @d4straub)
 
 ### `Fixed`
 
