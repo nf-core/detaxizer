@@ -118,8 +118,7 @@ workflow NFCORE_DETAXIZER {
     if (params.filter_trimmed || params.preprocessing) {
 
     FASTP (
-        ch_fastq_input,
-        [],
+        ch_fastq_input.map { meta, reads -> [meta, reads, []] },
         [],
         params.fastp_save_trimmed_fail,
         []
@@ -333,7 +332,10 @@ workflow NFCORE_DETAXIZER {
 
         BLAST_BLASTN (
             ch_fasta4blastn,
-            ch_blastn_db
+            ch_blastn_db,
+            [],
+            [],
+            []
         )
 
         ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())

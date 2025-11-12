@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
+- [PR #85](https://github.com/nf-core/detaxizer/pull/85) - Update nf-core modules (by @d4straub)
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.31             | 1.32        |
+| Kraken2  | 2.1.3            | 2.1.6       |
+| fastp    | 0.23.4           | 1.0.1       |
+| BLAST    | 2.15.0           | 2.17.0      |
+| bbmap    | 39.10            | 39.18       |
+
 ### `Removed`
 
 ## v1.2.0 - Kunschd - [2025-08-07]
