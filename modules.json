@@ -18,9 +18,8 @@
                     },
                     "blast/blastn": {
                         "branch": "master",
-                        "git_sha": "d46ce1891502bcf54c434d50d9a33ffe611beb19",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/blast/blastn/blast-blastn.diff"
+                        "git_sha": "9da6f5cc5b9170943be764c0a6926e81ba1ed3b9",
+                        "installed_by": ["modules"]
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
