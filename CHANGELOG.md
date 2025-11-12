@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [PR #90](https://github.com/nf-core/detaxizer/pull/90) - Update minimum nextflow version to 25.04.8 to fix conda (by @d4straub)
+
 ### `Dependencies`
 
 - [PR #86](https://github.com/nf-core/detaxizer/pull/86) - Update nf-core modules (by @d4straub)
