@@ -11,10 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [PR #79](https://github.com/nf-core/detaxizer/pull/79) - Update version to 1.3.0dev (by @d4straub)
+- [PR #79](https://github.com/nf-core/detaxizer/pull/79),[PR #87](https://github.com/nf-core/detaxizer/pull/87) - Update pipeline version (by @d4straub)
 - [PR #81](https://github.com/nf-core/detaxizer/pull/81) - Update citation from preprint to peer-reviewed publication (by @d4straub)
 - [PR #84](https://github.com/nf-core/detaxizer/pull/84) - Template update for nf-core/tools 3.4.1 (by @d4straub)
-- [PR #87](https://github.com/nf-core/detaxizer/pull/87) - Update version to 1.3.0 (by @d4straub)
 
 ### `Fixed`
 
@@ -31,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | fastp    | 0.23.4           | 1.0.1       |
 | BLAST    | 2.15.0           | 2.17.0      |
 | bbmap    | 39.10            | 39.18       |
+| nextflow | 25.04.0          | 25.04.8     |
 
 ### `Removed`
 
