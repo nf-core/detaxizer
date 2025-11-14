@@ -7,23 +7,28 @@
                 "nf-core": {
                     "bbmap/bbduk": {
                         "branch": "master",
-                        "git_sha": "a1abf90966a2a4016d3c3e41e228bfcbd4811ccc",
+                        "git_sha": "3351c212144fc8aab0e595165bf447ebecfebd8a",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bbmap/bbduk/bbmap-bbduk.diff"
                     },
+                    "bbmap/filterbyname": {
+                        "branch": "master",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"]
+                    },
                     "blast/blastn": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "9da6f5cc5b9170943be764c0a6926e81ba1ed3b9",
                         "installed_by": ["modules"]
                     },
                     "blast/makeblastdb": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "6330227ba2a71d39f35b0ef60e381f456489c6ee",
                         "installed_by": ["modules"]
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "d9ec4ef289ad39b8a662a7a12be50409b11df84b",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
@@ -33,12 +38,12 @@
                     },
                     "kraken2/kraken2": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "0821737e529094ddf3c355b76d19c49ea1469141",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
                         "installed_by": ["modules"]
                     }
                 }
@@ -47,17 +52,17 @@
                 "nf-core": {
                     "utils_nextflow_pipeline": {
                         "branch": "master",
-                        "git_sha": "c2b22d85f30a706a3073387f30380704fcae013b",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
-                        "git_sha": "51ae5406a030d4da1e49e4dab49756844fdd6c7a",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "2fd2cd6d0e7b273747f32e465fdc6bcc3ae0814e",
+                        "git_sha": "4b406a74dc0449c0401ed87d5bfff4252fd277fd",
                         "installed_by": ["subworkflows"]
                     }
                 }

@@ -3,6 +3,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.0 - rausgruschdla - [2025-11-13]
+
+### `Added`
+
+- [PR #80](https://github.com/nf-core/detaxizer/pull/80) - bbmap/filterbyname.sh natively handles pair-end reads, eliminating the steps required to modify fastq headers, improves run time, choose via `--filtering_tool bbmap` (by @m3hdad)
+
+### `Changed`
+
+- [PR #79](https://github.com/nf-core/detaxizer/pull/79),[PR #87](https://github.com/nf-core/detaxizer/pull/87) - Update pipeline version (by @d4straub)
+- [PR #81](https://github.com/nf-core/detaxizer/pull/81) - Update citation from preprint to peer-reviewed publication (by @d4straub)
+- [PR #84](https://github.com/nf-core/detaxizer/pull/84) - Template update for nf-core/tools 3.4.1 (by @d4straub)
+
+### `Fixed`
+
+- [PR #90](https://github.com/nf-core/detaxizer/pull/90) - Update minimum nextflow version to 25.04.8 to fix conda (by @d4straub)
+
+### `Dependencies`
+
+- [PR #86](https://github.com/nf-core/detaxizer/pull/86) - Update nf-core modules (by @d4straub)
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.31             | 1.32        |
+| Kraken2  | 2.1.3            | 2.1.6       |
+| fastp    | 0.23.4           | 1.0.1       |
+| BLAST    | 2.15.0           | 2.17.0      |
+| bbmap    | 39.10            | 39.18       |
+| nextflow | 25.04.0          | 25.04.8     |
+
+### `Removed`
+
 ## v1.2.0 - Kunschd - [2025-08-07]
 
 ### `Added`

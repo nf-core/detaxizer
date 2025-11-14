@@ -4,8 +4,8 @@ process BBMAP_BBDUK {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bbmap:39.10--h92535d8_0':
-        'biocontainers/bbmap:39.10--h92535d8_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/5a/5aae5977ff9de3e01ff962dc495bfa23f4304c676446b5fdf2de5c7edfa2dc4e/data' :
+        'community.wave.seqera.io/library/bbmap_pigz:07416fe99b090fa9' }"
 
     input:
     tuple val(meta), path(reads)
@@ -28,9 +28,8 @@ process BBMAP_BBDUK {
     def contaminated_reads = meta.single_end ? "outm=${prefix}.contaminated.fastq.gz" : "outm=${prefix}_1.contaminated.fastq.gz outm2=${prefix}_2.contaminated.fastq.gz"
     def contaminants_fa = contaminants ? "ref=$contaminants" : ''
     """
-    maxmem=\$(echo \"$task.memory\"| sed 's/ GB/g/g')
     bbduk.sh \\
-        -Xmx\$maxmem \\
+        -Xmx${task.memory.toGiga()}g \\
         $raw \\
         $trimmed \\
         $contaminated_reads \\
@@ -38,9 +37,10 @@ process BBMAP_BBDUK {
         $args \\
         $contaminants_fa \\
         &> ${prefix}.bbduk.log
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bbmap: \$(bbversion.sh | grep -v "Duplicate cpuset")
+        bbmap: \$(bbversion.sh | grep -v "]")
     END_VERSIONS
     """
 
@@ -54,7 +54,7 @@ process BBMAP_BBDUK {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bbmap: \$(bbversion.sh | grep -v "Duplicate cpuset")
+        bbmap: \$(bbversion.sh | grep -v "]")
     END_VERSIONS
     """
 }

@@ -1,6 +1,6 @@
 process ISOLATE_KRAKEN2_IDS {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_low'
 
     conda "conda-forge::python=3.10.4"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -8,7 +8,7 @@ process ISOLATE_KRAKEN2_IDS {
         'biocontainers/python:3.10.4' }"
 
     input:
-    tuple val(meta), path(kraken2results), path(tax2filter)
+    tuple val(meta), path(kraken2results), path(tax2filter), val(mapping)
 
     output:
     tuple val(meta), path('*classified.txt'), emit: classified
@@ -68,9 +68,25 @@ process ISOLATE_KRAKEN2_IDS {
                     filterList.append(line[1])
                     outfile.write("\\t".join(line))
 
+    mapping_path = '${mapping}' if '${mapping}' not in ['null', ''] else None
+    mapping_dict = {}
+    if mapping_path:
+        with open(mapping_path, 'r') as mapfile:
+            for line in mapfile:
+                parts = line.rstrip('\\n').split('\\t')
+                mapping_dict[parts[0]] = parts[1:]
+
     with open('${meta.id}.kraken2.ids.txt', 'w') as outfile:
         for entry in filterList:
-            outfile.write(entry+"\\n")
+            if mapping_dict:
+                headers = mapping_dict.get(entry, [])
+                if headers:
+                    for h in headers:
+                        outfile.write(f"{h}\\n")
+                else:
+                    outfile.write(entry+"\\n")
+            else:
+                outfile.write(entry+"\\n")
 
     with open('versions.yml', 'w') as f:
         f.write(f'"{subprocess.getoutput("echo ${task.process}")}":\\n')
