@@ -44,14 +44,14 @@ workflow SAMPLESHEET_MAG {
             }
         .groupTuple(remainder: true)
         .map{key, meta, reads ->
-                new_meta = [
+                def new_meta = [
                     id: key,
                     run: key,
                     single_end: meta[0].single_end,
                     long_reads: meta[0]?.long_reads ?: meta[1]?.long_reads ?: false
                     ]
                 // Making sure the long reads are the final element of the array.
-                read_files = reads.flatten().sort(false){ a, b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }
+                def read_files = reads.flatten().sort(false){ a, b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }
             [new_meta, read_files]
             }
         .tap{ ch_reads_grouped }
@@ -105,9 +105,9 @@ workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
 
 // Constructs the header string and then the strings of each row, and
 def channelToSamplesheet(ch_list_for_samplesheet, path, format) {
-    format_sep = ["csv":",", "tsv":"\t", "txt":"\t"][format]
+    def format_sep = ["csv":",", "tsv":"\t", "txt":"\t"][format]
 
-    ch_header = ch_list_for_samplesheet
+    def ch_header = ch_list_for_samplesheet
 
     ch_header
         .first()
