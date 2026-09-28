@@ -115,7 +115,7 @@ workflow DETAXIZER {
         ch_fastq_input
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
-    ch_versions = ch_versions.mix(FASTQC.out.versions_fastqc)
+    // FASTQC emits its software version as a topic tuple, collected via the `versions` topic below
 
     //
     // MODULE: Run fastp
