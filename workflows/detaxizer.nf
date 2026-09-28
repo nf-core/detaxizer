@@ -42,36 +42,41 @@ include { SUMMARIZER                                                } from '../m
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
-def ch_fasta_blastn = Channel.empty()
-
-if ( !params.fasta_blastn && params.validation_blastn ) {
-    ch_fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if ( params.validation_blastn ){
-    // If params.fasta_blastn is there, use it for the creation of the blastn database
-    ch_fasta_blastn = Channel.fromPath(params.fasta_blastn)
-}
-
-// specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
-
-def ch_fasta_bbduk = Channel.empty()
-
-if ( !params.fasta_bbduk && params.classification_bbduk ) {
-    ch_fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if ( params.classification_bbduk ){
-    // If params.fasta_bbduk is there, use it for the creation of the blastn database
-    ch_fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
-}
-
-workflow NFCORE_DETAXIZER {
+workflow DETAXIZER {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    multiqc_config
+    multiqc_logo
+    multiqc_methods_description
+    outdir
+
     main:
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
-    ch_filtered_reads = Channel.empty()
-    ch_removed_reads  = Channel.empty()
+
+    // Specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
+    def ch_fasta_blastn = channel.empty()
+
+    if ( !params.fasta_blastn && params.validation_blastn ) {
+        ch_fasta_blastn = channel.fromPath(getGenomeAttribute('fasta'))
+    } else if ( params.validation_blastn ){
+        // If params.fasta_blastn is there, use it for the creation of the blastn database
+        ch_fasta_blastn = channel.fromPath(params.fasta_blastn)
+    }
+
+    // Specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
+    def ch_fasta_bbduk = channel.empty()
+
+    if ( !params.fasta_bbduk && params.classification_bbduk ) {
+        ch_fasta_bbduk = channel.fromPath(getGenomeAttribute('fasta'))
+    } else if ( params.classification_bbduk ){
+        // If params.fasta_bbduk is there, use it for the creation of the blastn database
+        ch_fasta_bbduk = channel.fromPath(params.fasta_bbduk)
+    }
+
+    def ch_versions = channel.empty()
+    def ch_multiqc_files = channel.empty()
+    def ch_filtered_reads = channel.empty()
+    def ch_removed_reads  = channel.empty()
 
     ch_short = ch_samplesheet.branch {
         shortReads: it[1]
@@ -109,8 +114,8 @@ workflow NFCORE_DETAXIZER {
     FASTQC (
         ch_fastq_input
     )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+    ch_versions = ch_versions.mix(FASTQC.out.versions_fastqc)
 
     //
     // MODULE: Run fastp
@@ -137,7 +142,7 @@ workflow NFCORE_DETAXIZER {
         //
         // MODULE: Prepare Kraken2 Database
         //
-        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
+        ch_kraken2_db = channel.fromPath(params.kraken2db).map {
                 item -> [['id': "kraken2_db"], item]
             }
 
@@ -437,8 +442,8 @@ workflow NFCORE_DETAXIZER {
             BBMAP_FILTERBYNAME(
                 ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
                 ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                Channel.value('fastq.gz'),
-                Channel.value(false)
+                channel.value('fastq.gz'),
+                channel.value(false)
             )
             ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME.out.versions.first())
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
@@ -446,13 +451,13 @@ workflow NFCORE_DETAXIZER {
                 BBMAP_FILTERBYNAME_REMOVED(
                     ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
                     ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                    Channel.value('fastq.gz'),
-                    Channel.value(false)
+                    channel.value('fastq.gz'),
+                    channel.value(false)
                 )
                 ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
-                ch_filter_removed = Channel.empty()
+                ch_filter_removed = channel.empty()
             }
         }
     }
@@ -470,7 +475,7 @@ workflow NFCORE_DETAXIZER {
                 [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
             }
 
-            ch_removed2rename = Channel.empty()
+            ch_removed2rename = channel.empty()
             if ( params.output_removed_reads ) {
                 ch_removed2rename = ch_filter_removed.map { meta, path ->
                     [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -493,12 +498,12 @@ workflow NFCORE_DETAXIZER {
             }
             ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
             ch_filtered_reads = RENAME_FASTQ_HEADERS_AFTER.out.fastq
-            ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : Channel.empty()
+            ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : channel.empty()
         } else {
             ch_filtered_reads = ch_filter_filtered.map { meta, path ->
                 [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
             }
-            ch_removed_reads = Channel.empty()
+            ch_removed_reads = channel.empty()
             if ( params.output_removed_reads ) {
                 ch_removed_reads = ch_filter_removed.map { meta, path ->
                     [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -565,58 +570,60 @@ workflow NFCORE_DETAXIZER {
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            storeDir: "${outdir}/pipeline_info",
             name: 'nf_core_'  +  'detaxizer_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
-        ).set { ch_collated_versions }
-
+        )
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = Channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        Channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        Channel.empty()
-
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
-
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_methods_description.collectFile(
-            name: 'methods_description_mqc.yaml',
-            sort: true
-        )
+    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    def ch_multiqc_custom_methods_description = multiqc_methods_description
+        ? file(multiqc_methods_description, checkIfExists: true)
+        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
+    def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+    MULTIQC(
+        ch_multiqc_files.flatten().collect().map { files ->
+            [
+                [id: 'detaxizer'],
+                files,
+                multiqc_config
+                    ? file(multiqc_config, checkIfExists: true)
+                    : file("${projectDir}/assets/multiqc_config.yml", checkIfExists: true),
+                multiqc_logo ? file(multiqc_logo, checkIfExists: true) : [],
+                [],
+                [],
+            ]
+        }
     )
-
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
-
-    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
 }
 
 /*

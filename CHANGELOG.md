@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [Template update for nf-core/tools version 4.1.0 (from 3.4.1)](https://github.com/nf-core/tools/releases/tag/4.1.0)
+
 ### `Fixed`
 
 ### `Dependencies`

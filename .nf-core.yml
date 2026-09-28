@@ -6,7 +6,7 @@ lint:
     - .github/workflows/linting.yml
   files_exist:
     - .github/workflows/linting_comment.yml
-nf_core_version: 3.4.1
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Jannik Seidel
