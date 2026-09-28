@@ -34,14 +34,10 @@ fastp performs preprocessing of the reads (adapter/quality trimming). For detail
 <details markdown="1">
 <summary>Output files</summary>
 
-- `fastp/`: Contains the output from the preprocessing step.
-  - `<sample>_longReads/`: If long reads are present in your `samplesheet.csv` this folder is generated containing the fastp-report.
-    - `<sample>_longReads.fastp.html`: The report on the preprocessing step.
-    - `<sample>_longReads.fastp.json`: The data on the preprocessing step in `.json`-format.
-  - `<sample>_R1/`: If single-end short reads are present in your `samplesheet.csv` this folder is generated.
-    - same pattern as in `<sample>_longReads/` with the prefix `<sample>_R1.fastp.*`.
-  - `<sample>/`: For paired-end short reads in your `samplesheet.csv` this folder is generated.
-    - same pattern as in `<sample>_longReads/` with the prefix `<sample>.fastp.*`.
+- `fastp/`: Contains the output from the preprocessing step. The files are named with the prefixes `<sample>`, `<sample>_R1` or `<sample>_longReads` depending on the read type as described in [fastp](#fastp). The reports are only present if `--save_intermediates` is used.
+  - `<sample>.fastp.html`: The report on the preprocessing step.
+  - `<sample>.fastp.json`: The data on the preprocessing step in `.json`-format.
+  - `<sample>_1.fastp.fastq.gz` and `<sample>_2.fastp.fastq.gz`: The preprocessed paired-end reads. Only present if `--save_clipped_reads` is used.
 
 </details>
 
