@@ -1,12 +1,16 @@
 lint:
   files_unchanged:
+    - .gitignore
     - .github/CONTRIBUTING.md
     - .github/PULL_REQUEST_TEMPLATE.md
     - .github/workflows/branch.yml
     - .github/workflows/linting.yml
+    - assets/nf-core-detaxizer_logo_light.png
+    - docs/images/nf-core-detaxizer_logo_light.png
+    - docs/images/nf-core-detaxizer_logo_dark.png
   files_exist:
     - .github/workflows/linting_comment.yml
-nf_core_version: 3.4.1
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Jannik Seidel

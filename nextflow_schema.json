@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxon to identify (and remove) is Homo sapiens. Removal is optional.",
+    "description": "A pipeline to identify and remove certain sequences from raw genomic data. Default taxon to identify and remove is Homo sapiens.",
     "type": "object",
     "$defs": {
         "input_output_options": {
@@ -275,11 +275,11 @@
                 },
                 "saveReference": {
                     "type": "boolean",
+                    "description": "Save the reference genome and its index files in the results directory.",
                     "default": true
                 },
                 "igenomes_base": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "The base path to the igenomes reference files",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
@@ -401,13 +401,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "hidden": true
-                },
-                "hook_url": {
-                    "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "multiqc_config": {

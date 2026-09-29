@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "SAMPLESHEET_TAXPROFILER"
+description: Generate input samplesheets for downstream nf-core pipelines from the filtered reads
+keywords:
+  - samplesheet
+  - downstream
+  - taxprofiler
+  - mag
+components: []
+input:
+  - ch_reads:
+      type: list
+      description: |
+        Channel containing the filtered reads together with their sample metadata.
+output:
+  - dummy_emit:
+      type: boolean
+      description: |
+        Dummy emit to make nf-core subworkflows lint happy
+authors:
+  - "@d4straub"
+  - "@jannikseidelQBiC"
