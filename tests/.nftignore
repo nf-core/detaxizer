@@ -11,6 +11,7 @@ multiqc/multiqc_report.html
 bbduk/*.bbduk.log
 fastp/*.fastp.html
 fastqc/*_fastqc.{html,zip}
+FastQC/*_fastqc.html
 pipeline_info/*.{html,json,txt,yml}
 downstream_samplesheets/*
 summary/*

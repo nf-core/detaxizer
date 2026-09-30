@@ -30,6 +30,9 @@
                 "RENAME_FASTQ_HEADERS_AFTER": {
                     "seqkit": "2.8.2"
                 },
+                "RENAME_FASTQ_HEADERS_PRE": {
+                    "python": "3.12.0"
+                },
                 "SUMMARIZER": {
                     "python": "3.11.0",
                     "pandas": "1.5.2",
@@ -182,13 +185,6 @@
                 "summary/summary.tsv"
             ],
             [
-                "test_paired-end_1_fastqc.html:md5,53f4bc85cd51df19723e9b177b72462f",
-                "test_paired-end_2_fastqc.html:md5,ec928a7c1469c537bcdb385b077de500",
-                "test_paired-end_plus_long-reads_1_fastqc.html:md5,b9b0347009dad0f7e34df9d3cc4b7255",
-                "test_paired-end_plus_long-reads_2_fastqc.html:md5,072efbe29dd85be5cbf97eb69ea026c2",
-                "test_paired-end_plus_long-reads_longReads_fastqc.html:md5,52f4cbac40bb659d3f50f91e0326f88c",
-                "test_single-end_long_longReads_fastqc.html:md5,c8728af18e46aec911978854441425bb",
-                "test_single-end_short_R1_fastqc.html:md5,89ffd4c3d2693f141e61d4f35f11fdf9",
                 "test_paired-end.ids.txt:md5,87fcb963b620f9b9bbd4a33da17a48c5",
                 "test_paired-end_plus_long-reads.ids.txt:md5,8aaf57e4a876389a7ecd76fc5861815f",
                 "test_paired-end_plus_long-reads_longReads.ids.txt:md5,4705f9cf4fd986d78c729bbd9ca9d63a",
@@ -243,7 +239,7 @@
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
-        "timestamp": "2026-09-29T11:03:34.437181595",
+        "timestamp": "2026-09-30T09:53:15.357011191",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

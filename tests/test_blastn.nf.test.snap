@@ -39,6 +39,9 @@
                 "RENAME_FASTQ_HEADERS_AFTER": {
                     "seqkit": "2.8.2"
                 },
+                "RENAME_FASTQ_HEADERS_PRE": {
+                    "python": "3.12.0"
+                },
                 "SUMMARIZER": {
                     "python": "3.11.0",
                     "pandas": "1.5.2",
@@ -157,7 +160,7 @@
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
-        "timestamp": "2026-09-28T13:26:38.093113222",
+        "timestamp": "2026-09-30T09:48:01.619495694",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

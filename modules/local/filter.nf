@@ -1,19 +1,19 @@
 process FILTER {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_high'
 
     conda "bioconda::seqkit=2.8.2"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/seqkit:2.8.2--h9ee0642_0':
-        'biocontainers/seqkit:2.8.2--h9ee0642_0'}"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/seqkit:2.8.2--h9ee0642_0'
+        : 'biocontainers/seqkit:2.8.2--h9ee0642_0'}"
 
     input:
     tuple val(meta), path(fastq), path(ids_to_remove)
 
     output:
-    tuple val(meta), path('*filtered_renamed.fastq.gz')                     , emit: filtered
-    tuple val(meta), path('*removed_renamed.fastq.gz')  , optional: true    , emit: removed
-    path "versions.yml"                                                     , emit: versions
+    tuple val(meta), path('*filtered_renamed.fastq.gz'), emit: filtered
+    tuple val(meta), path('*removed_renamed.fastq.gz'), optional: true, emit: removed
+    tuple val("${task.process}"), val('seqkit'), eval('seqkit version | sed -E "s/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/"'), emit: versions_seqkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -39,10 +39,5 @@ process FILTER {
             seqkit grep -f ${ids_to_remove} ${fastq} -o ${meta.id}_removed_renamed.fastq.gz
         fi
     fi
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
-    END_VERSIONS
     """
 }

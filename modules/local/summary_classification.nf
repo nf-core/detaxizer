@@ -11,7 +11,7 @@ process SUMMARY_CLASSIFICATION {
 
     output:
     tuple val(meta), path("*.classification_summary.tsv")   , emit: summary
-    path("versions.yml")                                    , emit: versions
+    path("versions.yml")                                    , emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

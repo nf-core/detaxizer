@@ -1,18 +1,18 @@
 process MAP_KRAKEN2SEQIDS_TO_FQHEADERS {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_low'
 
     conda "conda-forge::python=3.10.4"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.10.4' :
-        'biocontainers/python:3.10.4' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/python:3.10.4'
+        : 'biocontainers/python:3.10.4'}"
 
     input:
     tuple val(meta), path(reads), path(classification)
 
     output:
     tuple val(meta), path('*kraken2.map.txt'), emit: mapping
-    path "versions.yml"                      , emit: versions
+    tuple val("${task.process}"), val('python'), eval('python --version | sed "s/Python //g"'), emit: versions_python, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -55,10 +55,5 @@ with open_file(classification) as kc, open(output, 'w') as out:
                 f1.readline(); f1.readline(); f1.readline()
                 out.write(f"{kid}\\t{h1[1:]}\\n")
 PY
-
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-    python: \$(python --version | sed 's/Python //g')
-END_VERSIONS
     """
 }
