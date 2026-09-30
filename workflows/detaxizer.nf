@@ -130,7 +130,6 @@ workflow DETAXIZER {
     )
 
     ch_fastq_for_classification = FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTP.out.versions.first())
     } else {
         ch_fastq_for_classification = ch_fastq_input
     }
@@ -163,7 +162,6 @@ workflow DETAXIZER {
             params.save_output_fastqs,
             true
         )
-        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
         if ( params.filtering_tool == 'bbmap' ) {
             MAP_KRAKEN2SEQIDS_TO_FQHEADERS(
@@ -212,7 +210,6 @@ workflow DETAXIZER {
             ch_fastq_for_classification,
             ch_fasta_bbduk.first()
         )
-        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
         //
         // MODULE: Run ISOLATE_BBDUK_IDS
@@ -306,9 +303,9 @@ workflow DETAXIZER {
             }
 
         BLAST_MAKEBLASTDB (
-                ch_reference_fasta_with_meta
+                ch_reference_fasta_with_meta,
+                []
         )
-        ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
         ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
             .flatMap { meta, fastaList ->
@@ -334,8 +331,6 @@ workflow DETAXIZER {
             [],
             []
         )
-
-        ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
 
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
@@ -434,7 +429,6 @@ workflow DETAXIZER {
                 channel.value('fastq.gz'),
                 channel.value(false)
             )
-            ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME.out.versions.first())
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
@@ -443,7 +437,6 @@ workflow DETAXIZER {
                     channel.value('fastq.gz'),
                     channel.value(false)
                 )
-                ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
                 ch_filter_removed = channel.empty()
@@ -508,8 +501,6 @@ workflow DETAXIZER {
                 true
                 )
 
-            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
-
             if (params.output_removed_reads) {
 
                 KRAKEN2_POST_CLASSIFICATION_REMOVED (
@@ -518,8 +509,6 @@ workflow DETAXIZER {
                     params.save_output_fastqs_removed,
                     true
                     )
-
-                ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
 
             }
 

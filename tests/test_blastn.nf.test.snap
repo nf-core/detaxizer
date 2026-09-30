@@ -3,10 +3,10 @@
         "content": [
             {
                 "BLAST_BLASTN": {
-                    "blast": "2.17.0+"
+                    "blastn": "2.17.0+"
                 },
                 "BLAST_MAKEBLASTDB": {
-                    "blast": "2.17.0+"
+                    "makeblastdb": "2.17.0+"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -160,7 +160,7 @@
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
-        "timestamp": "2026-09-30T09:48:01.619495694",
+        "timestamp": "2026-09-30T12:03:45.752728088",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

@@ -1,5 +1,6 @@
 Changes in component 'nf-core/bbmap/bbduk'
 'modules/nf-core/bbmap/bbduk/meta.yml' is unchanged
+'modules/nf-core/bbmap/bbduk/environment.yml' is unchanged
 Changes in 'bbmap/bbduk/main.nf':
 --- modules/nf-core/bbmap/bbduk/main.nf
 +++ modules/nf-core/bbmap/bbduk/main.nf
@@ -8,23 +9,21 @@ Changes in 'bbmap/bbduk/main.nf':
      tag "$meta.id"
 -    label 'process_medium'
 +    label 'process_high'
- 
+
      conda "${moduleDir}/environment.yml"
-     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-@@ -12,9 +12,10 @@
+     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+@@ -12,8 +12,9 @@
      path contaminants
- 
+
      output:
 -    tuple val(meta), path('*.fastq.gz'), emit: reads
 -    tuple val(meta), path('*.log')     , emit: log
--    path "versions.yml"                , emit: versions
-+    tuple val(meta), path('*.uncontaminated.fastq.gz')  , emit: reads
-+    tuple val(meta), path('*.contaminated.fastq.gz')    , emit: contaminated_reads
-+    tuple val(meta), path('*.log')                      , emit: log
-+    path "versions.yml"                                 , emit: versions
- 
++    tuple val(meta), path('*.uncontaminated.fastq.gz'), emit: reads
++    tuple val(meta), path('*.contaminated.fastq.gz')  , emit: contaminated_reads
++    tuple val(meta), path('*.log')                    , emit: log
+     tuple val("${task.process}"), val('bbmap'), eval('bbversion.sh | grep -v "Duplicate cpuset"'), emit: versions_bbmap, topic: versions
+
      when:
-     task.ext.when == null || task.ext.when
 @@ -23,13 +24,15 @@
      def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
@@ -42,9 +41,9 @@ Changes in 'bbmap/bbduk/main.nf':
          threads=$task.cpus \\
          $args \\
          $contaminants_fa \\
-@@ -44,7 +47,7 @@
+@@ -38,7 +41,7 @@
+
      stub:
-     def args = task.ext.args ?: ''
      def prefix = task.ext.prefix ?: "${meta.id}"
 -    def output_command  = meta.single_end ? "echo '' | gzip > ${prefix}.fastq.gz" : "echo '' | gzip > ${prefix}_1.fastq.gz ; echo '' | gzip > ${prefix}_2.fastq.gz"
 +    def output_command  = meta.single_end ? "echo '' | gzip > ${prefix}.uncontaminated.fastq.gz ; echo '' | gzip > ${prefix}.contaminated.fastq.gz" : "echo '' | gzip > ${prefix}_1.uncontaminated.fastq.gz ; echo '' | gzip > ${prefix}_2.uncontaminated.fastq.gz ; echo '' | gzip > ${prefix}_1.contaminated.fastq.gz ; echo '' | gzip > ${prefix}_2.contaminated.fastq.gz"
@@ -52,8 +51,7 @@ Changes in 'bbmap/bbduk/main.nf':
      touch ${prefix}.bbduk.log
      $output_command
 
-'modules/nf-core/bbmap/bbduk/environment.yml' is unchanged
 'modules/nf-core/bbmap/bbduk/tests/main.nf.test' is unchanged
-'modules/nf-core/bbmap/bbduk/tests/main.nf.test.snap' is unchanged
 'modules/nf-core/bbmap/bbduk/tests/nextflow.config' is unchanged
+'modules/nf-core/bbmap/bbduk/tests/main.nf.test.snap' is unchanged
 ************************************************************
