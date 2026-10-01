@@ -12,7 +12,7 @@ process KRAKEN2PREPARATION {
 
     output:
     path( "database/" ) , emit: db
-    path "versions.yml" , emit: versions
+    tuple val("${task.process}"), val('tar'), eval('tar --version | grep -oP "tar \\(GNU tar\\) \\K\\d+(\\.\\d+)*"'), emit: versions_tar, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,10 +23,5 @@ process KRAKEN2PREPARATION {
     tar -xf "${db}" -C db_tmp
     mkdir database
     mv `find db_tmp/ -name "*.k2d"` database/
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        tar: \$(tar --version | grep -oP 'tar \\(GNU tar\\) \\K\\d+(\\.\\d+)*')
-    END_VERSIONS
     """
 }

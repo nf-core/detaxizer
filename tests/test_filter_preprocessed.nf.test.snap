@@ -3,7 +3,7 @@
         "content": [
             {
                 "FASTP": {
-                    "fastp": "1.0.1"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -29,6 +29,9 @@
                 },
                 "RENAME_FASTQ_HEADERS_AFTER": {
                     "seqkit": "2.8.2"
+                },
+                "RENAME_FASTQ_HEADERS_PRE": {
+                    "python": "3.12.6"
                 },
                 "SUMMARIZER": {
                     "python": "3.11.0",
@@ -182,13 +185,6 @@
                 "summary/summary.tsv"
             ],
             [
-                "test_paired-end_1_fastqc.html:md5,53f4bc85cd51df19723e9b177b72462f",
-                "test_paired-end_2_fastqc.html:md5,ec928a7c1469c537bcdb385b077de500",
-                "test_paired-end_plus_long-reads_1_fastqc.html:md5,b9b0347009dad0f7e34df9d3cc4b7255",
-                "test_paired-end_plus_long-reads_2_fastqc.html:md5,072efbe29dd85be5cbf97eb69ea026c2",
-                "test_paired-end_plus_long-reads_longReads_fastqc.html:md5,52f4cbac40bb659d3f50f91e0326f88c",
-                "test_single-end_long_longReads_fastqc.html:md5,c8728af18e46aec911978854441425bb",
-                "test_single-end_short_R1_fastqc.html:md5,89ffd4c3d2693f141e61d4f35f11fdf9",
                 "test_paired-end.ids.txt:md5,87fcb963b620f9b9bbd4a33da17a48c5",
                 "test_paired-end_plus_long-reads.ids.txt:md5,8aaf57e4a876389a7ecd76fc5861815f",
                 "test_paired-end_plus_long-reads_longReads.ids.txt:md5,4705f9cf4fd986d78c729bbd9ca9d63a",
@@ -199,11 +195,11 @@
                 "test_paired-end_plus_long-reads_longReads.classification_summary.tsv:md5,6c8003c712c5ed3850e1701675e2e916",
                 "test_single-end_long_longReads.classification_summary.tsv:md5,b49a6432e66121b249109ee1967f9a68",
                 "test_single-end_short.classification_summary.tsv:md5,aed41f976e471f28161d5bfd8731bf72",
-                "test_paired-end.fastp.json:md5,1ed75467e0ba8b9104e7e7c531c7b8d7",
-                "test_paired-end_plus_long-reads.fastp.json:md5,f2f36015a54028c6e4fcec4348892960",
-                "test_paired-end_plus_long-reads_longReads.fastp.json:md5,255ed39b5d19e34b1a9ffdb119f4265c",
-                "test_single-end_long_longReads.fastp.json:md5,6a63035e377c1c37a769f7cc3eb46f97",
-                "test_single-end_short_R1.fastp.json:md5,6cf5654b6c5f43f5ed99562158e37d08",
+                "test_paired-end.fastp.json:md5,71dd38ade2edd56185315cb20966de0b",
+                "test_paired-end_plus_long-reads.fastp.json:md5,711025b33163772ca5ea27532fe811df",
+                "test_paired-end_plus_long-reads_longReads.fastp.json:md5,a853384a3fe5eb846177b9ca5327f695",
+                "test_single-end_long_longReads.fastp.json:md5,2daf26f693c660605cbfa2924b64973d",
+                "test_single-end_short_R1.fastp.json:md5,fe6049cd800a307c15e4f11fe78d98ac",
                 "test_paired-end_plus_long-reads_longReads_filtered.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "test_single-end_long_longReads_filtered.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "test_single-end_short_filtered.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
@@ -243,7 +239,7 @@
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
-        "timestamp": "2026-09-29T11:03:34.437181595",
+        "timestamp": "2026-09-30T11:14:28.978087977",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

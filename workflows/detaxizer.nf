@@ -130,7 +130,6 @@ workflow DETAXIZER {
     )
 
     ch_fastq_for_classification = FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTP.out.versions.first())
     } else {
         ch_fastq_for_classification = ch_fastq_input
     }
@@ -149,7 +148,6 @@ workflow DETAXIZER {
         KRAKEN2PREPARATION (
             ch_kraken2_db
         )
-        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
     }
 
 
@@ -164,7 +162,6 @@ workflow DETAXIZER {
             params.save_output_fastqs,
             true
         )
-        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
         if ( params.filtering_tool == 'bbmap' ) {
             MAP_KRAKEN2SEQIDS_TO_FQHEADERS(
@@ -172,7 +169,6 @@ workflow DETAXIZER {
                     .join(KRAKEN2_KRAKEN2.out.classified_reads_assignment, by: 0)
                     .map { meta, reads, classification -> [meta, reads, classification] }
             )
-            ch_versions = ch_versions.mix(MAP_KRAKEN2SEQIDS_TO_FQHEADERS.out.versions.first())
         }
 
         //
@@ -181,7 +177,6 @@ workflow DETAXIZER {
         PARSE_KRAKEN2REPORT(
             KRAKEN2_KRAKEN2.out.report.take(1)
         )
-        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
 
         //
         // MODULE: Isolate the hits for a certain taxa and subclasses
@@ -203,7 +198,6 @@ workflow DETAXIZER {
             ch_combined
         )
 
-        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
 
         }
 
@@ -216,7 +210,6 @@ workflow DETAXIZER {
             ch_fastq_for_classification,
             ch_fasta_bbduk.first()
         )
-        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
         //
         // MODULE: Run ISOLATE_BBDUK_IDS
@@ -224,7 +217,6 @@ workflow DETAXIZER {
         ISOLATE_BBDUK_IDS(
             BBMAP_BBDUK.out.contaminated_reads
         )
-        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
 
 
     }
@@ -267,7 +259,6 @@ workflow DETAXIZER {
 
     }
 
-    ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
 
     //
     // MODULE: Summarize the classification results
@@ -281,7 +272,6 @@ workflow DETAXIZER {
     ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
             meta, path -> [path]
     }
-    ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
 
     //////////////////////////////////////////////////
     //  Validation
@@ -302,7 +292,6 @@ workflow DETAXIZER {
             ch_combined
         )
 
-        ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
         //
         // MODULE: Run BLASTN
@@ -314,9 +303,9 @@ workflow DETAXIZER {
             }
 
         BLAST_MAKEBLASTDB (
-                ch_reference_fasta_with_meta
+                ch_reference_fasta_with_meta,
+                []
         )
-        ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
         ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
             .flatMap { meta, fastaList ->
@@ -343,8 +332,6 @@ workflow DETAXIZER {
             []
         )
 
-        ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
-
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -361,7 +348,6 @@ workflow DETAXIZER {
         FILTER_BLASTN_IDENTCOV (
             BLAST_BLASTN.out.txt
         )
-        ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
 
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
@@ -396,7 +382,6 @@ workflow DETAXIZER {
         ch_blastn_summary = SUMMARY_BLASTN (
             ch_blastn_combined
         )
-        ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
 
     // Drop meta of blastn_summary as it is not needed for the combination step of summarizer
         ch_blastn_summary = ch_blastn_summary.summary.map {
@@ -435,7 +420,6 @@ workflow DETAXIZER {
             FILTER(
                 ch_to_filter
             )
-            ch_versions = ch_versions.mix(FILTER.out.versions.first())
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
@@ -445,7 +429,6 @@ workflow DETAXIZER {
                 channel.value('fastq.gz'),
                 channel.value(false)
             )
-            ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME.out.versions.first())
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
@@ -454,7 +437,6 @@ workflow DETAXIZER {
                     channel.value('fastq.gz'),
                     channel.value(false)
                 )
-                ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
                 ch_filter_removed = channel.empty()
@@ -496,7 +478,6 @@ workflow DETAXIZER {
                     ch_removed2rename.first()
                 )
             }
-            ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
             ch_filtered_reads = RENAME_FASTQ_HEADERS_AFTER.out.fastq
             ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : channel.empty()
         } else {
@@ -520,8 +501,6 @@ workflow DETAXIZER {
                 true
                 )
 
-            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
-
             if (params.output_removed_reads) {
 
                 KRAKEN2_POST_CLASSIFICATION_REMOVED (
@@ -530,8 +509,6 @@ workflow DETAXIZER {
                     params.save_output_fastqs_removed,
                     true
                     )
-
-                ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
 
             }
 
@@ -559,7 +536,6 @@ workflow DETAXIZER {
         ch_summary
     )
 
-    ch_versions = ch_versions.mix(ch_summary.versions)
 
     if ( params.generate_downstream_samplesheets ) {
 

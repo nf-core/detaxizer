@@ -13,7 +13,7 @@ process FILTER_BLASTN_IDENTCOV {
     output:
     tuple val(meta), path('*identcov.txt')          , emit: classified
     tuple val(meta), path('*blastn_classified.txt') , emit: classified_ids
-    path "versions.yml"                             , emit: versions
+    path "versions.yml"                             , emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

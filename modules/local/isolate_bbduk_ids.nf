@@ -12,7 +12,7 @@ process ISOLATE_BBDUK_IDS {
 
     output:
     tuple val(meta), path('*.bbduk.txt')    , emit: classified_ids
-    path "versions.yml"                     , emit: versions
+    tuple val("${task.process}"), val('seqkit'), eval('seqkit version | sed -E "s/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/"'), emit: versions_seqkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,9 +26,5 @@ process ISOLATE_BBDUK_IDS {
         seqkit seq -n ${contamination[1]} > read_ids2.txt
         awk '!seen[\$0]++' read_ids1.txt read_ids2.txt > ${meta.id}.bbduk.txt
     fi
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
-    END_VERSIONS
     """
 }

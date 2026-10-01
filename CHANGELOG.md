@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - [PR #103](https://github.com/nf-core/detaxizer/pull/103) - [Template update for nf-core/tools version 4.1.0 (from 3.4.1)](https://github.com/nf-core/tools/releases/tag/4.1.0) (by @d4straub)
+- [PR #104](https://github.com/nf-core/detaxizer/pull/104) - Migrated local modules to Nextflow topic channels for software version collection and updated nf-core modules to latest versions
+
+| software | previous | now   |
+| -------- | -------- | ----- |
+| fastp    | 1.0.1    | 1.3.6 |
 
 ### `Fixed`
 

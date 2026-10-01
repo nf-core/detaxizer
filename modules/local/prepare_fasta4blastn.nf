@@ -12,7 +12,7 @@ process PREPARE_FASTA4BLASTN {
 
     output:
     tuple val(meta), path("*.fa.gz"), emit: fasta
-    path("versions.yml")            , emit: versions
+    tuple val("${task.process}"), val('seqkit'), eval('seqkit version | sed -E "s/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/"'), emit: versions_seqkit, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,9 +31,5 @@ process PREPARE_FASTA4BLASTN {
         seqkit fq2fa out.fq.gz -o ${meta.id}_R2.fa.gz
         rm out.fq.gz
     fi
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        seqkit: \$(seqkit version | sed -E 's/.*v([0-9]+\\.[0-9]+\\.[0-9]+).*/\\1/')
-    END_VERSIONS
     """
 }

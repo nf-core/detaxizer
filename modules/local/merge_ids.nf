@@ -12,7 +12,7 @@ process MERGE_IDS {
 
     output:
     tuple val(meta), path('*ids.txt')       , emit: classified_ids
-    path "versions.yml"                     , emit: versions
+    tuple val("${task.process}"), val('gawk'), eval('awk -Wversion | sed "1!d; s/.*Awk //; s/,.*//"'), emit: versions_gawk, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,9 +25,5 @@ process MERGE_IDS {
     else
         awk '!seen[\$0]++' \${stringarray[0]} \${stringarray[1]} > ${meta.id}.ids.txt
     fi
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        gawk: \$(awk -Wversion | sed '1!d; s/.*Awk //; s/,.*//')
-    END_VERSIONS
     """
 }
