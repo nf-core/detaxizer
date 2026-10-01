@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated local modules to Nextflow topic channels for software version collection (`emit: versions_<tool>, topic: versions`)
 - Updated nf-core modules to latest versions (topic-channel version outputs)
 
-| software | previous | now |
-| -------- | -------- | --- |
+| software | previous | now   |
+| -------- | -------- | ----- |
 | fastp    | 1.0.1    | 1.3.6 |
 
 ### `Fixed`
