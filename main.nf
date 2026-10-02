@@ -54,19 +54,20 @@ workflow NFCORE_DETAXIZER {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// Parameters are declared with types and default values in a static params block.
+// Parameters that are used to resolve the configuration (e.g. `outdir`, `publish_dir_mode`,
+// `custom_config_base`, `igenomes_base`, `monochrome_logs`) are still defined in
+// `nextflow.config` as parameter types are only applied after configuration resolution.
 params {
 
     // Path to comma-separated file containing information about the samples in the experiment.
-    input: String
-
-    // The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.
-    outdir: String
+    input: Path
 
     // Email address for completion summary.
-    email: String
+    email: String?
 
     // MultiQC report title. Printed as page header, used for filename if not otherwise specified.
-    multiqc_title: String
+    multiqc_title: String?
 
     // If preprocessing with fastp should be turned on.
     preprocessing: Boolean
@@ -102,7 +103,7 @@ params {
     save_intermediates: Boolean
 
     // Location of the fasta which contains the contaminant sequences.
-    fasta_bbduk: String
+    fasta_bbduk: Path?
 
     // Length of k-mers for classification carried out by bbduk
     bbduk_kmers: Integer = 27
@@ -141,7 +142,7 @@ params {
     tax2filter: String = 'Homo sapiens'
 
     // Location of the fasta from which the blastn database will be constructed.
-    fasta_blastn: String
+    fasta_blastn: Path?
 
     // Coverage is the percentage of the query sequence which can be found in the alignments of the sequence match. It can be used to fine-tune the validation step.
     blast_coverage: Float = 40.0
@@ -170,50 +171,17 @@ params {
     // fastp option to define if the clipped reads should be saved
     save_clipped_reads: Boolean
 
-    // Name of iGenomes reference.
-    genome: String = 'GRCh38'
-
-    // Do not load the iGenomes reference config.
-    igenomes_ignore: Boolean
-
-    // Save the reference genome and its index files in the results directory.
-    saveReference: Boolean = true
-
-    // The base path to the igenomes reference files
-    igenomes_base: String = 's3://ngi-igenomes/igenomes/'
-
     // Turn on generation of samplesheets for downstream pipelines.
     generate_downstream_samplesheets: Boolean
 
     // Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for.
     generate_pipeline_samplesheets: String = 'taxprofiler,mag'
 
-    // Git commit id for Institutional configs.
-    custom_config_version: String = 'master'
-
-    // Base directory for Institutional configs.
-    custom_config_base: String = 'https://raw.githubusercontent.com/nf-core/configs/master'
-
-    // Institutional config name.
-    config_profile_name: String
-
-    // Institutional config description.
-    config_profile_description: String
-
-    // Institutional config contact information.
-    config_profile_contact: String
-
-    // Institutional config URL link.
-    config_profile_url: String
-
     // Display version and exit.
     version: Boolean
 
-    // Method used to save pipeline results to output directory.
-    publish_dir_mode: String = 'copy'
-
     // Email address for completion summary, only when pipeline fails.
-    email_on_fail: String
+    email_on_fail: String?
 
     // Send plain-text email instead of HTML.
     plaintext_email: Boolean
@@ -221,29 +189,20 @@ params {
     // File size limit when attaching MultiQC reports to summary emails.
     max_multiqc_email_size: String = '25.MB'
 
-    // Do not use coloured log outputs.
-    monochrome_logs: Boolean
-
     // Custom config file to supply to MultiQC.
-    multiqc_config: String
+    multiqc_config: Path?
 
     // Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file
-    multiqc_logo: String
+    multiqc_logo: Path?
 
     // Custom MultiQC yaml file containing HTML including a methods description.
-    multiqc_methods_description: String
+    multiqc_methods_description: Path?
 
     // Boolean whether to validate parameters against the schema at runtime
     validate_params: Boolean = true
 
-    // Base URL or local path to location of pipeline test dataset files
-    pipelines_testdata_base_path: String = 'https://raw.githubusercontent.com/nf-core/test-datasets/'
-
-    // Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.
-    trace_report_suffix: String
-
     // Display the help message.
-    help
+    help: Boolean
 
     // Display the full detailed help message.
     help_full: Boolean

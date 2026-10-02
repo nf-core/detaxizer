@@ -109,6 +109,7 @@
             "properties": {
                 "fasta_bbduk": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta which contains the contaminant sequences."
                 },
                 "bbduk_kmers": {
@@ -197,6 +198,7 @@
             "properties": {
                 "fasta_blastn": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta from which the blastn database will be constructed."
                 },
                 "blast_coverage": {
@@ -412,12 +414,14 @@
                 },
                 "multiqc_logo": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
                     "fa_icon": "fas fa-image",
                     "hidden": true
                 },
                 "multiqc_methods_description": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom MultiQC yaml file containing HTML including a methods description.",
                     "fa_icon": "fas fa-cog"
                 },

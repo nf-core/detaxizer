@@ -1,4 +1,6 @@
 lint:
+  nextflow_config: false # TODO: Remove when tools supports parameter types
+  schema_params: false # TODO: Remove when tools supports parameter types
   files_unchanged:
     - .gitignore
     - .github/CONTRIBUTING.md
