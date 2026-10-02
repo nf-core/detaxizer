@@ -54,12 +54,6 @@ workflow NFCORE_DETAXIZER {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Parameters are declared with types and default values in a static params block.
-// Parameters that are used to resolve the configuration (e.g. `outdir`, `publish_dir_mode`,
-// `custom_config_base`, `igenomes_base`, `monochrome_logs`) are still defined in
-// `nextflow.config` as parameter types are only applied after configuration resolution.
-
-
 params {
 
     // Path to comma-separated file containing information about the samples in the experiment.
