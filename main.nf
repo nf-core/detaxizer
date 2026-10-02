@@ -109,7 +109,7 @@ params {
     bbduk_kmers: Integer = 27
 
     // The database which is used in the classification step. Please be aware that this default database will require ~60GB download and ~80GB RAM.
-    kraken2db: String = 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'
+    kraken2db: Path = 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'
 
     // Save unclassified reads and classified reads (those assigned to any taxon, not specifically assessed or filtered) to separate files.
     save_output_fastqs: Boolean
