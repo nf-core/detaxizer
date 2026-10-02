@@ -58,10 +58,15 @@ workflow NFCORE_DETAXIZER {
 // Parameters that are used to resolve the configuration (e.g. `outdir`, `publish_dir_mode`,
 // `custom_config_base`, `igenomes_base`, `monochrome_logs`) are still defined in
 // `nextflow.config` as parameter types are only applied after configuration resolution.
+
+
 params {
 
     // Path to comma-separated file containing information about the samples in the experiment.
-    input: Path
+    input: Path?
+
+    // The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.
+    outdir: String?
 
     // Email address for completion summary.
     email: String?
@@ -171,14 +176,47 @@ params {
     // fastp option to define if the clipped reads should be saved
     save_clipped_reads: Boolean
 
+    // Name of iGenomes reference.
+    genome: String?
+
+    // Do not load the iGenomes reference config.
+    igenomes_ignore: Boolean
+
+    // Save the reference genome and its index files in the results directory.
+    saveReference: Boolean
+
+    // The base path to the igenomes reference files
+    igenomes_base: String?
+
     // Turn on generation of samplesheets for downstream pipelines.
     generate_downstream_samplesheets: Boolean
 
     // Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for.
     generate_pipeline_samplesheets: String = 'taxprofiler,mag'
 
+    // Git commit id for Institutional configs.
+    custom_config_version: String?
+
+    // Base directory for Institutional configs.
+    custom_config_base: String?
+
+    // Institutional config name.
+    config_profile_name: String?
+
+    // Institutional config description.
+    config_profile_description: String?
+
+    // Institutional config contact information.
+    config_profile_contact: String?
+
+    // Institutional config URL link.
+    config_profile_url: String?
+
     // Display version and exit.
     version: Boolean
+
+    // Method used to save pipeline results to output directory.
+    publish_dir_mode: String?
 
     // Email address for completion summary, only when pipeline fails.
     email_on_fail: String?
@@ -188,6 +226,9 @@ params {
 
     // File size limit when attaching MultiQC reports to summary emails.
     max_multiqc_email_size: String = '25.MB'
+
+    // Do not use coloured log outputs.
+    monochrome_logs: Boolean
 
     // Custom config file to supply to MultiQC.
     multiqc_config: Path?
@@ -200,6 +241,12 @@ params {
 
     // Boolean whether to validate parameters against the schema at runtime
     validate_params: Boolean = true
+
+    // Base URL or local path to location of pipeline test dataset files
+    pipelines_testdata_base_path: String?
+
+    // Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.
+    trace_report_suffix: String
 
     // Display the help message.
     help: Boolean
