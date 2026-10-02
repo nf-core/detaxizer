@@ -57,7 +57,7 @@ workflow DETAXIZER {
     def ch_fasta_blastn = channel.empty()
 
     if ( !params.fasta_blastn && params.validation_blastn ) {
-        ch_fasta_blastn = channel.fromPath(getGenomeAttribute('fasta'))
+        ch_fasta_blastn = channel.fromPath(getGenomeAttribute('fasta', params.genomes, params.genome))
     } else if ( params.validation_blastn ){
         // If params.fasta_blastn is there, use it for the creation of the blastn database
         ch_fasta_blastn = channel.fromPath(params.fasta_blastn)
@@ -67,7 +67,7 @@ workflow DETAXIZER {
     def ch_fasta_bbduk = channel.empty()
 
     if ( !params.fasta_bbduk && params.classification_bbduk ) {
-        ch_fasta_bbduk = channel.fromPath(getGenomeAttribute('fasta'))
+        ch_fasta_bbduk = channel.fromPath(getGenomeAttribute('fasta', params.genomes, params.genome))
     } else if ( params.classification_bbduk ){
         // If params.fasta_bbduk is there, use it for the creation of the blastn database
         ch_fasta_bbduk = channel.fromPath(params.fasta_bbduk)

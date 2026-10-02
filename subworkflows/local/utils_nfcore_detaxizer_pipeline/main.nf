@@ -99,7 +99,12 @@ workflow PIPELINE_INITIALISATION {
     //
     // Custom validation for pipeline parameters
     //
-    validateInputParameters()
+    validateInputParameters(
+        params.generate_downstream_samplesheets,
+        params.generate_pipeline_samplesheets,
+        params.genomes,
+        params.genome,
+    )
 
     //
     // Create channel from input file provided through params.input
@@ -166,10 +171,9 @@ workflow PIPELINE_COMPLETION {
 //
 // Check and validate pipeline parameters
 //
-def validateInputParameters() {
-    genomeExistsError()
-
-    if (params.generate_downstream_samplesheets && !params.generate_pipeline_samplesheets) {
+def validateInputParameters(generate_downstream_samplesheets, generate_pipeline_samplesheets, genomes, genome) {
+    genomeExistsError(genomes, genome)
+    if (generate_downstream_samplesheets && !generate_pipeline_samplesheets) {
         error('[nf-core/detaxizer] If supplying `--generate_downstream_samplesheets`, you must also specify which pipeline to generate for with `--generate_pipeline_samplesheets! Check input.')
     }
 }
@@ -191,10 +195,10 @@ def validateInputSamplesheet(input) {
 //
 // Get attribute from genome config file e.g. fasta
 //
-def getGenomeAttribute(attribute) {
-    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-        if (params.genomes[ params.genome ].containsKey(attribute)) {
-            return params.genomes[ params.genome ][ attribute ]
+def getGenomeAttribute(attribute, genomes, genome) {
+    if (genomes && genome && genomes.containsKey(genome)) {
+        if (genomes[genome].containsKey(attribute)) {
+            return genomes[genome][attribute]
         }
     }
     return null
@@ -203,12 +207,12 @@ def getGenomeAttribute(attribute) {
 //
 // Exit pipeline if incorrect --genome key provided
 //
-def genomeExistsError() {
-    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+def genomeExistsError(genomes, genome) {
+    if (genomes && genome && !genomes.containsKey(genome)) {
         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+            "  Genome '${genome}' not found in any config files provided to the pipeline.\n" +
             "  Currently, the available genome keys are:\n" +
-            "  ${params.genomes.keySet().join(", ")}\n" +
+            "  ${genomes.keySet().join(", ")}\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
@@ -216,16 +220,16 @@ def genomeExistsError() {
 //
 // Generate methods description for MultiQC
 //
-def toolCitationText() {
+def toolCitationText(preprocessing, filter_trimmed, classification_kraken2, classification_bbduk, validation_blastn, skip_filter, filtering_tool) {
 
     def citation_text = [
             "Tools used in the workflow included:",
             "FastQC (Andrews 2010),",
-            params["preprocessing"] | params["filter_trimmed"] ? "fastp (Chen et al. 2018),": "",
-            params["classification_kraken2"] | !params["classification_bbduk"] & !params["classification_kraken2"] ? "Kraken2 (Wood et al. 2019)," : "",
-            params["classification_bbduk"] ? "BBMap (Bushnell B. 2022)," : "",
-            params["validation_blastn"] ? "BLAST (Altschul et al. 1990)," : "",
-            params["validation_blastn"] | (!params["skip_filter"] & params["filtering_tool"] == "seqkit") | params["classification_bbduk"] ? "seqkit (Shen et al. 2016)," : "",
+            preprocessing | filter_trimmed ? "fastp (Chen et al. 2018),": "",
+            classification_kraken2 | !classification_bbduk & !classification_kraken2 ? "Kraken2 (Wood et al. 2019)," : "",
+            classification_bbduk ? "BBMap (Bushnell B. 2022)," : "",
+            validation_blastn ? "BLAST (Altschul et al. 1990)," : "",
+            validation_blastn | (!skip_filter & filtering_tool == "seqkit") | classification_bbduk ? "seqkit (Shen et al. 2016)," : "",
             "MultiQC (Ewels et al. 2016)",
             "."
         ].join(' ').trim()
@@ -233,15 +237,15 @@ def toolCitationText() {
     return citation_text
 }
 
-def toolBibliographyText() {
+def toolBibliographyText(preprocessing, filter_trimmed, classification_kraken2, classification_bbduk, validation_blastn, skip_filter) {
 
     def reference_text = [
             "<li>Andrews, S. (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/</li>",
-            params["preprocessing"] | params["filter_trimmed"] ? "<li>Chen, S., Zhou, Y., Chen, Y. & Gu, J. (2018) fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890. doi: 10.1093/bioinformatics/bty560</li>" : "",
-            params["classification_kraken2"] | !params["classification_bbduk"] & !params["classification_kraken2"] ? "<li>Wood, D. E., Lu, J. & Langmead, B. (2019) Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257. doi: 10.1186/s13059-019-1891-0</li>" : "",
-            params["classification_bbduk"] ? "<li>Bushnell, B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/</li>" : "",
-            params["validation_blastn"] ? "<li>Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. (1990) Basic local alignment search tool. Journal of Molecular Biology 215, 403–410. doi: 10.1016/s0022-2836(05)80360-2.</li>" : "",
-            params["validation_blastn"] | !params["skip_filter"] | params["classification_bbduk"] ? "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi: 10.1371/journal.pone.0163962</li>" : "",
+            preprocessing | filter_trimmed ? "<li>Chen, S., Zhou, Y., Chen, Y. & Gu, J. (2018) fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890. doi: 10.1093/bioinformatics/bty560</li>" : "",
+            classification_kraken2 | !classification_bbduk & !classification_kraken2 ? "<li>Wood, D. E., Lu, J. & Langmead, B. (2019) Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257. doi: 10.1186/s13059-019-1891-0</li>" : "",
+            classification_bbduk ? "<li>Bushnell, B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/</li>" : "",
+            validation_blastn ? "<li>Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. (1990) Basic local alignment search tool. Journal of Molecular Biology 215, 403–410. doi: 10.1016/s0022-2836(05)80360-2.</li>" : "",
+            validation_blastn | !skip_filter | classification_bbduk ? "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi: 10.1371/journal.pone.0163962</li>" : "",
             "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
         ].join(' ').trim()
 
@@ -272,8 +276,23 @@ def methodsDescriptionText(mqc_methods_yaml) {
     meta["tool_citations"] = ""
     meta["tool_bibliography"] = ""
 
-    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    meta["tool_bibliography"] = toolBibliographyText()
+    meta["tool_citations"] = toolCitationText(
+        params.preprocessing,
+        params.filter_trimmed,
+        params.classification_kraken2,
+        params.classification_bbduk,
+        params.validation_blastn,
+        params.skip_filter,
+        params.filtering_tool,
+    ).replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText(
+        params.preprocessing,
+        params.filter_trimmed,
+        params.classification_kraken2,
+        params.classification_bbduk,
+        params.validation_blastn,
+        params.skip_filter,
+    )
 
 
     def methods_text = mqc_methods_yaml.text

@@ -109,6 +109,7 @@
             "properties": {
                 "fasta_bbduk": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta which contains the contaminant sequences."
                 },
                 "bbduk_kmers": {
@@ -126,6 +127,7 @@
             "properties": {
                 "kraken2db": {
                     "type": "string",
+                    "format": "file-path",
                     "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz",
                     "help_text": "For input how to use this parameter to fine-tune the step see the kraken2 section in the [usage documentation](https://nf-co.re/detaxizer/docs/usage#kraken2). To reduce the required download and RAM by around 10 fold, rather use a database capped at e.g. 8 GB, for example https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz.",
                     "description": "The database which is used in the classification step. Please be aware that this default database will require ~60GB download and ~80GB RAM."
@@ -197,6 +199,7 @@
             "properties": {
                 "fasta_blastn": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta from which the blastn database will be constructed."
                 },
                 "blast_coverage": {
@@ -412,12 +415,14 @@
                 },
                 "multiqc_logo": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
                     "fa_icon": "fas fa-image",
                     "hidden": true
                 },
                 "multiqc_methods_description": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom MultiQC yaml file containing HTML including a methods description.",
                     "fa_icon": "fas fa-cog"
                 },
