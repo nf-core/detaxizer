@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [PR #108](https://github.com/nf-core/detaxizer/pull/108) - Update samplesheet generation for nf-core/mag (by @d4straub)
+
 ### `Dependencies`
 
 | software | previous | now     |
