@@ -35,9 +35,9 @@ process FILTER {
             fi
         done
     else
-        seqkit grep -v -f ${ids_to_remove} ${fastq} -o ${meta.id}_filtered_renamed.fastq.gz
+        seqkit grep -v -f \$ids_to_remove_merged ${fastq} -o ${meta.id}_filtered_renamed.fastq.gz
         if [ "${params.output_removed_reads}" == "true" ]; then
-            seqkit grep -f ${ids_to_remove} ${fastq} -o ${meta.id}_removed_renamed.fastq.gz
+            seqkit grep -f \$ids_to_remove_merged ${fastq} -o ${meta.id}_removed_renamed.fastq.gz
         fi
     fi
     """

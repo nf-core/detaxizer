@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-- [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Fix COUNTER in filtering, but without result impact (reported by @vagkaratzas, fix by @d4straub)
+- [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
 
 ### `Dependencies`
 
