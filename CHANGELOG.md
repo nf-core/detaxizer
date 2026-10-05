@@ -16,11 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | -------- | -------- | ----- |
 | fastp    | 1.0.1    | 1.3.6 |
 
+- [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types
+
 ### `Fixed`
 
 - [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Fix COUNTER in filtering, but without result impact (reported by @vagkaratzas, fix by @d4straub)
 
 ### `Dependencies`
+
+| software | previous | now     |
+| -------- | -------- | ------- |
+| fastp    | 1.0.1    | 1.3.6   |
+| nextflow | 25.10.4  | 26.04.0 |
 
 ### `Removed`
 
