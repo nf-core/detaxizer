@@ -21,16 +21,17 @@ process FILTER {
     script:
     """
     # Extract the sequences from the fastq.gz files
+    awk '!seen[\$0]++' ${ids_to_remove} > ${meta.id}.all.ids.txt
+    ids_to_remove_merged=${meta.id}.all.ids.txt
     if [[ "${fastq}" == *" "* ]]; then
         IFS=' ' read -ra array <<< "${fastq}"
-        IFS=' ' read -ra array2 <<< "${ids_to_remove}"
-            COUNTER=0
+        COUNTER=0
         for element in "\${array[@]}"
         do
             COUNTER=\$((COUNTER+1))
-            seqkit grep -v -f \${array2[\$(COUNTER-1)]} \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_filtered_renamed.fastq.gz
+            seqkit grep -v -f \$ids_to_remove_merged \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_filtered_renamed.fastq.gz
             if [ "${params.output_removed_reads}" == "true" ]; then
-                seqkit grep -f \${array2[\$(COUNTER-1)]} \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_removed_renamed.fastq.gz
+                seqkit grep -f \$ids_to_remove_merged \$element -o \$(echo ${meta.id})_R\$(echo \$COUNTER)_removed_renamed.fastq.gz
             fi
         done
     else
