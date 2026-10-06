@@ -31,7 +31,7 @@ include { ISOLATE_BBDUK_IDS                                         } from '../m
 include { MERGE_IDS                                                 } from '../modules/local/merge_ids'
 include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn'
 include { FILTER_BLASTN_IDENTCOV                                    } from '../modules/local/filter_blastn_identcov'
-include { FILTER                                                    } from '../modules/local/filter'
+include { FILTER                                                    } from '../modules/local/filter/main'
 include { RENAME_FASTQ_HEADERS_AFTER                                } from '../modules/local/rename_fastq_headers_after'
 include { SUMMARY_CLASSIFICATION                                    } from '../modules/local/summary_classification'
 include { SUMMARY_BLASTN                                            } from '../modules/local/summary_blastn'
