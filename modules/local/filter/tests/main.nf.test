@@ -1,0 +1,64 @@
+nextflow_process {
+
+    name "Test Process FILTER"
+    script "../main.nf"
+    process "FILTER"
+
+    tag "modules"
+    tag "modules_local"
+    tag "filter"
+
+    test("paired-end - reads flagged in either mate are removed from both mates") {
+
+        setup {
+            def writeGz = { String name, String content ->
+                def gz = new File(launchDir, name)
+                def stream = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(gz))
+                stream.write(content.bytes)
+                stream.close()
+            }
+            writeGz('test_R1.fastq.gz', '@read1\nACGTACGT\n+\nIIIIIIII\n@read2\nTTTTGGGG\n+\nIIIIIIII\n@read3\nGGGGCCCC\n+\nIIIIIIII\n')
+            writeGz('test_R2.fastq.gz', '@read1\nCGTACGTA\n+\nIIIIIIII\n@read2\nGGGGTTTT\n+\nIIIIIIII\n@read3\nCCCCGGGG\n+\nIIIIIIII\n')
+            // read2 is flagged in mate 1 only, read3 in mate 2 only.
+            new File(launchDir, 'remove_R1.ids.txt').text = 'read2\n'
+            new File(launchDir, 'remove_R2.ids.txt').text = 'read3\n'
+        }
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test', single_end:false, amount_of_files:2 ],
+                    [
+                        file("$launchDir/test_R1.fastq.gz"),
+                        file("$launchDir/test_R2.fastq.gz")
+                    ],
+                    [
+                        file("$launchDir/remove_R1.ids.txt"),
+                        file("$launchDir/remove_R2.ids.txt")
+                    ]
+                ])
+                """
+            }
+        }
+
+        then {
+            def filtered = process.out.filtered.get(0).get(1)
+            def r1 = path(filtered.find { it.toString().contains('_R1_') })
+            def r2 = path(filtered.find { it.toString().contains('_R2_') })
+            def r1Names = r1.linesGzip.findAll { it.startsWith('@') }
+            def r2Names = r2.linesGzip.findAll { it.startsWith('@') }
+            assertAll(
+                { assert process.success },
+                { assert r1.exists() },
+                { assert r2.exists() },
+                // both mates keep exactly read1: read2 dropped from R1-only, read3 from R2-only
+                { assert r1Names == ['@read1'] },
+                { assert r2Names == ['@read1'] },
+                { assert !r1.linesGzip.any { it.contains('read2') } },
+                { assert !r2.linesGzip.any { it.contains('read3') } },
+                { assert snapshot(r1.linesGzip, r2.linesGzip).match() }
+            )
+        }
+    }
+}
