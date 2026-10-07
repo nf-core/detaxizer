@@ -43,6 +43,14 @@ nextflow_workflow {
                                 file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
                                 file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
                             ]
+                        ],
+                        [
+                            [id:'test_single-end_plus_long-reads_longReads', single_end:true, long_reads:true, amount_of_files:1],
+                            file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
+                        ],
+                        [
+                            [id:'test_single-end_plus_long-reads', single_end:true, long_reads:false, amount_of_files:1],
+                            file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true)
                         ]
                 )
                 """
@@ -69,6 +77,8 @@ nextflow_workflow {
                 { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_long,test_single-end_long,0,,,.*,,OXFORD_NANOPORE/ } },
                 // Short-reads-only samples keep short_reads_platform=ILLUMINA and an empty long_reads_platform
                 { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_short,test_single-end_short,0,.*,,,ILLUMINA,/ } },
+                // Single-end short reads plus long reads keep both, with both platforms populated
+                { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_plus_long-reads,test_single-end_plus_long-reads,0,.*_R1\.fastq\.gz,,.*subset350\.fq\.gz,ILLUMINA,OXFORD_NANOPORE/ } },
             )
         }
     }
