@@ -54,7 +54,6 @@ workflow SAMPLESHEET_MAG {
                 def new_meta = [
                     id: key,
                     run: key,
-                    single_end: meta[0].single_end,
                     long_reads: !long_files.isEmpty(),
                     short_reads: !short_files.isEmpty(),
                     short_reads_paired: short_files.size() > 1
@@ -78,6 +77,7 @@ workflow SAMPLESHEET_MAG {
                 def short_reads_2      = meta.short_reads_paired ? out_path + reads[1].getName() : ""
                 def long_reads         = has_long_reads ? out_path + reads.last().getName() : ""                                // If long reads, take final element
                 def short_reads_platform = has_short_reads ? "ILLUMINA" : ""
+                // TODO: long_reads_platform assumes OXFORD_NANOPORE, PacBio long reads are mislabelled
                 def long_reads_platform  = has_long_reads ? "OXFORD_NANOPORE" : ""
             [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads, short_reads_platform: short_reads_platform, long_reads_platform: long_reads_platform]
         }
