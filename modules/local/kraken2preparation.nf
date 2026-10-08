@@ -3,7 +3,7 @@ process KRAKEN2PREPARATION {
     label 'process_high'
 
     conda "conda-forge::sed=4.8 conda-forge::tar=1.34"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:22.04' :
         'nf-core/ubuntu:22.04' }"
 
