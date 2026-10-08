@@ -1,19 +1,19 @@
 process ISOLATE_KRAKEN2_IDS {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_low'
 
     conda "conda-forge::python=3.10.4"
-    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.10.4' :
-        'biocontainers/python:3.10.4' }"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/python:3.10.4'
+        : 'biocontainers/python:3.10.4'}"
 
     input:
     tuple val(meta), path(kraken2results), path(tax2filter), val(mapping)
 
     output:
     tuple val(meta), path('*classified.txt'), emit: classified
-    tuple val(meta), path('*ids.txt')       , emit: classified_ids
-    path "versions.yml"                     , emit: versions, topic: versions
+    tuple val(meta), path('*ids.txt'), emit: classified_ids
+    path "versions.yml", emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -61,9 +61,9 @@ process ISOLATE_KRAKEN2_IDS {
                 unclassified = lca_mapping[0]
 
                 if (
-                    sum_to_filter > $params.cutoff_tax2filter
-                    and sum_to_filter/(sum_to_keep + sum_to_filter) > $params.cutoff_tax2keep
-                    and sum_to_filter/(unclassified + sum_to_filter) > $params.cutoff_unclassified
+                    sum_to_filter > ${params.cutoff_tax2filter}
+                    and sum_to_filter/(sum_to_keep + sum_to_filter) > ${params.cutoff_tax2keep}
+                    and sum_to_filter/(unclassified + sum_to_filter) > ${params.cutoff_unclassified}
                 ):
                     filterList.append(line[1])
                     outfile.write("\\t".join(line))
