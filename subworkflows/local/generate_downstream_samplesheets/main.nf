@@ -44,15 +44,22 @@ workflow SAMPLESHEET_MAG {
             }
         .groupTuple(remainder: true)
         .map{key, meta, reads ->
+                // Pair each read entry with its metadata, then separate short and long reads.
+                def short_files = []
+                def long_files  = []
+                [meta, reads].transpose().each { m, r ->
+                    def files = r instanceof List ? r : [r]
+                    if (m.long_reads) { long_files.addAll(files) } else { short_files.addAll(files) }
+                }
                 def new_meta = [
                     id: key,
                     run: key,
-                    single_end: meta[0].single_end,
-                    long_reads: meta[0]?.long_reads ?: meta[1]?.long_reads ?: false
+                    long_reads: !long_files.isEmpty(),
+                    short_reads: !short_files.isEmpty(),
+                    short_reads_paired: short_files.size() > 1
                     ]
-                // Making sure the long reads are the final element of the array.
-                def read_files = reads.flatten().sort(false){ a, b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }
-            [new_meta, read_files]
+                // Short reads precede long reads so the emitter can index them directly.
+                [new_meta, short_files + long_files]
             }
         .tap{ ch_reads_grouped }
 
@@ -60,26 +67,24 @@ workflow SAMPLESHEET_MAG {
     ch_list_for_samplesheet = ch_reads_grouped
         .map {
             meta, reads ->
-                def out_path       = file(params.outdir).toString() + '/filter/filtered/'
-                def sample         = meta.id
-                def run            = meta.run
-                def group          = ""                                                                                       // only used for co-abundance in binning
-                def short_reads_1  = meta.long_reads == (reads.size() > 2) ? out_path + reads[0].getName() : ""               // If long reads, but no short reads, then short_reads_1 is empty
-                def short_reads_2  = meta.long_reads == (reads.size() > 2) && reads[1] ? out_path + reads[1].getName() : ""
-                def long_reads     = meta.long_reads ? out_path + reads.last().getName() : ""                                 // If long reads, take final element
-            [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads]
+                def out_path           = file(params.outdir).toString() + '/filter/filtered/'
+                def sample             = meta.id
+                def run                = meta.run
+                def group              = 0                                                                                     // only used for co-abundance in binning
+                def has_short_reads    = meta.short_reads
+                def has_long_reads     = meta.long_reads
+                def short_reads_1      = has_short_reads ? out_path + reads[0].getName() : ""
+                def short_reads_2      = meta.short_reads_paired ? out_path + reads[1].getName() : ""
+                def long_reads         = has_long_reads ? out_path + reads.last().getName() : ""                                // If long reads, take final element
+                def short_reads_platform = has_short_reads ? "ILLUMINA" : ""
+                // TODO: long_reads_platform assumes OXFORD_NANOPORE, PacBio long reads are mislabelled
+                def long_reads_platform  = has_long_reads ? "OXFORD_NANOPORE" : ""
+            [sample: sample, run: run, group: group, short_reads_1: short_reads_1, short_reads_2: short_reads_2, long_reads: long_reads, short_reads_platform: short_reads_platform, long_reads_platform: long_reads_platform]
         }
-        .tap{ ch_list_for_samplesheet_all }
-        .filter{ it.short_reads_1!="" } // MAG doesn't support standalone long reads
         .branch{
             se: it.short_reads_2 ==""
             pe: true
         }
-
-    // Throw a warning that only long reads are not supported yet by MAG
-    ch_list_for_samplesheet_all
-        .filter{ it.long_reads !="" && it.short_reads_1=="" }
-        .collect{ log.warn("Standalone long reads are not yet supported by the nf-core/mag pipeline and ARE REMOVED from the samplesheet 'mag-{se,pe}.csv' \n sample: ${it.sample}" )}
 
     channelToSamplesheet(ch_list_for_samplesheet.pe,"${params.outdir}/downstream_samplesheets/mag-pe", format)
     channelToSamplesheet(ch_list_for_samplesheet.se, "${params.outdir}/downstream_samplesheets/mag-se", format)
