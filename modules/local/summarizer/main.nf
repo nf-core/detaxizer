@@ -1,17 +1,18 @@
 process SUMMARIZER {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "conda-forge::python=3.11.0 numpy=1.24.2 pandas=1.5.2"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
-        'biocontainers/pandas:1.5.2' }"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pandas:1.5.2'
+        : 'biocontainers/pandas:1.5.2'}"
+
     input:
     tuple val(meta), path(tosummarize)
 
     output:
     tuple val(meta), path("summary.tsv"), emit: summary
-    path("versions.yml")                , emit: versions, topic: versions
+    path ("versions.yml"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

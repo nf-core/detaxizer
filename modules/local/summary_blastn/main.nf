@@ -1,17 +1,18 @@
 process SUMMARY_BLASTN {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "conda-forge::python=3.11.0 pandas=1.5.2"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
-        'biocontainers/pandas:1.5.2' }"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pandas:1.5.2'
+        : 'biocontainers/pandas:1.5.2'}"
+
     input:
     tuple val(meta), path(blastn_1), path(blastn_2), path(filteredblastn_1), path(filteredblastn_2)
 
     output:
-    tuple val(meta), path("*.blastn_summary.tsv")   , emit: summary
-    path("versions.yml")                            , emit: versions, topic: versions
+    tuple val(meta), path("*.blastn_summary.tsv"), emit: summary
+    path ("versions.yml"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

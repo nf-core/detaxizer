@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [PR #104](https://github.com/nf-core/detaxizer/pull/104) - Migrated local modules to Nextflow topic channels for software version collection and updated nf-core modules to latest versions (by @d4straub)
 - [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types
 - [PR #108](https://github.com/nf-core/detaxizer/pull/108) - nf-core/mag samplesheets now include `group=0` and `short_reads_platform`/`long_reads_platform` columns required by mag 5.x, and keep long-read-only samples (reported by @vagkaratzas, fix by @d4straub)
+- [PR #110](https://github.com/nf-core/detaxizer/pull/110) - Formatting changes, apptainer efficiency increase and AWS full-test launch config with nf-schema pinned to 2.7.2 (by @d4straub)
 
 ### `Fixed`
 
