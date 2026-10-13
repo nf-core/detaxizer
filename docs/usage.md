@@ -16,14 +16,11 @@ Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org
 NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_bbduk --classification_kraken2 --outdir results_recall
 ```
 
-To best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) at the cost of higher non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs) was achieved in the [benchmark](https://doi.org/10.1093/nargab/lqaf125) with the following settings (translated from version 1.1.0 to version 1.2.0):
+The best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) came at the cost of more non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs). This setting was used in the [benchmark](https://doi.org/10.1093/nargab/lqaf125), translated from version 1.1.0 to version 1.2.0:
 
 ```bash
 NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results_precision
 ```
-
-> [!TIP]
-> Remote databases can complicate caching, so that resuming or repeating will re-download large database files. It is recommended instead to pre-download remote databases and refer to local copies.
 
 ## Samplesheet input
 
@@ -74,7 +71,7 @@ The task of decontamination has to be balanced out between false positives and f
 
 ### kraken2
 
-For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. caped at 8GB) can be used, but it should always be kept in mind that this may lead to more false negatives (but conversely potentially less false positives).
+For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. capped at 8GB) can be used. This database lowers the memory requirement but yields more false negatives and fewer false positives.
 
 To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
 
@@ -136,11 +133,16 @@ To change what is classified by `bbduk`, a fasta containing the sequences of the
 
 If you want to run `bbduk` use the `--classification_bbduk` flag. For running both classification steps and use the merged output for filtering, use both flags (`--classification_kraken2` and `--classification_bbduk`).
 
-To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. Also, if just one reference genome is needed for blastn and it is in `igenomes.config` use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. If a single reference genome for blastn is listed in `igenomes.config`, use its name (for example `'GRCh38'`) as the `genome` parameter.
 
 blastn can be turned on using the `validation_blastn` parameter.
 
-There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step. The filtering step can be omitted altogether with `--skip_filter`.
+The filter input and the source of the IDs to filter by each have a default and an alternative.
+
+- Input: raw reads by default; set `--filter_trimmed` to use the preprocessed reads.
+- IDs: classification IDs (kraken2) by default; blastn IDs when validation runs; set `--filter_with_classification` to keep the classification IDs during validation.
+
+The filtering step can be omitted altogether with `--skip_filter`.
 
 If you want to output the removed reads, use `--output_removed_reads`.
 

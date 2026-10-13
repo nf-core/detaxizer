@@ -50,9 +50,13 @@
 
 - [Python](https://www.python.org/)
 
-- [biopython](https://biopython.org/)
+- [pandas](https://pandas.pydata.org/)
 
-  > Cock, P. J. A., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., & de Hoon, M. J. L. (2009). Biopython: freely available Python tools for computational molecular biology and bioinformatics. In Bioinformatics (Vol. 25, Issue 11, pp. 1422–1423). Oxford University Press (OUP). doi:10.1093/bioinformatics/btp163
+  > McKinney, W. (2010). Data Structures for Statistical Computing in Python. In Proceedings of the 9th Python in Science Conference (pp. 56–61). doi:10.25080/Majora-92bf1922-00a
+
+- [numpy](https://numpy.org/)
+
+  > Harris, C. R., Millman, K. J., van der Walt, S. J., Gommers, R., Virtanen, P., Cournapeau, D., Wieser, E., Taylor, J., Berg, S., Smith, N. J., Kern, R., Picus, M., Hoyer, S., van Kerkwijk, M. H., Brett, M., Haldane, A., del Río, J. F., Wiebe, M., Peterson, P., Gérard-Marchant, P., Sheppard, K., Reddy, T., Weckesser, W., Abbasi, H., Gohlke, C., & Oliphant, T. E. (2020). Array programming with NumPy. In Nature (Vol. 585, Issue 7825, pp. 357–362). Springer Science and Business Media LLC. doi:10.1038/s41586-020-2649-2
 
 ## Software packaging/containerisation tools
 
