@@ -1,6 +1,27 @@
 //
-// Subworkflow with functionality specific to the nf-core/createtaxdb pipeline
+// Subworkflow with functionality specific to the nf-core/detaxizer pipeline
 //
+
+workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
+    take:
+    ch_reads
+
+    main:
+    def downstreampipeline_names = params.generate_pipeline_samplesheets.split(",")
+
+    if ( downstreampipeline_names.contains('taxprofiler')) {
+        SAMPLESHEET_TAXPROFILER(ch_reads)
+    }
+    if ( downstreampipeline_names.contains('mag')) {
+        SAMPLESHEET_MAG(ch_reads)
+    }
+
+    emit:
+    taxprofiler = "${params.outdir}/downstream_samplesheets/taxprofiler.csv"
+    mag_pe      = "${params.outdir}/downstream_samplesheets/mag-pe.csv"
+    mag_se      = "${params.outdir}/downstream_samplesheets/mag-se.csv"
+
+}
 
 workflow SAMPLESHEET_TAXPROFILER {
     take:
@@ -88,22 +109,6 @@ workflow SAMPLESHEET_MAG {
 
     channelToSamplesheet(ch_list_for_samplesheet.pe,"${params.outdir}/downstream_samplesheets/mag-pe", format)
     channelToSamplesheet(ch_list_for_samplesheet.se, "${params.outdir}/downstream_samplesheets/mag-se", format)
-
-}
-
-workflow GENERATE_DOWNSTREAM_SAMPLESHEETS {
-    take:
-    ch_reads
-
-    main:
-    def downstreampipeline_names = params.generate_pipeline_samplesheets.split(",")
-
-    if ( downstreampipeline_names.contains('taxprofiler')) {
-        SAMPLESHEET_TAXPROFILER(ch_reads)
-    }
-    if ( downstreampipeline_names.contains('mag')) {
-        SAMPLESHEET_MAG(ch_reads)
-    }
 
 }
 

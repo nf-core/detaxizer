@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/detaxizer/master/nextflow_schema.json",
     "title": "nf-core/detaxizer pipeline parameters",
-    "description": "A pipeline to identify and remove certain sequences from raw genomic data. Default taxon to identify and remove is Homo sapiens.",
+    "description": "A pipeline to identify (and remove) certain sequences from raw genomic data. Default taxon to identify (and remove) is Homo sapiens. Removal is optional.",
     "type": "object",
     "$defs": {
         "input_output_options": {
@@ -47,7 +47,6 @@
             "title": "General workflow parameters",
             "type": "object",
             "description": "Parameters which enable/disable certain steps used in the workflow.",
-            "default": "",
             "properties": {
                 "preprocessing": {
                     "type": "boolean",
@@ -59,7 +58,7 @@
                 },
                 "classification_kraken2": {
                     "type": "boolean",
-                    "description": "Signifies that kraken2 is used in the classification process. Can be combined with the 'classification_bbduk' parameter to run both. For kraken2 alone no parameter is needed."
+                    "description": "Run kraken2 classification. kraken2 is the default classification step. This flag makes the choice explicit and can be combined with the 'classification_bbduk' parameter to run both."
                 },
                 "validation_blastn": {
                     "type": "boolean",
@@ -82,7 +81,7 @@
                     "type": "string",
                     "default": "seqkit",
                     "enum": ["seqkit", "bbmap"],
-                    "description": "Select the read-filtering tool: seqkit or bbmap. seqkit normalizes FASTQ headers by temporarily renaming them; bbmap uses filterbyname.sh for exact header matching -- Note: BBTools I/O forces any base that is N to Q=0 (!)."
+                    "description": "Select the read-filtering tool. seqkit normalizes FASTQ headers by temporarily renaming them. bbmap uses filterbyname.sh for exact header matching. BBTools I/O forces any base that is N to Q=0."
                 },
                 "output_removed_reads": {
                     "type": "boolean",
@@ -90,8 +89,8 @@
                 },
                 "filter_trimmed": {
                     "type": "boolean",
-                    "description": "If the pre-processed reads should be used by the filter.",
-                    "help_text": "If set to `True` the the pre-proccesed reads are used for filtering. Else the raw reads are used."
+                    "description": "Use the preprocessed reads in the filtering step. Enabling this parameter also enables preprocessing.",
+                    "help_text": "If set to `True` the preprocessed reads are used for filtering. Otherwise the raw reads are used. Setting this parameter also turns on preprocessing with fastp."
                 },
                 "save_intermediates": {
                     "type": "boolean",
@@ -105,7 +104,6 @@
             "title": "bbduk",
             "type": "object",
             "description": "Parameter to customize bbduk execution",
-            "default": "",
             "properties": {
                 "fasta_bbduk": {
                     "type": "string",
@@ -123,7 +121,6 @@
             "title": "kraken2",
             "type": "object",
             "description": "Parameters used by kraken2 to classify all reads provided. Fine-tuning of the isolation step can be done via the `cutoff_*` parameters.",
-            "default": "",
             "properties": {
                 "kraken2db": {
                     "type": "string",
@@ -164,7 +161,7 @@
                 "cutoff_tax2filter": {
                     "type": "integer",
                     "default": 0,
-                    "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
+                    "description": "Minimum number of assigned k-mers for the taxon/taxa to be assessed or filtered. The pipeline ignores a read with fewer assigned k-mers."
                 },
                 "cutoff_tax2keep": {
                     "type": "number",
@@ -195,7 +192,6 @@
             "title": "blastn",
             "type": "object",
             "description": "Parameters to fine-tune the output of blastn.",
-            "default": "",
             "properties": {
                 "fasta_blastn": {
                     "type": "string",
@@ -224,7 +220,6 @@
             "title": "fastp options",
             "type": "object",
             "description": "Options to control the behavior of fastp",
-            "default": "",
             "properties": {
                 "reads_minlength": {
                     "type": "integer",
@@ -304,7 +299,7 @@
                     "type": "string",
                     "default": "taxprofiler,mag",
                     "description": "Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for.",
-                    "pattern": "^(taxprofiler|mag)(?:,(taxprofiler|mag)){0,1}"
+                    "pattern": "^(taxprofiler|mag)(,(taxprofiler|mag))*$"
                 }
             }
         },
