@@ -43,7 +43,7 @@
                     "pandas": "1.5.2"
                 },
                 "Workflow": {
-                    "nf-core/detaxizer": "v1.4.0dev"
+                    "nf-core/detaxizer": "v1.4.0"
                 }
             },
             [
@@ -239,7 +239,7 @@
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
             ]
         ],
-        "timestamp": "2026-09-30T11:14:28.978087977",
+        "timestamp": "2026-10-13T06:01:22.078647491",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

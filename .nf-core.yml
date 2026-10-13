@@ -22,4 +22,4 @@ template:
   name: detaxizer
   org: nf-core
   outdir: .
-  version: 1.4.0dev
+  version: 1.4.0
