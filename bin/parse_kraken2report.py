@@ -19,9 +19,14 @@ def read_in_kraken2report(report):
     krakenList = []
     with open(report, 'r') as f:
         for line in f:
-            if not line:
+            if not line.strip():
                 continue
-            lineToAppend = line.replace('\n','').split('\t')
+            lineToAppend = line.rstrip('\n').split('\t')
+            if len(lineToAppend) != 6:
+                raise ValueError(
+                    f"Unexpected kraken2 report line, expected 6 tab separated fields but found "
+                    f"{len(lineToAppend)}: {line.rstrip()}"
+                )
             krakenList.append(lineToAppend)
     return krakenList
 
