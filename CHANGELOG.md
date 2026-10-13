@@ -3,28 +3,35 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.4.0dev [date]
+## v1.4.0 - [unreleased]
 
 ### `Added`
 
+- [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types (by @d4straub)
+
 ### `Changed`
 
-- [PR #103](https://github.com/nf-core/detaxizer/pull/103) - [Template update for nf-core/tools version 4.1.0 (from 3.4.1)](https://github.com/nf-core/tools/releases/tag/4.1.0) (by @d4straub)
+- [PR #103](https://github.com/nf-core/detaxizer/pull/103) - Template update for nf-core/tools 4.1.0 (from 3.4.1), for details read the [nf-core/tools 4.1.0 release notes](https://github.com/nf-core/tools/releases/tag/4.1.0) (by @d4straub)
 - [PR #104](https://github.com/nf-core/detaxizer/pull/104) - Migrated local modules to Nextflow topic channels for software version collection and updated nf-core modules to latest versions (by @d4straub)
-- [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types
 - [PR #108](https://github.com/nf-core/detaxizer/pull/108) - nf-core/mag samplesheets now include `group=0` and `short_reads_platform`/`long_reads_platform` columns required by mag 5.x, and keep long-read-only samples (reported by @vagkaratzas, fix by @d4straub)
 - [PR #110](https://github.com/nf-core/detaxizer/pull/110) - Formatting changes, apptainer efficiency increase and AWS full-test launch config with nf-schema pinned to 2.7.2 (by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - Documentation and schema corrections: fixed published file names and paths in the output documentation, repaired usage documentation and README prose, clarified schema descriptions and replaced the unused Biopython citation with pandas and numpy (by @d4straub)
 
 ### `Fixed`
 
 - [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` now quotes the Kraken2 database move and extracts the tar version portably, `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input (by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `generate_downstream_samplesheets` now exposes its samplesheets through an emit block and its metadata matches the defined outputs (by @d4straub)
 
 ### `Dependencies`
 
-| software | previous | now     |
-| -------- | -------- | ------- |
-| fastp    | 1.0.1    | 1.3.6   |
-| nextflow | 25.10.4  | 26.04.0 |
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.32             | 1.35        |
+| fastp    | 1.0.1            | 1.3.6       |
+| nextflow | 25.10.4          | 26.04.0     |
+
+The bbmap/bbduk module is locally patched through `modules/nf-core/bbmap/bbduk/bbmap-bbduk.diff` and that patch must be proposed upstream to nf-core/modules in a pull request.
 
 ### `Removed`
 
