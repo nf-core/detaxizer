@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.4.0 - [unreleased]
+## v1.4.0 - wegbutza - [unreleased]
 
 ### `Added`
 
@@ -20,8 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
-- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` now quotes the Kraken2 database move and extracts the tar version portably, `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input (by @d4straub)
-- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `generate_downstream_samplesheets` now exposes its samplesheets through an emit block and its metadata matches the defined outputs (by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` extracts the tar version portably; `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input; `generate_downstream_samplesheets` had an emit block added (by @d4straub)
 
 ### `Dependencies`
 
@@ -30,8 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | MultiQC  | 1.32             | 1.35        |
 | fastp    | 1.0.1            | 1.3.6       |
 | nextflow | 25.10.4          | 26.04.0     |
-
-The bbmap/bbduk module is locally patched through `modules/nf-core/bbmap/bbduk/bbmap-bbduk.diff` and that patch must be proposed upstream to nf-core/modules in a pull request.
 
 ### `Removed`
 
