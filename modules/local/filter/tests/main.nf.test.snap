@@ -1,0 +1,23 @@
+{
+    "paired-end - reads flagged in either mate are removed from both mates": {
+        "content": [
+            [
+                "@read1",
+                "ACGTACGT",
+                "+",
+                "IIIIIIII"
+            ],
+            [
+                "@read1",
+                "CGTACGTA",
+                "+",
+                "IIIIIIII"
+            ]
+        ],
+        "timestamp": "2026-10-05T13:47:06.766684356",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

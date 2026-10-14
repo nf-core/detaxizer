@@ -22,56 +22,61 @@ include { BLAST_MAKEBLASTDB                                         } from '../m
 include { BBMAP_FILTERBYNAME                                        } from '../modules/nf-core/bbmap/filterbyname/main'
 include { BBMAP_FILTERBYNAME as BBMAP_FILTERBYNAME_REMOVED          } from '../modules/nf-core/bbmap/filterbyname/main'
 
-include { RENAME_FASTQ_HEADERS_PRE                                  } from '../modules/local/rename_fastq_headers_pre'
-include { KRAKEN2PREPARATION                                        } from '../modules/local/kraken2preparation'
-include { PARSE_KRAKEN2REPORT                                       } from '../modules/local/parse_kraken2report'
-include { ISOLATE_KRAKEN2_IDS                                       } from '../modules/local/isolate_kraken2_ids'
-include { MAP_KRAKEN2SEQIDS_TO_FQHEADERS                            } from '../modules/local/map_kraken2seqids_to_fqheaders'
-include { ISOLATE_BBDUK_IDS                                         } from '../modules/local/isolate_bbduk_ids'
-include { MERGE_IDS                                                 } from '../modules/local/merge_ids'
-include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn'
-include { FILTER_BLASTN_IDENTCOV                                    } from '../modules/local/filter_blastn_identcov'
-include { FILTER                                                    } from '../modules/local/filter'
-include { RENAME_FASTQ_HEADERS_AFTER                                } from '../modules/local/rename_fastq_headers_after'
-include { SUMMARY_CLASSIFICATION                                    } from '../modules/local/summary_classification'
-include { SUMMARY_BLASTN                                            } from '../modules/local/summary_blastn'
-include { SUMMARIZER                                                } from '../modules/local/summarizer'
+include { RENAME_FASTQ_HEADERS_PRE                                  } from '../modules/local/rename_fastq_headers_pre/main'
+include { KRAKEN2PREPARATION                                        } from '../modules/local/kraken2preparation/main'
+include { PARSE_KRAKEN2REPORT                                       } from '../modules/local/parse_kraken2report/main'
+include { ISOLATE_KRAKEN2_IDS                                       } from '../modules/local/isolate_kraken2_ids/main'
+include { MAP_KRAKEN2SEQIDS_TO_FQHEADERS                            } from '../modules/local/map_kraken2seqids_to_fqheaders/main'
+include { ISOLATE_BBDUK_IDS                                         } from '../modules/local/isolate_bbduk_ids/main'
+include { MERGE_IDS                                                 } from '../modules/local/merge_ids/main'
+include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn/main'
+include { FILTER_BLASTN_IDENTCOV                                    } from '../modules/local/filter_blastn_identcov/main'
+include { FILTER                                                    } from '../modules/local/filter/main'
+include { RENAME_FASTQ_HEADERS_AFTER                                } from '../modules/local/rename_fastq_headers_after/main'
+include { SUMMARY_CLASSIFICATION                                    } from '../modules/local/summary_classification/main'
+include { SUMMARY_BLASTN                                            } from '../modules/local/summary_blastn/main'
+include { SUMMARIZER                                                } from '../modules/local/summarizer/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
-def ch_fasta_blastn = Channel.empty()
-
-if ( !params.fasta_blastn && params.validation_blastn ) {
-    ch_fasta_blastn = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if ( params.validation_blastn ){
-    // If params.fasta_blastn is there, use it for the creation of the blastn database
-    ch_fasta_blastn = Channel.fromPath(params.fasta_blastn)
-}
-
-// specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
-
-def ch_fasta_bbduk = Channel.empty()
-
-if ( !params.fasta_bbduk && params.classification_bbduk ) {
-    ch_fasta_bbduk = Channel.fromPath(getGenomeAttribute('fasta'))
-} else if ( params.classification_bbduk ){
-    // If params.fasta_bbduk is there, use it for the creation of the blastn database
-    ch_fasta_bbduk = Channel.fromPath(params.fasta_bbduk)
-}
-
-workflow NFCORE_DETAXIZER {
+workflow DETAXIZER {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    multiqc_config
+    multiqc_logo
+    multiqc_methods_description
+    outdir
+
     main:
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
-    ch_filtered_reads = Channel.empty()
-    ch_removed_reads  = Channel.empty()
+
+    // Specify the ch_fasta_blastn channel if it is not provided via --fasta_blastn
+    def ch_fasta_blastn = channel.empty()
+
+    if ( !params.fasta_blastn && params.validation_blastn ) {
+        ch_fasta_blastn = channel.fromPath(getGenomeAttribute('fasta', params.genomes, params.genome))
+    } else if ( params.validation_blastn ){
+        // If params.fasta_blastn is there, use it for the creation of the blastn database
+        ch_fasta_blastn = channel.fromPath(params.fasta_blastn)
+    }
+
+    // Specify the ch_fasta_bbduk channel if it is not provided via --fasta_bbduk
+    def ch_fasta_bbduk = channel.empty()
+
+    if ( !params.fasta_bbduk && params.classification_bbduk ) {
+        ch_fasta_bbduk = channel.fromPath(getGenomeAttribute('fasta', params.genomes, params.genome))
+    } else if ( params.classification_bbduk ){
+        // If params.fasta_bbduk is there, use it for the creation of the blastn database
+        ch_fasta_bbduk = channel.fromPath(params.fasta_bbduk)
+    }
+
+    def ch_versions = channel.empty()
+    def ch_multiqc_files = channel.empty()
+    def ch_filtered_reads = channel.empty()
+    def ch_removed_reads  = channel.empty()
 
     ch_short = ch_samplesheet.branch {
         shortReads: it[1]
@@ -109,8 +114,8 @@ workflow NFCORE_DETAXIZER {
     FASTQC (
         ch_fastq_input
     )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+    // FASTQC emits its software version as a topic tuple, collected via the `versions` topic below
 
     //
     // MODULE: Run fastp
@@ -125,7 +130,6 @@ workflow NFCORE_DETAXIZER {
     )
 
     ch_fastq_for_classification = FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTP.out.versions.first())
     } else {
         ch_fastq_for_classification = ch_fastq_input
     }
@@ -137,14 +141,13 @@ workflow NFCORE_DETAXIZER {
         //
         // MODULE: Prepare Kraken2 Database
         //
-        ch_kraken2_db = Channel.fromPath(params.kraken2db).map {
+        ch_kraken2_db = channel.fromPath(params.kraken2db).map {
                 item -> [['id': "kraken2_db"], item]
             }
 
         KRAKEN2PREPARATION (
             ch_kraken2_db
         )
-        ch_versions = ch_versions.mix(KRAKEN2PREPARATION.out.versions.first())
     }
 
 
@@ -159,7 +162,6 @@ workflow NFCORE_DETAXIZER {
             params.save_output_fastqs,
             true
         )
-        ch_versions = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
         if ( params.filtering_tool == 'bbmap' ) {
             MAP_KRAKEN2SEQIDS_TO_FQHEADERS(
@@ -167,7 +169,6 @@ workflow NFCORE_DETAXIZER {
                     .join(KRAKEN2_KRAKEN2.out.classified_reads_assignment, by: 0)
                     .map { meta, reads, classification -> [meta, reads, classification] }
             )
-            ch_versions = ch_versions.mix(MAP_KRAKEN2SEQIDS_TO_FQHEADERS.out.versions.first())
         }
 
         //
@@ -176,7 +177,6 @@ workflow NFCORE_DETAXIZER {
         PARSE_KRAKEN2REPORT(
             KRAKEN2_KRAKEN2.out.report.take(1)
         )
-        ch_versions = ch_versions.mix(PARSE_KRAKEN2REPORT.out.versions)
 
         //
         // MODULE: Isolate the hits for a certain taxa and subclasses
@@ -198,7 +198,6 @@ workflow NFCORE_DETAXIZER {
             ch_combined
         )
 
-        ch_versions = ch_versions.mix(ISOLATE_KRAKEN2_IDS.out.versions.first())
 
         }
 
@@ -211,7 +210,6 @@ workflow NFCORE_DETAXIZER {
             ch_fastq_for_classification,
             ch_fasta_bbduk.first()
         )
-        ch_versions = ch_versions.mix(BBMAP_BBDUK.out.versions.first())
 
         //
         // MODULE: Run ISOLATE_BBDUK_IDS
@@ -219,7 +217,6 @@ workflow NFCORE_DETAXIZER {
         ISOLATE_BBDUK_IDS(
             BBMAP_BBDUK.out.contaminated_reads
         )
-        ch_versions = ch_versions.mix(ISOLATE_BBDUK_IDS.out.versions.first())
 
 
     }
@@ -262,7 +259,6 @@ workflow NFCORE_DETAXIZER {
 
     }
 
-    ch_versions = ch_versions.mix(MERGE_IDS.out.versions.first())
 
     //
     // MODULE: Summarize the classification results
@@ -276,7 +272,6 @@ workflow NFCORE_DETAXIZER {
     ch_classification_summary = SUMMARY_CLASSIFICATION.out.summary.map {
             meta, path -> [path]
     }
-    ch_versions = ch_versions.mix(SUMMARY_CLASSIFICATION.out.versions.first())
 
     //////////////////////////////////////////////////
     //  Validation
@@ -297,7 +292,6 @@ workflow NFCORE_DETAXIZER {
             ch_combined
         )
 
-        ch_versions = ch_versions.mix(PREPARE_FASTA4BLASTN.out.versions.first())
 
         //
         // MODULE: Run BLASTN
@@ -309,9 +303,9 @@ workflow NFCORE_DETAXIZER {
             }
 
         BLAST_MAKEBLASTDB (
-                ch_reference_fasta_with_meta
+                ch_reference_fasta_with_meta,
+                []
         )
-        ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
 
         ch_fasta4blastn = PREPARE_FASTA4BLASTN.out.fasta
             .flatMap { meta, fastaList ->
@@ -338,8 +332,6 @@ workflow NFCORE_DETAXIZER {
             []
         )
 
-        ch_versions = ch_versions.mix(BLAST_BLASTN.out.versions.first())
-
         ch_combined_blast = BLAST_BLASTN.out.txt.map {
             meta, path ->
                 return [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -356,7 +348,6 @@ workflow NFCORE_DETAXIZER {
         FILTER_BLASTN_IDENTCOV (
             BLAST_BLASTN.out.txt
         )
-        ch_versions = ch_versions.mix(FILTER_BLASTN_IDENTCOV.out.versions.first())
 
         ch_filtered_combined = FILTER_BLASTN_IDENTCOV.out.classified.map {
             meta, path ->
@@ -391,7 +382,6 @@ workflow NFCORE_DETAXIZER {
         ch_blastn_summary = SUMMARY_BLASTN (
             ch_blastn_combined
         )
-        ch_versions = ch_versions.mix(ch_blastn_summary.versions.first())
 
     // Drop meta of blastn_summary as it is not needed for the combination step of summarizer
         ch_blastn_summary = ch_blastn_summary.summary.map {
@@ -430,29 +420,26 @@ workflow NFCORE_DETAXIZER {
             FILTER(
                 ch_to_filter
             )
-            ch_versions = ch_versions.mix(FILTER.out.versions.first())
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
             BBMAP_FILTERBYNAME(
                 ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
                 ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                Channel.value('fastq.gz'),
-                Channel.value(false)
+                channel.value('fastq.gz'),
+                channel.value(false)
             )
-            ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME.out.versions.first())
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
                     ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
                     ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                    Channel.value('fastq.gz'),
-                    Channel.value(false)
+                    channel.value('fastq.gz'),
+                    channel.value(false)
                 )
-                ch_versions = ch_versions.mix(BBMAP_FILTERBYNAME_REMOVED.out.versions.first())
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
-                ch_filter_removed = Channel.empty()
+                ch_filter_removed = channel.empty()
             }
         }
     }
@@ -470,7 +457,7 @@ workflow NFCORE_DETAXIZER {
                 [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
             }
 
-            ch_removed2rename = Channel.empty()
+            ch_removed2rename = channel.empty()
             if ( params.output_removed_reads ) {
                 ch_removed2rename = ch_filter_removed.map { meta, path ->
                     [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -491,14 +478,13 @@ workflow NFCORE_DETAXIZER {
                     ch_removed2rename.first()
                 )
             }
-            ch_versions = ch_versions.mix(RENAME_FASTQ_HEADERS_AFTER.out.versions.first())
             ch_filtered_reads = RENAME_FASTQ_HEADERS_AFTER.out.fastq
-            ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : Channel.empty()
+            ch_removed_reads  = params.output_removed_reads ? RENAME_FASTQ_HEADERS_AFTER.out.fastq_removed : channel.empty()
         } else {
             ch_filtered_reads = ch_filter_filtered.map { meta, path ->
                 [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
             }
-            ch_removed_reads = Channel.empty()
+            ch_removed_reads = channel.empty()
             if ( params.output_removed_reads ) {
                 ch_removed_reads = ch_filter_removed.map { meta, path ->
                     [ meta + [ id: meta.id.replaceAll("(_R1|_R2)", "") ], path ]
@@ -515,8 +501,6 @@ workflow NFCORE_DETAXIZER {
                 true
                 )
 
-            ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_FILTERED.out.versions.first())
-
             if (params.output_removed_reads) {
 
                 KRAKEN2_POST_CLASSIFICATION_REMOVED (
@@ -525,8 +509,6 @@ workflow NFCORE_DETAXIZER {
                     params.save_output_fastqs_removed,
                     true
                     )
-
-                ch_versions = ch_versions.mix(KRAKEN2_POST_CLASSIFICATION_REMOVED.out.versions.first())
 
             }
 
@@ -554,7 +536,6 @@ workflow NFCORE_DETAXIZER {
         ch_summary
     )
 
-    ch_versions = ch_versions.mix(ch_summary.versions)
 
     if ( params.generate_downstream_samplesheets ) {
 
@@ -565,58 +546,60 @@ workflow NFCORE_DETAXIZER {
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            storeDir: "${outdir}/pipeline_info",
             name: 'nf_core_'  +  'detaxizer_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
-        ).set { ch_collated_versions }
-
+        )
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = Channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        Channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        Channel.empty()
-
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
-
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_methods_description.collectFile(
-            name: 'methods_description_mqc.yaml',
-            sort: true
-        )
+    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    def ch_multiqc_custom_methods_description = multiqc_methods_description
+        ? file(multiqc_methods_description, checkIfExists: true)
+        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
+    def ch_methods_description = channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
+    MULTIQC(
+        ch_multiqc_files.flatten().collect().map { files ->
+            [
+                [id: 'detaxizer'],
+                files,
+                multiqc_config
+                    ? file(multiqc_config, checkIfExists: true)
+                    : file("${projectDir}/assets/multiqc_config.yml", checkIfExists: true),
+                multiqc_logo ? file(multiqc_logo, checkIfExists: true) : [],
+                [],
+                [],
+            ]
+        }
     )
-
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
-
-    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
 }
 
 /*

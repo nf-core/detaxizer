@@ -1,17 +1,18 @@
 process SUMMARIZER {
-    tag "$meta.id"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "conda-forge::python=3.11.0 numpy=1.24.2 pandas=1.5.2"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:1.5.2' :
-        'biocontainers/pandas:1.5.2' }"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/pandas:1.5.2'
+        : 'biocontainers/pandas:1.5.2'}"
+
     input:
     tuple val(meta), path(tosummarize)
 
     output:
     tuple val(meta), path("summary.tsv"), emit: summary
-    path("versions.yml")                , emit: versions
+    path ("versions.yml"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,8 +32,11 @@ process SUMMARIZER {
     files_classified = glob.glob('*.classification_summary.tsv')
     files_blastn = glob.glob('*.blastn_summary.tsv')
 
+    if not files_classified and not files_blastn:
+        raise ValueError("No classification or blastn summary files were provided to the summarizer")
+
     classified_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_classified]
-    df_classified = pd.concat(classified_dfs)
+    df_classified = pd.concat(classified_dfs) if classified_dfs else pd.DataFrame()
     if files_blastn != []:
         blastn_dfs = [pd.read_csv(file, sep="\\t", index_col=0) for file in files_blastn]
         df_blastn = pd.concat(blastn_dfs)
