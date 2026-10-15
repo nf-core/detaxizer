@@ -425,17 +425,17 @@ workflow DETAXIZER {
         } else {
             BBMAP_FILTERBYNAME(
                 ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
-                ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                channel.value('fastq.gz'),
-                channel.value(false)
+                ch_to_filter.map { meta, reads, ids -> ids.join(',') },
+                'fastq.gz',
+                false
             )
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
                     ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
-                    ch_to_filter.map { meta, reads, ids -> ids.toString() },
-                    channel.value('fastq.gz'),
-                    channel.value(false)
+                    ch_to_filter.map { meta, reads, ids -> ids.join(',') },
+                    'fastq.gz',
+                    false
                 )
                 ch_filter_removed = BBMAP_FILTERBYNAME_REMOVED.out.reads
             } else {
