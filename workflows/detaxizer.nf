@@ -32,6 +32,7 @@ include { MERGE_IDS                                                 } from '../m
 include { PREPARE_FASTA4BLASTN                                      } from '../modules/local/prepare_fasta4blastn/main'
 include { FILTER_BLASTN_IDENTCOV                                    } from '../modules/local/filter_blastn_identcov/main'
 include { FILTER                                                    } from '../modules/local/filter/main'
+include { NORMALIZE_BBMAP_IDS                                       } from '../modules/local/normalize_bbmap_ids/main'
 include { RENAME_FASTQ_HEADERS_AFTER                                } from '../modules/local/rename_fastq_headers_after/main'
 include { SUMMARY_CLASSIFICATION                                    } from '../modules/local/summary_classification/main'
 include { SUMMARY_BLASTN                                            } from '../modules/local/summary_blastn/main'
@@ -423,17 +424,23 @@ workflow DETAXIZER {
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
+            // Normalise read IDs before bbmap filtering: Rewriting '/2' to '/1' (and de-duplicating) ensures every flagged mate removes the pair from both mates.
+            NORMALIZE_BBMAP_IDS(
+                ch_to_filter.map { meta, reads, ids -> tuple(meta, reads, ids) }
+            )
+            ch_to_filter_bbmap = NORMALIZE_BBMAP_IDS.out.reads_and_ids
+
             BBMAP_FILTERBYNAME(
-                ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
-                ch_to_filter.map { meta, reads, ids -> ids.join(',') },
+                ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
+                ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten().join(',') },
                 'fastq.gz',
                 false
             )
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
-                    ch_to_filter.map { meta, reads, ids -> tuple(meta, reads) },
-                    ch_to_filter.map { meta, reads, ids -> ids.join(',') },
+                    ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
+                    ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten().join(',') },
                     'fastq.gz',
                     false
                 )
