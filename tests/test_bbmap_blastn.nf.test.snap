@@ -5,6 +5,9 @@
                 "BBMAP_FILTERBYNAME": {
                     "bbmap": 39.18
                 },
+                "BBMAP_FILTERBYNAME_REMOVED": {
+                    "bbmap": 39.18
+                },
                 "BLAST_BLASTN": {
                     "blastn": "2.17.0+"
                 },
@@ -31,6 +34,9 @@
                     "python": "3.10.4"
                 },
                 "MERGE_IDS": {
+                    "gawk": "5.3.0"
+                },
+                "NORMALIZE_BBMAP_IDS": {
                     "gawk": "5.3.0"
                 },
                 "PARSE_KRAKEN2REPORT": {
@@ -70,6 +76,14 @@
                 "filter/filtered/test_paired-end_plus_long-reads_longReads_filtered.fastq.gz",
                 "filter/filtered/test_single-end_long_longReads_filtered.fastq.gz",
                 "filter/filtered/test_single-end_short_filtered.fastq.gz",
+                "filter/removed",
+                "filter/removed/test_paired-end_plus_long-reads_longReads_removed.fastq.gz",
+                "filter/removed/test_paired-end_plus_long-reads_removed_1.fastq.gz",
+                "filter/removed/test_paired-end_plus_long-reads_removed_2.fastq.gz",
+                "filter/removed/test_paired-end_removed_1.fastq.gz",
+                "filter/removed/test_paired-end_removed_2.fastq.gz",
+                "filter/removed/test_single-end_long_longReads_removed.fastq.gz",
+                "filter/removed/test_single-end_short_removed.fastq.gz",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/fastqc-status-check-heatmap.txt",
@@ -139,13 +153,20 @@
                 "summary/summary.tsv"
             ],
             [
-                "test_paired-end_filtered_1.fastq.gz:md5,06c1b8db02efc5fe4e9716074f296f5b",
-                "test_paired-end_filtered_2.fastq.gz:md5,6db405d38954454e3de77d9babe3c6bf",
-                "test_paired-end_plus_long-reads_filtered_1.fastq.gz:md5,8773962a259071be13d2a02788ada624",
-                "test_paired-end_plus_long-reads_filtered_2.fastq.gz:md5,55ff5c4aceb64b8eee616ccd09d3ade4",
+                "test_paired-end_filtered_1.fastq.gz:md5,f505287b1f2e96ce81661692e482a76b",
+                "test_paired-end_filtered_2.fastq.gz:md5,820f4e6da7f471ff8c6b86b6253bc9c5",
+                "test_paired-end_plus_long-reads_filtered_1.fastq.gz:md5,b2e8636ffb9aa2dbd7baa756b7113c3d",
+                "test_paired-end_plus_long-reads_filtered_2.fastq.gz:md5,2cb3d0ec1e3cbb0d600dbfab60290128",
                 "test_paired-end_plus_long-reads_longReads_filtered.fastq.gz:md5,e84278a72eeb7164ca870936001dd059",
                 "test_single-end_long_longReads_filtered.fastq.gz:md5,e84278a72eeb7164ca870936001dd059",
                 "test_single-end_short_filtered.fastq.gz:md5,06c1b8db02efc5fe4e9716074f296f5b",
+                "test_paired-end_plus_long-reads_longReads_removed.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "test_paired-end_plus_long-reads_removed_1.fastq.gz:md5,3790c697cd09b0905cb56ef365978d1f",
+                "test_paired-end_plus_long-reads_removed_2.fastq.gz:md5,dbe7ef925e260d73f981c600f3b72e37",
+                "test_paired-end_removed_1.fastq.gz:md5,e576aa029df6893a482fcc6de53b3102",
+                "test_paired-end_removed_2.fastq.gz:md5,4a4ad3d2c3e45e8225ba7029e4645ff4",
+                "test_single-end_long_longReads_removed.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "test_single-end_short_removed.fastq.gz:md5,11a73080db52458f7312a4ff35c2b47d",
                 "fastqc-status-check-heatmap.txt:md5,97736debfcf4943f197bdf7dc53f6266",
                 "fastqc_overrepresented_sequences_plot.txt:md5,eda71b2e6c9fd4e13bb4fe561ef45339",
                 "fastqc_per_base_n_content_plot.txt:md5,8c1895e38cb44ba6c562600b6c599b58",
@@ -159,9 +180,10 @@
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "multiqc_fastqc.txt:md5,d3d743ade0aaa9293c8a1810f6a4143f",
                 "multiqc_general_stats.txt:md5,8aaf67bc592c577b323d83215b693c14"
-            ]
+            ],
+            1982
         ],
-        "timestamp": "2026-10-15T10:55:12.788208668",
+        "timestamp": "2026-10-15T15:34:36.578451372",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
