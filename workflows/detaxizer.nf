@@ -424,11 +424,12 @@ workflow DETAXIZER {
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
-            // Normalise read IDs before bbmap filtering: Rewriting '/2' to '/1' (and de-duplicating) ensures every flagged mate removes the pair from both mates.
             NORMALIZE_BBMAP_IDS(
-                ch_to_filter.map { meta, reads, ids -> tuple(meta, reads, ids) }
+                ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
             )
-            ch_to_filter_bbmap = NORMALIZE_BBMAP_IDS.out.reads_and_ids
+            ch_to_filter_bbmap = NORMALIZE_BBMAP_IDS.out.reads_and_ids.mix(
+                ch_to_filter.filter { meta, reads, ids -> meta.single_end }
+            )
 
             BBMAP_FILTERBYNAME(
                 ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },

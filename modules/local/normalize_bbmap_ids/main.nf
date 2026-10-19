@@ -19,11 +19,7 @@ process NORMALIZE_BBMAP_IDS {
 
     script:
     """
-    # bbmap's filterbyname.sh pairs the input reads and matches the supplied names
-    # only against the first mate (R1). Identifiers that originate from the second
-    # mate carry a trailing '/2' and therefore never match, so pairs flagged in R2
-    # only would not be removed. Rewriting '/(1|2)' to '/1' (and de-duplicating)
-    # makes every flagged mate remove the pair from both mates.
+    # filterbyname.sh matches only the first mate's name, so map /2 to /1
     cat ${ids} \\
         | sed -E 's#/[12]\$#/1#' \\
         | awk '!seen[\$0]++' \\

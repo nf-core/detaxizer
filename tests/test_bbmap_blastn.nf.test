@@ -18,13 +18,19 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            // Count how many pairs were actually removed by the bbmap filter.
-            // For paired-end samples the R1 removed file holds one read per removed pair.
-            def removed_r1_files = getAllFilesFromDir("$params.outdir/filter/removed")
+            // Count reads (fastq records) in a gzipped file
+            def countReads = { filePath ->
+                path(filePath.toString()).linesGzip.findAll { line -> line.startsWith('@') }.size()
+            }
+            // Number of removed read pairs: for paired-end samples the R1 removed file holds one read per removed pair
+            def removed_dir = "$params.outdir/filter/removed"
+            def removed_pairs_count = getAllFilesFromDir(removed_dir)
                 .findAll { f -> f.toString().endsWith('_removed_1.fastq.gz') }
-            def removed_pairs_count = removed_r1_files.collect { f ->
-                path(f.toString()).linesGzip.findAll { line -> line.startsWith('@') }.size()
-            }.sum() ?: 0
+                .collect { f -> countReads(f) }
+                .sum() ?: 0
+            // Single-end samples that carry read names ending in '/2' must still be removed
+            def se_short_removed_count   = countReads("${removed_dir}/test_single-end_short_removed.fastq.gz")
+            def se_r2names_removed_count = countReads("${removed_dir}/test_single-end_r2names_removed.fastq.gz")
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -36,7 +42,10 @@ nextflow_pipeline {
                     stable_path,
                     // Number of removed read pairs (from paired-end samples)
                     removed_pairs_count
-                ).match() }
+                ).match() },
+                { assert removed_pairs_count == 1982 },
+                { assert se_short_removed_count == 981 },
+                { assert se_r2names_removed_count == 987 }
             )
         }
     }
