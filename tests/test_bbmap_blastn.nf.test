@@ -1,0 +1,52 @@
+nextflow_pipeline {
+
+    name "Test pipeline with bbmap filtering and blastn validation"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_bbmap_blastn"
+
+    test("-profile test_bbmap_blastn") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Count reads (fastq records) in a gzipped file
+            def countReads = { filePath ->
+                path(filePath.toString()).linesGzip.findAll { line -> line.startsWith('@') }.size()
+            }
+            // Number of removed read pairs: for paired-end samples the R1 removed file holds one read per removed pair
+            def removed_dir = "$params.outdir/filter/removed"
+            def removed_pairs_count = getAllFilesFromDir(removed_dir)
+                .findAll { f -> f.toString().endsWith('_removed_1.fastq.gz') }
+                .collect { f -> countReads(f) }
+                .sum() ?: 0
+            // Single-end samples that carry read names ending in '/2' must still be removed
+            def se_short_removed_count   = countReads("${removed_dir}/test_single-end_short_removed.fastq.gz")
+            def se_r2names_removed_count = countReads("${removed_dir}/test_single-end_r2names_removed.fastq.gz")
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_detaxizer_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path,
+                    // Number of removed read pairs (from paired-end samples)
+                    removed_pairs_count
+                ).match() },
+                { assert removed_pairs_count == 1982 },
+                { assert se_short_removed_count == 981 },
+                { assert se_r2names_removed_count == 987 }
+            )
+        }
+    }
+}
