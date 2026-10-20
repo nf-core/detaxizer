@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
 - [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` extracts the tar version portably; `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input; `generate_downstream_samplesheets` had an emit block added (by @d4straub)
-- [PR #114](https://github.com/nf-core/detaxizer/pull/114) - Fixed paired-end `--filtering_tool bbmap` with `--validation_blastn`: reads flagged in the second mate only are now removed as well. `filterbyname.sh` matches the supplied names against the first mate, so second-mate ids (`/2`) are normalized to `/1` before filtering; fixed bbmap citation (reported by @erikrikarddaniel, fix by @d4straub)
+- [PR #114](https://github.com/nf-core/detaxizer/pull/114) - Fixed `--filtering_tool bbmap` with `--validation_blastn`: flagged reads were not removed from single-end and long-read samples, and paired-end pairs flagged only in the second mate were kept. The id files are now passed comma-separated with `/2` ids normalized to `/1`, and BBMap is cited when used for filtering (reported by @erikrikarddaniel, fix by @d4straub)
 
 ### `Dependencies`
 
