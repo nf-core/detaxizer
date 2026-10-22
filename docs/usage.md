@@ -144,6 +144,8 @@ The filter input and the source of the IDs to filter by each have a default and 
 
 The filtering step can be omitted altogether with `--skip_filter`.
 
+With `--filtering_tool bbmap`, reads are removed by name with `filterbyname.sh`, which only matches the first mate. Second-mate read names are therefore normalised to their first-mate form before filtering. The supported read-name conventions are `<name>/2`, `<name>.2` and the CASAVA 1.8+ mate field (e.g. `<coords> 2:N:0:1`); these are mapped to `<name>/1`, `<name>.1` and `<coords> 1:N:0:1`, respectively. Read names not following these conventions are matched as-is, so reads flagged only in the second mate may then not be removed.
+
 If you want to output the removed reads, use `--output_removed_reads`.
 
 Optional classification of the filtered (and removed) reads can be done using `--classification_kraken2_post_filtering`. This uses the kraken2 database provided by `kraken2db`.
