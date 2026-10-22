@@ -19,10 +19,6 @@ process NORMALIZE_BBMAP_IDS {
 
     script:
     """
-    # filterbyname.sh matches only the first mate's name, so map /2 to /1
-    cat ${ids} \\
-        | sed -E 's#/[12]\$#/1#' \\
-        | awk '!seen[\$0]++' \\
-        > ${meta.id}.normalized_ids.txt
+    normalize_bbmap_ids.sh -o ${meta.id}.normalized_ids.txt ${[ids].flatten().join(' ')}
     """
 }
