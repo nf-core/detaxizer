@@ -26,9 +26,10 @@ input:
           paired-end data, respectively.
         ontologies: []
   - names_to_filter:
-      type: string
+      type: file
       description: |
-        String containing names of reads to filter out of the fastq files.
+        File(s) containing the names of reads to filter out of the fastq files, one name per line
+      ontologies: []
   - output_format:
       type: string
       description: |
