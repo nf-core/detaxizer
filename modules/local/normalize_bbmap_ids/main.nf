@@ -8,21 +8,18 @@ process NORMALIZE_BBMAP_IDS {
         : 'biocontainers/gawk:5.3.0'}"
 
     input:
-    tuple val(meta), path(reads), path(ids)
+    tuple val(meta), path(ids)
 
     output:
-    tuple val(meta), path(reads), path('*normalized_ids.txt'), emit: reads_and_ids
+    tuple val(meta), path('*normalized_ids.txt'), emit: ids
     tuple val("${task.process}"), val('gawk'), eval('awk -Wversion | sed "1!d; s/.*Awk //; s/,.*//"'), emit: versions_gawk, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    def id_files = [ids].flatten().collect { id_file -> "\"${id_file}\"" }.join(' ')
     """
-    # filterbyname.sh matches only the first mate's name, so map /2 to /1
-    cat ${ids} \\
-        | sed -E 's#/[12]\$#/1#' \\
-        | awk '!seen[\$0]++' \\
-        > ${meta.id}.normalized_ids.txt
+    normalize_bbmap_ids.sh -o "${meta.id}.normalized_ids.txt" ${id_files}
     """
 }

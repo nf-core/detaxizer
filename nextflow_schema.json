@@ -81,7 +81,7 @@
                     "type": "string",
                     "default": "seqkit",
                     "enum": ["seqkit", "bbmap"],
-                    "description": "Select the read-filtering tool. seqkit normalizes FASTQ headers by temporarily renaming them. bbmap uses filterbyname.sh for exact header matching. BBTools I/O forces any base that is N to Q=0."
+                    "description": "Select the read-filtering tool. seqkit normalizes FASTQ headers by temporarily renaming them. bbmap uses filterbyname.sh, which matches the first mate only, so second-mate read names are normalised to their first-mate form before filtering and names that do not follow a known mate convention are matched as-is. BBTools I/O forces any base that is N to Q=0."
                 },
                 "output_removed_reads": {
                     "type": "boolean",
