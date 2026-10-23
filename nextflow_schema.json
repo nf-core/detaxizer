@@ -47,7 +47,6 @@
             "title": "General workflow parameters",
             "type": "object",
             "description": "Parameters which enable/disable certain steps used in the workflow.",
-            "default": "",
             "properties": {
                 "preprocessing": {
                     "type": "boolean",
@@ -59,7 +58,7 @@
                 },
                 "classification_kraken2": {
                     "type": "boolean",
-                    "description": "Signifies that kraken2 is used in the classification process. Can be combined with the 'classification_bbduk' parameter to run both. For kraken2 alone no parameter is needed."
+                    "description": "Run kraken2 classification. kraken2 is the default classification step. This flag makes the choice explicit and can be combined with the 'classification_bbduk' parameter to run both."
                 },
                 "validation_blastn": {
                     "type": "boolean",
@@ -82,7 +81,7 @@
                     "type": "string",
                     "default": "seqkit",
                     "enum": ["seqkit", "bbmap"],
-                    "description": "Select the read-filtering tool: seqkit or bbmap. seqkit normalizes FASTQ headers by temporarily renaming them; bbmap uses filterbyname.sh for exact header matching -- Note: BBTools I/O forces any base that is N to Q=0 (!)."
+                    "description": "Select the read-filtering tool. seqkit normalizes FASTQ headers by temporarily renaming them. bbmap uses filterbyname.sh, which matches the first mate only, so second-mate read names are normalised to their first-mate form before filtering and names that do not follow a known mate convention are matched as-is. BBTools I/O forces any base that is N to Q=0."
                 },
                 "output_removed_reads": {
                     "type": "boolean",
@@ -90,8 +89,8 @@
                 },
                 "filter_trimmed": {
                     "type": "boolean",
-                    "description": "If the pre-processed reads should be used by the filter.",
-                    "help_text": "If set to `True` the the pre-proccesed reads are used for filtering. Else the raw reads are used."
+                    "description": "Use the preprocessed reads in the filtering step. Enabling this parameter also enables preprocessing.",
+                    "help_text": "If set to `True` the preprocessed reads are used for filtering. Otherwise the raw reads are used. Setting this parameter also turns on preprocessing with fastp."
                 },
                 "save_intermediates": {
                     "type": "boolean",
@@ -105,10 +104,10 @@
             "title": "bbduk",
             "type": "object",
             "description": "Parameter to customize bbduk execution",
-            "default": "",
             "properties": {
                 "fasta_bbduk": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta which contains the contaminant sequences."
                 },
                 "bbduk_kmers": {
@@ -122,10 +121,10 @@
             "title": "kraken2",
             "type": "object",
             "description": "Parameters used by kraken2 to classify all reads provided. Fine-tuning of the isolation step can be done via the `cutoff_*` parameters.",
-            "default": "",
             "properties": {
                 "kraken2db": {
                     "type": "string",
+                    "format": "file-path",
                     "default": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz",
                     "help_text": "For input how to use this parameter to fine-tune the step see the kraken2 section in the [usage documentation](https://nf-co.re/detaxizer/docs/usage#kraken2). To reduce the required download and RAM by around 10 fold, rather use a database capped at e.g. 8 GB, for example https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz.",
                     "description": "The database which is used in the classification step. Please be aware that this default database will require ~60GB download and ~80GB RAM."
@@ -162,7 +161,7 @@
                 "cutoff_tax2filter": {
                     "type": "integer",
                     "default": 0,
-                    "description": "If a read has less k-mers assigned to the taxon/taxa to be assessed/to be filtered the read is ignored by the pipeline."
+                    "description": "Minimum number of assigned k-mers for the taxon/taxa to be assessed or filtered. The pipeline ignores a read with fewer assigned k-mers."
                 },
                 "cutoff_tax2keep": {
                     "type": "number",
@@ -193,10 +192,10 @@
             "title": "blastn",
             "type": "object",
             "description": "Parameters to fine-tune the output of blastn.",
-            "default": "",
             "properties": {
                 "fasta_blastn": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Location of the fasta from which the blastn database will be constructed."
                 },
                 "blast_coverage": {
@@ -221,7 +220,6 @@
             "title": "fastp options",
             "type": "object",
             "description": "Options to control the behavior of fastp",
-            "default": "",
             "properties": {
                 "reads_minlength": {
                     "type": "integer",
@@ -275,11 +273,11 @@
                 },
                 "saveReference": {
                     "type": "boolean",
+                    "description": "Save the reference genome and its index files in the results directory.",
                     "default": true
                 },
                 "igenomes_base": {
                     "type": "string",
-                    "format": "directory-path",
                     "description": "The base path to the igenomes reference files",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
@@ -301,7 +299,7 @@
                     "type": "string",
                     "default": "taxprofiler,mag",
                     "description": "Specify a comma separated string in quotes to specify which pipeline to generate a samplesheet for.",
-                    "pattern": "^(taxprofiler|mag)(?:,(taxprofiler|mag)){0,1}"
+                    "pattern": "^(taxprofiler|mag)(,(taxprofiler|mag))*$"
                 }
             }
         },
@@ -403,13 +401,6 @@
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
-                "hook_url": {
-                    "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
-                    "hidden": true
-                },
                 "multiqc_config": {
                     "type": "string",
                     "format": "file-path",
@@ -419,12 +410,14 @@
                 },
                 "multiqc_logo": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
                     "fa_icon": "fas fa-image",
                     "hidden": true
                 },
                 "multiqc_methods_description": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom MultiQC yaml file containing HTML including a methods description.",
                     "fa_icon": "fas fa-cog"
                 },
