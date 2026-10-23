@@ -8,7 +8,9 @@
 #   CASAVA:        read/2
 #   CASAVA 1.8+:   <coords> 2:N:<control>:<index>   (control number is any integer)
 #   SRA/ENA:       read.2
-# Identical ids are de-duplicated; whitespace within a line is preserved.
+# A first-mate id can itself end in .2, so that form keeps its original id next
+# to the normalised one. Duplicates are removed and whitespace within a line is
+# preserved.
 #
 # Usage: normalize_bbmap_ids.sh -o <output.txt> <ids.txt> [<ids2.txt> ...]
 set -euo pipefail
@@ -55,9 +57,12 @@ done
 
 awk '
 {
-    line = $0
-    sub(/\r$/, "", line)
-    if (line == "") next
+    orig = $0
+    sub(/\r$/, "", orig)
+    if (orig == "") next
+
+    line = orig
+    ambiguous = 0
 
     # First token: CASAVA "/2", SRA/ENA ".2", or CASAVA 1.8+ mate placed first.
     if (match(line, /^[^ \t]+/)) {
@@ -68,6 +73,7 @@ awk '
             sub(/\/2$/, "/1", nf)
         } else if (nf ~ /\.2$/) {
             sub(/\.2$/, ".1", nf)
+            ambiguous = 1
         } else if (nf ~ /^2:[YN]:[0-9]+/) {
             sub(/^2:/, "1:", nf)
         }
@@ -88,5 +94,6 @@ awk '
         }
     }
 
+    if (ambiguous && !seen[orig]++) print orig
     if (!seen[line]++) print line
 }' "${inputs[@]}" > "$output"

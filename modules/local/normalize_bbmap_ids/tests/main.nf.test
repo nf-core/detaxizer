@@ -100,6 +100,7 @@ nextflow_process {
                 { assert process.success },
                 { assert normalizedLines == [
                     'M00123:1:FLOW:1:1101:1:1 1:N:1:1',
+                    'SRR123.2',
                     'SRR123.1',
                     'M00123:1:FLOW:1:1101:1:2 1:N:0:1 extra',
                     'M00123:1:FLOW:1:1101:1:3 1:N:0:1'
@@ -137,6 +138,35 @@ nextflow_process {
                 { assert process.success },
                 { assert normalized.toString().endsWith('.normalized_ids.txt') },
                 { assert normalizedLines == ['readA/1'] }
+            )
+        }
+    }
+
+    test("first-mate name ending in .2 keeps its original form") {
+
+        setup {
+            // 'sample.2' is a first-mate name, not a mate suffix, so both the name
+            // and its normalised form must reach filterbyname.sh
+            new File(launchDir, 'test_ambiguous.ids.txt').text = 'sample.2\nsample.1\n'
+        }
+
+        when {
+            process {
+                """
+                input[0] = Channel.of([
+                    [ id:'test_ambiguous', single_end:false, amount_of_files:2 ],
+                    file("$launchDir/test_ambiguous.ids.txt")
+                ])
+                """
+            }
+        }
+
+        then {
+            def normalized = process.out.ids.get(0).get(1)
+            def normalizedLines = new File(normalized.toString()).readLines()
+            assertAll(
+                { assert process.success },
+                { assert normalizedLines == ['sample.2', 'sample.1'] }
             )
         }
     }

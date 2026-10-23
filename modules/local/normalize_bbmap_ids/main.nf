@@ -18,7 +18,8 @@ process NORMALIZE_BBMAP_IDS {
     task.ext.when == null || task.ext.when
 
     script:
+    def id_files = [ids].flatten().collect { id_file -> "\"${id_file}\"" }.join(' ')
     """
-    normalize_bbmap_ids.sh -o ${meta.id}.normalized_ids.txt ${[ids].flatten().join(' ')}
+    normalize_bbmap_ids.sh -o "${meta.id}.normalized_ids.txt" ${id_files}
     """
 }

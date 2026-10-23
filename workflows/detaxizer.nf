@@ -424,30 +424,33 @@ workflow DETAXIZER {
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
+            ch_bbmap_paired = ch_to_filter
+                .filter { meta, _reads, _ids -> !meta.single_end }
+
             NORMALIZE_BBMAP_IDS(
-                ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
-                    .map { meta, reads, ids -> [meta, ids] }
+                ch_bbmap_paired.map { meta, _reads, ids -> [meta, ids] }
             )
-            // re-attach the normalised id file to the reads, single-end samples are passed through unchanged
-            ch_to_filter_bbmap = ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
-                .map { meta, reads, ids -> [meta, reads] }
-                .join(NORMALIZE_BBMAP_IDS.out.ids, by: [0])
+
+            // join on the sample id, otherwise a sample missing its normalised ids is dropped without an error
+            ch_to_filter_bbmap = ch_bbmap_paired
+                .map { meta, reads, _ids -> [meta.id, meta, reads] }
+                .join(NORMALIZE_BBMAP_IDS.out.ids.map { meta, ids -> [meta.id, ids] }, by: [0])
+                .map { _key, meta, reads, ids -> [meta, reads, ids] }
                 .mix(
-                    ch_to_filter.filter { meta, reads, ids -> meta.single_end }
+                    ch_to_filter.filter { meta, _reads, _ids -> meta.single_end }
                 )
 
-            // the id files are declared as `path` input in the module so that they are staged into the task work dir
             BBMAP_FILTERBYNAME(
-                ch_to_filter_bbmap.map { meta, reads, ids -> [meta, reads] },
-                ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten() },
+                ch_to_filter_bbmap.map { meta, reads, _ids -> [meta, reads] },
+                ch_to_filter_bbmap.map { _meta, _reads, ids -> [ids].flatten() },
                 'fastq.gz',
                 false
             )
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
-                    ch_to_filter_bbmap.map { meta, reads, ids -> [meta, reads] },
-                    ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten() },
+                    ch_to_filter_bbmap.map { meta, reads, _ids -> [meta, reads] },
+                    ch_to_filter_bbmap.map { _meta, _reads, ids -> [ids].flatten() },
                     'fastq.gz',
                     false
                 )
