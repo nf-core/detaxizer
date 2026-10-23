@@ -11,10 +11,6 @@ nextflow_process {
     test("CASAVA-style read names with /1 and /2 suffixes") {
 
         setup {
-            def gz = new File(launchDir, 'test_slash_reads.fastq.gz')
-            def s = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(gz))
-            s.write('@readA/1\nACGTACGT\n+\nIIIIIIII\n'.bytes)
-            s.close()
             // mate 2 ids must be normalised to /1, and duplicates removed
             new File(launchDir, 'test_slash.ids.txt').text = 'readA/1\nreadB/2\nreadC/1\nreadC/2\n'
         }
@@ -24,7 +20,6 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'test_slash', single_end:false, amount_of_files:2 ],
-                    file("$launchDir/test_slash_reads.fastq.gz"),
                     file("$launchDir/test_slash.ids.txt")
                 ])
                 """
@@ -32,7 +27,7 @@ nextflow_process {
         }
 
         then {
-            def normalized = process.out.reads_and_ids.get(0).get(2)
+            def normalized = process.out.ids.get(0).get(1)
             def normalizedLines = new File(normalized.toString()).readLines()
             assertAll(
                 { assert process.success },
@@ -45,10 +40,6 @@ nextflow_process {
     test("CASAVA 1.8+ read names with space-separated read number") {
 
         setup {
-            def gz = new File(launchDir, 'test_casava_reads.fastq.gz')
-            def s = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(gz))
-            s.write('@M00123:1:000000000-A1B2C:1:1101:10000:1000 1:N:0:1\nACGTACGT\n+\nIIIIIIII\n'.bytes)
-            s.close()
             // CASAVA 1.8+ style: read number 2 must be normalised to 1, duplicates removed
             new File(launchDir, 'test_casava.ids.txt').text =
                 'M00123:1:000000000-A1B2C:1:1101:10000:1000 1:N:0:1\n' +
@@ -60,7 +51,6 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'test_casava', single_end:false, amount_of_files:2 ],
-                    file("$launchDir/test_casava_reads.fastq.gz"),
                     file("$launchDir/test_casava.ids.txt")
                 ])
                 """
@@ -68,7 +58,7 @@ nextflow_process {
         }
 
         then {
-            def normalized = process.out.reads_and_ids.get(0).get(2)
+            def normalized = process.out.ids.get(0).get(1)
             def normalizedLines = new File(normalized.toString()).readLines()
             assertAll(
                 { assert process.success },
@@ -81,10 +71,6 @@ nextflow_process {
     test("additional CASAVA 1.8+ and SRA/ENA mate forms") {
 
         setup {
-            def gz = new File(launchDir, 'test_forms_reads.fastq.gz')
-            def s = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(gz))
-            s.write('@readA/1\nACGTACGT\n+\nIIIIIIII\n'.bytes)
-            s.close()
             new File(launchDir, 'test_forms.ids.txt').text =
                 // control number other than 0
                 'M00123:1:FLOW:1:1101:1:1 2:N:1:1\n' +
@@ -101,7 +87,6 @@ nextflow_process {
                 """
                 input[0] = Channel.of([
                     [ id:'test_forms', single_end:false, amount_of_files:2 ],
-                    file("$launchDir/test_forms_reads.fastq.gz"),
                     file("$launchDir/test_forms.ids.txt")
                 ])
                 """
@@ -109,7 +94,7 @@ nextflow_process {
         }
 
         then {
-            def normalized = process.out.reads_and_ids.get(0).get(2)
+            def normalized = process.out.ids.get(0).get(1)
             def normalizedLines = new File(normalized.toString()).readLines()
             assertAll(
                 { assert process.success },
@@ -126,14 +111,6 @@ nextflow_process {
     test("paired-end with two id files") {
 
         setup {
-            def peR1 = new File(launchDir, 'test_pe_R1.fastq.gz')
-            def peR2 = new File(launchDir, 'test_pe_R2.fastq.gz')
-            def s1 = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(peR1))
-            s1.write('@readA/1\nACGTACGT\n+\nIIIIIIII\n'.bytes)
-            s1.close()
-            def s2 = new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(peR2))
-            s2.write('@readA/2\nCGTACGTA\n+\nIIIIIIII\n'.bytes)
-            s2.close()
             // two id files: mate 1 flagged in R1, mate 2 flagged in R2 -> one pair
             new File(launchDir, 'test_pe_R1.ids.txt').text = 'readA/1\n'
             new File(launchDir, 'test_pe_R2.ids.txt').text = 'readA/2\n'
@@ -145,10 +122,6 @@ nextflow_process {
                 input[0] = Channel.of([
                     [ id:'test_pe', single_end:false, amount_of_files:2 ],
                     [
-                        file("$launchDir/test_pe_R1.fastq.gz"),
-                        file("$launchDir/test_pe_R2.fastq.gz")
-                    ],
-                    [
                         file("$launchDir/test_pe_R1.ids.txt"),
                         file("$launchDir/test_pe_R2.ids.txt")
                     ]
@@ -158,7 +131,7 @@ nextflow_process {
         }
 
         then {
-            def normalized = process.out.reads_and_ids.get(0).get(2)
+            def normalized = process.out.ids.get(0).get(1)
             def normalizedLines = new File(normalized.toString()).readLines()
             assertAll(
                 { assert process.success },

@@ -426,14 +426,19 @@ workflow DETAXIZER {
         } else {
             NORMALIZE_BBMAP_IDS(
                 ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
+                    .map { meta, reads, ids -> [meta, ids] }
             )
-            ch_to_filter_bbmap = NORMALIZE_BBMAP_IDS.out.reads_and_ids.mix(
-                ch_to_filter.filter { meta, reads, ids -> meta.single_end }
-            )
+            // re-attach the normalised id file to the reads, single-end samples are passed through unchanged
+            ch_to_filter_bbmap = ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
+                .map { meta, reads, ids -> [meta, reads] }
+                .join(NORMALIZE_BBMAP_IDS.out.ids, by: [0])
+                .mix(
+                    ch_to_filter.filter { meta, reads, ids -> meta.single_end }
+                )
 
             // the id files are declared as `path` input in the module so that they are staged into the task work dir
             BBMAP_FILTERBYNAME(
-                ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
+                ch_to_filter_bbmap.map { meta, reads, ids -> [meta, reads] },
                 ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten() },
                 'fastq.gz',
                 false
@@ -441,7 +446,7 @@ workflow DETAXIZER {
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
-                    ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
+                    ch_to_filter_bbmap.map { meta, reads, ids -> [meta, reads] },
                     ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten() },
                     'fastq.gz',
                     false
