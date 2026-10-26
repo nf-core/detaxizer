@@ -16,14 +16,11 @@ Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org
 NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_bbduk --classification_kraken2 --outdir results_recall
 ```
 
-To best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) at the cost of higher non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs) was achieved in the [benchmark](https://doi.org/10.1093/nargab/lqaf125) with the following settings (translated from version 1.1.0 to version 1.2.0):
+The best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) came at the cost of more non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs). This setting was used in the [benchmark](https://doi.org/10.1093/nargab/lqaf125), translated from version 1.1.0 to version 1.2.0:
 
 ```bash
 NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results_precision
 ```
-
-> [!TIP]
-> Remote databases can complicate caching, so that resuming or repeating will re-download large database files. It is recommended instead to pre-download remote databases and refer to local copies.
 
 ## Samplesheet input
 
@@ -74,7 +71,7 @@ The task of decontamination has to be balanced out between false positives and f
 
 ### kraken2
 
-For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. caped at 8GB) can be used, but it should always be kept in mind that this may lead to more false negatives (but conversely potentially less false positives).
+For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. capped at 8GB) can be used. This database lowers the memory requirement but yields more false negatives and fewer false positives.
 
 To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
 
@@ -110,7 +107,7 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
 > [!WARNING]
-> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/running/run-pipelines#configuring-pipelines), other infrastructural tweaks (such as output directories), or module arguments (args).
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -136,11 +133,18 @@ To change what is classified by `bbduk`, a fasta containing the sequences of the
 
 If you want to run `bbduk` use the `--classification_bbduk` flag. For running both classification steps and use the merged output for filtering, use both flags (`--classification_kraken2` and `--classification_bbduk`).
 
-To change the organism(s) which should be validated as contamination(s) by blasting against a database, you have to provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. Also, if just one reference genome is needed for blastn and it is in `igenomes.config` use the according name (e.g. `'GRCh38'`) as `genome` parameter.
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. If a single reference genome for blastn is listed in `igenomes.config`, use its name (for example `'GRCh38'`) as the `genome` parameter.
 
 blastn can be turned on using the `validation_blastn` parameter.
 
-There are two options for the input of the filter, either the raw reads or the preprocessed ones. The first is the default option. Also, for the definition of the reads to be filtered by their IDs two options are available. Either the default is taken, the output from the classification step (kraken2), or using the output from the `blastn` step. The filtering step can be omitted altogether with `--skip_filter`.
+The filter input and the source of the IDs to filter by each have a default and an alternative.
+
+- Input: raw reads by default; set `--filter_trimmed` to use the preprocessed reads.
+- IDs: classification IDs (kraken2) by default; blastn IDs when validation runs; set `--filter_with_classification` to keep the classification IDs during validation.
+
+The filtering step can be omitted altogether with `--skip_filter`.
+
+With `--filtering_tool bbmap`, reads are removed by name with `filterbyname.sh`, which matches the first mate. Second-mate read names are therefore mapped onto their first-mate form before filtering. The supported read-name conventions are `<name>/2` and the CASAVA 1.8+ mate field (e.g. `<coords> 2:N:0:1`), mapped to `<name>/1` and `<coords> 1:N:0:1`. The SRA/ENA form `<name>.2` is mapped to `<name>.1` as well, but the original name is kept in the filter list because a first-mate name can also end in `.2`. Read names not following these conventions are matched as-is, so reads flagged only in the second mate may then not be removed.
 
 If you want to output the removed reads, use `--output_removed_reads`.
 
@@ -204,7 +208,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow `24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
@@ -224,19 +228,19 @@ Specify the path to a specific config file (this is a core Nextflow command). Se
 
 Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the pipeline steps, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher resources request (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
 
-To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) section of the nf-core website.
+To change the resource requests, please see the [max resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#set-max-resources) and [customise process resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#customize-process-resources) section of the nf-core website.
 
 ### Custom Containers
 
 In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool. By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of date.
 
-To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
+To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#update-tool-versions) section of the nf-core website.
 
 ### Custom Tool Arguments
 
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
-To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
+To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#modifying-tool-arguments) section of the nf-core website.
 
 ### nf-core/configs
 

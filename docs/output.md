@@ -34,20 +34,16 @@ fastp performs preprocessing of the reads (adapter/quality trimming). For detail
 <details markdown="1">
 <summary>Output files</summary>
 
-- `fastp/`: Contains the output from the preprocessing step.
-  - `<sample>_longReads/`: If long reads are present in your `samplesheet.csv` this folder is generated containing the fastp-report.
-    - `<sample>_longReads.fastp.html`: The report on the preprocessing step.
-    - `<sample>_longReads.fastp.json`: The data on the preprocessing step in `.json`-format.
-  - `<sample>_R1/`: If single-end short reads are present in your `samplesheet.csv` this folder is generated.
-    - same pattern as in `<sample>_longReads/` with the prefix `<sample>_R1.fastp.*`.
-  - `<sample>/`: For paired-end short reads in your `samplesheet.csv` this folder is generated.
-    - same pattern as in `<sample>_longReads/` with the prefix `<sample>.fastp.*`.
+- `fastp/`: Contains the output from the preprocessing step. The files are named with the prefixes `<sample>`, `<sample>_R1` or `<sample>_longReads` depending on the read type as described in [fastp](#fastp). The reports are only present if `--save_intermediates` is used.
+  - `<sample>.fastp.html`: The report on the preprocessing step.
+  - `<sample>.fastp.json`: The data on the preprocessing step in `.json`-format.
+  - `<sample>_R1.fastp.fastq.gz` and `<sample>_R2.fastp.fastq.gz`: The preprocessed reads. Paired-end reads produce both files, single-end short reads produce the `<sample>_R1.fastp.fastq.gz` file and long reads produce the `<sample>_longReads.fastp.fastq.gz` file. Only present if `--save_clipped_reads` is used.
 
 </details>
 
 ### kraken2
 
-kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `*.kraken2.report.txt`, `isolated/*.classified.txt` and `summary/*.kraken2_summary.tsv`.
+kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `*.kraken2.report.txt` and `isolated/*.classified.txt`.
 `<sample>` can be replaced by `<sample>_longReads`, `<sample>_R1` or left as `<sample>` depending on the cases mentioned in [fastp](#fastp).
 
 <details markdown="1">
@@ -63,8 +59,6 @@ kraken2 classifies the reads. The important files are `*.classifiedreads.txt`, `
   - `removed/`: Contains the classification of the removed reads (post-filtering).
     - `<sample>.classifiedreads.txt`: The whole kraken2 output for removed reads.
     - `<sample>.kraken2.report.txt`: Statistics on how many reads were assigned to which taxon/taxonomic group in the removed reads.
-  - `summary/`: Summary of the kraken2 process.
-    - `<sample>.kraken2_summary.tsv`: Contains two three columns, column 1 is the sample name, column 2 the amount of lines in the untouched kraken2 output and column 3 the amount of lines in the isolated output.
   - `taxonomy/`: Contains the list of taxa to filter/to assess for.
     - `taxa_to_filter.txt`: Contains the taxon ids of all taxa to assess the data for or to filter out.
   - `<sample>.classifiedreads.txt`: The whole kraken2 output for all reads.
@@ -129,8 +123,8 @@ In this folder, the filtered and re-renamed reads can be found. This result has 
 - `filter/`: Folder containing the filtered and re-renamed reads.
   - `filtered/`: Folder containing the decontaminated reads
     - `<sample>_filtered.fastq.gz`: The filtered reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
-- `removed/`: Folder containing the removed reads (optional)
-  - `<sample>_removed.fastq.gz`: The removed reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
+  - `removed/`: Folder containing the removed reads (optional)
+    - `<sample>_removed.fastq.gz`: The removed reads, `<sample>` can stay as `<sample>` for single-end short reads, take the pattern `<sample>_{R1,R2}` for paired-end reads and `<sample>_longReads` for long reads.
 
 </details>
 
@@ -179,19 +173,17 @@ pipelines:
 
 - `downstream_samplesheets/`
   - `taxprofiler.csv`: Filled out nf-core/taxprofiler `--input` csv with paths to reads saved in the results directory
-  - `mag-pe.csv`: Filled out nf-core/mag `--input` csv for paired-end reads with paths to reads saved in the results directory
-  - `mag-se.csv`: Filled out nf-core/mag `--input` csv for single-end reads with paths to reads saved in the results directory
+  - `mag-pe.csv`: Filled out nf-core/mag `--input` csv for paired-end short reads with paths to reads saved in the results directory
+  - `mag-se.csv`: Filled out nf-core/mag `--input` csv for single-end short reads and long-read-only samples with paths to reads saved in the results directory
 
 </details>
 
-:::warning
-Any generated downstream samplesheet is provided as 'best effort' and are not guaranteed to work straight out of the box!
-They may not be complete (e.g. some columns may need to be manually filled in).
-:::
+> [!WARNING]
+> Any generated downstream samplesheet is provided as 'best effort' and are not guaranteed to work straight out of the box!
+> They may not be complete (e.g. some columns may need to be manually filled in).
 
-:::warning
-Detaxizer can process long-reads independent from short reads. nf-core/mag (as of 3.1.0) can only take short, or short + long but not standalone long-reads as an input (this is being worked on). Standalone long-reads will not be included in the nf-core/mag samplesheets.
-:::
+> [!WARNING]
+> Long-read-only samples are written to `mag-se.csv` (with empty short-read columns).
 
 ### Pipeline information
 
@@ -200,10 +192,10 @@ Detaxizer can process long-reads independent from short reads. nf-core/mag (as o
 
 - `pipeline_info/`
   - Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
-  - Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.yml`. The `pipeline_report*` files will only be present if the `--email` / `--email_on_fail` parameter's are used when running the pipeline.
+  - Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `nf_core_detaxizer_software_mqc_versions.yml`. The `pipeline_report*` files will only be present if the `--email` / `--email_on_fail` parameter's are used when running the pipeline.
   - Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
   - Parameters used by the pipeline run: `params.json`.
 
 </details>
 
-[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
+[Nextflow](https://docs.seqera.io/platform-cloud/reports/overview) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.

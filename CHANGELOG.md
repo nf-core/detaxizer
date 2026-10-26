@@ -3,6 +3,38 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.4.0 - wegbutza - [unreleased]
+
+### `Added`
+
+- [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types (by @d4straub)
+
+### `Changed`
+
+- [PR #103](https://github.com/nf-core/detaxizer/pull/103) - Template update for nf-core/tools 4.1.0 (from 3.4.1), for details read the [nf-core/tools 4.1.0 release notes](https://github.com/nf-core/tools/releases/tag/4.1.0) (by @d4straub)
+- [PR #104](https://github.com/nf-core/detaxizer/pull/104) - Migrated local modules to Nextflow topic channels for software version collection and updated nf-core modules to latest versions (by @d4straub)
+- [PR #108](https://github.com/nf-core/detaxizer/pull/108) - nf-core/mag samplesheets now include `group=0` and `short_reads_platform`/`long_reads_platform` columns required by mag 5.x, and keep long-read-only samples (reported by @vagkaratzas, fix by @d4straub)
+- [PR #110](https://github.com/nf-core/detaxizer/pull/110) - Formatting changes, apptainer efficiency increase and AWS full-test launch config with nf-schema pinned to 2.7.2 (by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - Documentation and schema corrections: fixed published file names and paths in the output documentation, repaired usage documentation and README prose, clarified schema descriptions and replaced the unused Biopython citation with pandas and numpy (by @d4straub)
+
+### `Fixed`
+
+- [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` extracts the tar version portably; `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input; `generate_downstream_samplesheets` had an emit block added (by @d4straub)
+- [PR #114](https://github.com/nf-core/detaxizer/pull/114) - Fixed `--filtering_tool bbmap` with `--validation_blastn`: flagged reads were not removed from single-end and long-read samples, and paired-end pairs flagged only in the second mate were kept. The id files are now passed comma-separated with `/2` ids normalized to `/1`, and BBMap is cited when used for filtering (reported by @erikrikarddaniel, fix by @d4straub)
+- [PR #115](https://github.com/nf-core/detaxizer/pull/115) - With `--filtering_tool bbmap` more second-mate read names are supported (`/2`, `.2` and the CASAVA 1.8+ mate field). Read names ending in `.2` keep their original form in the filter list, because a first-mate name can also end in `.2`. The `bbmap/filterbyname` module takes the id files as a `path` input, which needs an upstream module change (reported by @Vicbeg, fix by @d4straub)
+- [PR #116](https://github.com/nf-core/detaxizer/pull/116) - Launch the AWS tests with `seqeralabs/action-seqera-launch` and the v2 syntax parser, and stop uploading the debug log as an artifact, as in [nf-core/ampliseq#1136](https://github.com/nf-core/ampliseq/pull/1136) (inspired by @erikrikarddaniel, by @d4straub)
+
+### `Dependencies`
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.32             | 1.35        |
+| fastp    | 1.0.1            | 1.3.6       |
+| nextflow | 25.10.4          | 26.04.0     |
+
+### `Removed`
+
 ## v1.3.0 - rausgruschdla - [2025-11-13]
 
 ### `Added`

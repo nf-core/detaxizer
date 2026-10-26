@@ -43,6 +43,14 @@ nextflow_workflow {
                                 file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true),
                                 file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R2.fastq.gz',checkIfExists: true)
                             ]
+                        ],
+                        [
+                            [id:'test_single-end_plus_long-reads_longReads', single_end:true, long_reads:true, amount_of_files:1],
+                            file(params.modules_testdata_base_path + 'subset350.fq.gz',checkIfExists: true)
+                        ],
+                        [
+                            [id:'test_single-end_plus_long-reads', single_end:true, long_reads:false, amount_of_files:1],
+                            file(params.modules_testdata_base_path + 'test_minigut_sample2_hg38host_R1.fastq.gz',checkIfExists: true)
                         ]
                 )
                 """
@@ -50,6 +58,9 @@ nextflow_workflow {
         }
 
         then {
+            def mag_se = path("$launchDir/downstream_samplesheets/mag-se.csv").getText()
+            def mag_pe = path("$launchDir/downstream_samplesheets/mag-pe.csv").getText()
+            def expected_header = "sample,run,group,short_reads_1,short_reads_2,long_reads,short_reads_platform,long_reads_platform"
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -59,6 +70,15 @@ nextflow_workflow {
                         "${params.outdir}/downstream_samplesheets/mag-se.csv"
                     ]).match()
                 },
+                // Both MAG samplesheets keep the exact column ordering
+                { assert mag_pe.tokenize('\n').first() == expected_header },
+                { assert mag_se.tokenize('\n').first() == expected_header },
+                // Long-reads-only samples are emitted with empty short-read columns and OXFORD_NANOPORE platform
+                { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_long,test_single-end_long,0,,,.*,,OXFORD_NANOPORE/ } },
+                // Short-reads-only samples keep short_reads_platform=ILLUMINA and an empty long_reads_platform
+                { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_short,test_single-end_short,0,.*,,,ILLUMINA,/ } },
+                // Single-end short reads plus long reads keep both, with both platforms populated
+                { assert mag_se.tokenize('\n').any { it.trim() ==~ /test_single-end_plus_long-reads,test_single-end_plus_long-reads,0,.*_R1\.fastq\.gz,,.*subset350\.fq\.gz,ILLUMINA,OXFORD_NANOPORE/ } },
             )
         }
     }
