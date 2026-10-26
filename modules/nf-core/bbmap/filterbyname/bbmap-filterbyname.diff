@@ -1,0 +1,46 @@
+Changes in component 'nf-core/bbmap/filterbyname'
+Changes in 'bbmap/filterbyname/meta.yml':
+--- modules/nf-core/bbmap/filterbyname/meta.yml
++++ modules/nf-core/bbmap/filterbyname/meta.yml
+@@ -26,9 +26,10 @@
+           paired-end data, respectively.
+         ontologies: []
+   - names_to_filter:
+-      type: string
++      type: file
+       description: |
+-        String containing names of reads to filter out of the fastq files.
++        File(s) containing the names of reads to filter out of the fastq files, one name per line
++      ontologies: []
+   - output_format:
+       type: string
+       description: |
+
+'modules/nf-core/bbmap/filterbyname/environment.yml' is unchanged
+Changes in 'bbmap/filterbyname/main.nf':
+--- modules/nf-core/bbmap/filterbyname/main.nf
++++ modules/nf-core/bbmap/filterbyname/main.nf
+@@ -9,7 +9,7 @@
+ 
+     input:
+     tuple val(meta), path(reads)
+-    val(names_to_filter)
++    path(names_to_filter)
+     val(output_format)
+     val(interleaved_output)
+ 
+@@ -28,7 +28,9 @@
+     def output = (meta.single_end || interleaved_output) ?
+         "out=${prefix}.${output_format}" :
+         "out1=${prefix}_1.${output_format} out2=${prefix}_2.${output_format}"
+-    def names_command = names_to_filter ? "names=${names_to_filter}": ""
++    // `names_to_filter` is staged into the task work dir, so reference the file name(s) relative to the work dir
++    def names_files = [names_to_filter].flatten().findAll { it -> it }
++    def names_command = names_files ? "names=${names_files.collect { it -> it.getName() }.join(',')}": ""
+ 
+     def avail_mem = 3
+     if (!task.memory) {
+
+'modules/nf-core/bbmap/filterbyname/tests/main.nf.test' is unchanged
+'modules/nf-core/bbmap/filterbyname/tests/main.nf.test.snap' is unchanged
+************************************************************

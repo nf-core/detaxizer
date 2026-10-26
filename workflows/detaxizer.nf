@@ -424,24 +424,33 @@ workflow DETAXIZER {
             ch_filter_filtered = FILTER.out.filtered
             ch_filter_removed  = FILTER.out.removed
         } else {
+            ch_bbmap_paired = ch_to_filter
+                .filter { meta, _reads, _ids -> !meta.single_end }
+
             NORMALIZE_BBMAP_IDS(
-                ch_to_filter.filter { meta, reads, ids -> !meta.single_end }
-            )
-            ch_to_filter_bbmap = NORMALIZE_BBMAP_IDS.out.reads_and_ids.mix(
-                ch_to_filter.filter { meta, reads, ids -> meta.single_end }
+                ch_bbmap_paired.map { meta, _reads, ids -> [meta, ids] }
             )
 
+            // join on the sample id, otherwise a sample missing its normalised ids is dropped without an error
+            ch_to_filter_bbmap = ch_bbmap_paired
+                .map { meta, reads, _ids -> [meta.id, meta, reads] }
+                .join(NORMALIZE_BBMAP_IDS.out.ids.map { meta, ids -> [meta.id, ids] }, by: [0])
+                .map { _key, meta, reads, ids -> [meta, reads, ids] }
+                .mix(
+                    ch_to_filter.filter { meta, _reads, _ids -> meta.single_end }
+                )
+
             BBMAP_FILTERBYNAME(
-                ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
-                ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten().join(',') },
+                ch_to_filter_bbmap.map { meta, reads, _ids -> [meta, reads] },
+                ch_to_filter_bbmap.map { _meta, _reads, ids -> [ids].flatten() },
                 'fastq.gz',
                 false
             )
             ch_filter_filtered = BBMAP_FILTERBYNAME.out.reads
             if ( params.output_removed_reads ) {
                 BBMAP_FILTERBYNAME_REMOVED(
-                    ch_to_filter_bbmap.map { meta, reads, ids -> tuple(meta, reads) },
-                    ch_to_filter_bbmap.map { meta, reads, ids -> [ids].flatten().join(',') },
+                    ch_to_filter_bbmap.map { meta, reads, _ids -> [meta, reads] },
+                    ch_to_filter_bbmap.map { _meta, _reads, ids -> [ids].flatten() },
                     'fastq.gz',
                     false
                 )

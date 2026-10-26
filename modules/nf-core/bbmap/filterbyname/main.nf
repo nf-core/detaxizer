@@ -9,7 +9,7 @@ process BBMAP_FILTERBYNAME {
 
     input:
     tuple val(meta), path(reads)
-    val(names_to_filter)
+    path(names_to_filter)
     val(output_format)
     val(interleaved_output)
 
@@ -28,7 +28,9 @@ process BBMAP_FILTERBYNAME {
     def output = (meta.single_end || interleaved_output) ?
         "out=${prefix}.${output_format}" :
         "out1=${prefix}_1.${output_format} out2=${prefix}_2.${output_format}"
-    def names_command = names_to_filter ? "names=${names_to_filter}": ""
+    // `names_to_filter` is staged into the task work dir, so reference the file name(s) relative to the work dir
+    def names_files = [names_to_filter].flatten().findAll { it -> it }
+    def names_command = names_files ? "names=${names_files.collect { it -> it.getName() }.join(',')}": ""
 
     def avail_mem = 3
     if (!task.memory) {

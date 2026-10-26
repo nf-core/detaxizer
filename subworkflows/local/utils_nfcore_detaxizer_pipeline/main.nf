@@ -245,7 +245,7 @@ def toolBibliographyText(preprocessing, filter_trimmed, classification_kraken2, 
             classification_kraken2 | !classification_bbduk & !classification_kraken2 ? "<li>Wood, D. E., Lu, J. & Langmead, B. (2019) Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257. doi: 10.1186/s13059-019-1891-0</li>" : "",
             classification_bbduk | (!skip_filter & filtering_tool == "bbmap") ? "<li>Bushnell, B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/</li>" : "",
             validation_blastn ? "<li>Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. (1990) Basic local alignment search tool. Journal of Molecular Biology 215, 403–410. doi: 10.1016/s0022-2836(05)80360-2.</li>" : "",
-            validation_blastn | !skip_filter | classification_bbduk ? "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi: 10.1371/journal.pone.0163962</li>" : "",
+            validation_blastn | (!skip_filter & filtering_tool == "seqkit") | classification_bbduk ? "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi: 10.1371/journal.pone.0163962</li>" : "",
             "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
         ].join(' ').trim()
 
