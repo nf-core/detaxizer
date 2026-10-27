@@ -6,58 +6,89 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+nf-core/detaxizer is a pipeline to assess raw (meta)genomic data for contaminations and filter reads which were classified as contamination. The default taxon classified as contamination is **_Homo sapiens_**.
+
+## Benchmark
+
+Benchmarking with an [artificial real metagenomic reads dataset](https://doi.org/10.5281/zenodo.10472795) is described in this [publication](https://doi.org/10.1093/nargab/lqaf125) with nf-core/detaxizer 1.1.0. The best performing decontamination was achieved by nf-core/detaxizer with the combination of bbduk with GRCh38 AWS igenome and Kraken2 with the Kraken2 Standard database. This setting reached a recall of 0.99962 (3,770 false negatives of 10,000,002 human read pairs) but a precision of 0.99150 (85,741 false positives of 21,172,961 microbial read pairs). The following command mirrors the settings in the benchmark (but with version 1.2.0 instead of 1.1.0):
+
+```bash
+NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_bbduk --classification_kraken2 --outdir results_recall
+```
+
+The best retention of microbial reads (precision of 0.99922 = 7,654 false positives of 21 million microbial read pairs) came at the cost of more non-detected human reads (recall of 0.99303 = 69,725 false negatives of 10 million human read pairs). This setting was used in the [benchmark](https://doi.org/10.1093/nargab/lqaf125), translated from version 1.1.0 to version 1.2.0:
+
+```bash
+NXF_VER=24.04.4 nextflow run nf-core/detaxizer -r 1.2.0 -profile singularity --input samplesheet.csv --classification_kraken2 --kraken2db https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz --outdir results_precision
+```
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below. For single-end short reads use the column `short_reads_fastq_1`, for long reads use the column `long_reads_fastq_1`.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 5 samples, showing all possible combinations of short and long reads.
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+sample,short_reads_fastq_1,short_reads_fastq_2,long_reads_fastq_1
+SINGLE_END_SHORT,AEG588A1_S1_L002_R1_001.fastq.gz,,
+PAIRED_END_SHORT,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz,
+SINGLE_END_LONG,,,AEG588A3_001.fastq.gz
+SINGLE_END_SHORT_LONG,AEG588A4_S1_L002_R1_001.fastq.gz,,AEG588A4_001.fastq.gz
+PAIRED_END_PLUS_LONG,AEG588A5_S1_L002_R1_001.fastq.gz,AEG588A5_S1_L002_R2_001.fastq.gz,AEG588A5_001.fastq.gz
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| Column                | Description                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`              | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `short_reads_fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional, if `long_reads_fastq_1` is also provided.          |
+| `short_reads_fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Only used for paired-end files.                    |
+| `long_reads_fastq_1`  | Full path to FastQ file for long reads. File has to be gzipped and have the extension ".fastq.gz" or "fq.gz". Optional. Use only for long reads.                                       |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+
+## Databases
+
+The databases used by detaxizer have an influence on the amount of false positives (classified as contamination although not originating from that taxon/taxa) and false negatives (not classified as the taxon/taxa defined as contamination although of such origin).
+
+The task of decontamination has to be balanced out between false positives and false negatives depending on what is needed in your use case.
+
+> [!NOTE]
+> Be aware that the `tax2filter` (default _Homo sapiens_) has to be in the provided kraken2 database (if kraken2 is used) and that the reference for bbduk (provided by the `fasta_bbduk` parameter) should contain the taxa to filter/assess if it is wanted to assess/remove the same taxa as in `tax2filter`. This overlap in the databases is not checked by the pipeline. To filter out/assess taxa with bbduk only, the `tax2filter` parameter is not needed but a fasta file with references of these taxa has to be provided.
+
+> [!TIP]
+> The choice of database matters for performance and computational requirements as described in our [benchmarking study](https://doi.org/10.1093/nargab/lqaf125).
+
+> [!TIP]
+> Local and remote databases can be used. However, remote databases can complicate caching, so that resuming or repeating will re-download large database files (indicated by `staging foreign file`). It is recommended instead to pre-download remote databases and refer to local copies.
+
+### kraken2
+
+For optimal decontamination performance a large kraken2 database should be used. This comes at costs in terms of hardware requirements and download volumes. The default is a large database called "Standard", with ~60GB size and requires ~80GB RAM. For the largest kraken2 standard database (which can be found [here](https://benlangmead.github.io/aws-indexes/k2)) at least 100 GB of memory should be available, depending on the size of your data the required memory may be higher. For standard decontamination tasks the Standard-8 GB database (i.e. capped at 8GB) can be used. This database lowers the memory requirement but yields more false negatives and fewer false positives.
+
+To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
+
+### bbduk
+
+bbduk uses a fasta file which contains sequences from the taxon/taxa classified as contamination. Default is the `GRCh38` human reference genome. Provide a custom file using the `fasta_bbduk` parameter.
+
+### blastn
+
+The blastn database is built from a fasta file. Default is the `GRCh38` human reference genome. To decrease the amount of false negatives in this step or include different taxa, a database of several taxa can be used. The fasta containing desired sequences has to be provided to the pipeline by using the `fasta_blastn` parameter.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/detaxizer --input ./samplesheet.csv --outdir ./results -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -89,11 +120,35 @@ with:
 ```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+Before and after the execution of the pipeline the headers inside the `.fastq.gz` files are renamed. This step is necessary to avoid difficulties with different header formats in the pipeline. The renamed headers will never be shown to you, except when looking into the work directory. Only the original read headers are shown in the results.
+
+To change the taxon or taxonomic subtree which is classified by kraken2 as contamination use the `tax2filter` parameter (default `Homo sapiens`). The taxon has to be in the kraken2 database used, which can be specified using the `kraken2db` parameter.
+
+To change what is classified by `bbduk`, a fasta containing the sequences of the contaminant taxon/taxa has to be provided using the `fasta_bbduk` parameter.
+
+If you want to run `bbduk` use the `--classification_bbduk` flag. For running both classification steps and use the merged output for filtering, use both flags (`--classification_kraken2` and `--classification_bbduk`).
+
+To change the organism(s) which should be validated as contamination(s) by blasting against a database, provide a fasta from which the blastn database is built using the `fasta_blastn` parameter. If a single reference genome for blastn is listed in `igenomes.config`, use its name (for example `'GRCh38'`) as the `genome` parameter.
+
+blastn can be turned on using the `validation_blastn` parameter.
+
+The filter input and the source of the IDs to filter by each have a default and an alternative.
+
+- Input: raw reads by default; set `--filter_trimmed` to use the preprocessed reads.
+- IDs: classification IDs (kraken2) by default; blastn IDs when validation runs; set `--filter_with_classification` to keep the classification IDs during validation.
+
+The filtering step can be omitted altogether with `--skip_filter`.
+
+With `--filtering_tool bbmap`, reads are removed by name with `filterbyname.sh`, which matches the first mate. Second-mate read names are therefore mapped onto their first-mate form before filtering. The supported read-name conventions are `<name>/2` and the CASAVA 1.8+ mate field (e.g. `<coords> 2:N:0:1`), mapped to `<name>/1` and `<coords> 1:N:0:1`. The SRA/ENA form `<name>.2` is mapped to `<name>.1` as well, but the original name is kept in the filter list because a first-mate name can also end in `.2`. Read names not following these conventions are matched as-is, so reads flagged only in the second mate may then not be removed.
+
+If you want to output the removed reads, use `--output_removed_reads`.
+
+Optional classification of the filtered (and removed) reads can be done using `--classification_kraken2_post_filtering`. This uses the kraken2 database provided by `kraken2db`.
 
 ### Updating the pipeline
 

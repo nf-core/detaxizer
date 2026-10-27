@@ -3,11 +3,196 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.4.0 - [unreleased<!-- TODO nf-core: replace with date on release -->]
+## v1.5.0dev - unreleased - [yyyy-mm-dd]
+
+### `Added`
+
+### `Changed`
+
+- [PR #120](https://github.com/nf-core/detaxizer/pull/120) - Bmp version to 1.5.0dev (by @d4straub)
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Removed`
+
+## v1.4.0 - wegbutza - [2026-10-26]
+
+### `Added`
+
+- [PR #105](https://github.com/nf-core/detaxizer/pull/105) - Added Nextflow parameter types (by @d4straub)
+
+### `Changed`
+
+- [PR #103](https://github.com/nf-core/detaxizer/pull/103) - Template update for nf-core/tools 4.1.0 (from 3.4.1), for details read the [nf-core/tools 4.1.0 release notes](https://github.com/nf-core/tools/releases/tag/4.1.0) (by @d4straub)
+- [PR #104](https://github.com/nf-core/detaxizer/pull/104) - Migrated local modules to Nextflow topic channels for software version collection and updated nf-core modules to latest versions (by @d4straub)
+- [PR #108](https://github.com/nf-core/detaxizer/pull/108) - nf-core/mag samplesheets now include `group=0` and `short_reads_platform`/`long_reads_platform` columns required by mag 5.x, and keep long-read-only samples (reported by @vagkaratzas, fix by @d4straub)
+- [PR #110](https://github.com/nf-core/detaxizer/pull/110) - Formatting changes, apptainer efficiency increase and AWS full-test launch config with nf-schema pinned to 2.7.2 (by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - Documentation and schema corrections: fixed published file names and paths in the output documentation, repaired usage documentation and README prose, clarified schema descriptions and replaced the unused Biopython citation with pandas and numpy (by @d4straub)
+
+### `Fixed`
+
+- [PR #107](https://github.com/nf-core/detaxizer/pull/107) - Paired-end seqkit filtering with `--validation_blastn` now removes reads flagged in either mate, previously one mate's ids were applied to both (reported by @vagkaratzas, fix by @d4straub)
+- [PR #111](https://github.com/nf-core/detaxizer/pull/111) - `kraken2preparation` extracts the tar version portably; `parse_kraken2report` skips blank lines and validates the field count, and the summarizer fails clearly on empty input; `generate_downstream_samplesheets` had an emit block added (by @d4straub)
+- [PR #114](https://github.com/nf-core/detaxizer/pull/114) - Fixed `--filtering_tool bbmap` with `--validation_blastn`: flagged reads were not removed from single-end and long-read samples, and paired-end pairs flagged only in the second mate were kept. The id files are now passed comma-separated with `/2` ids normalized to `/1`, and BBMap is cited when used for filtering (reported by @erikrikarddaniel, fix by @d4straub)
+- [PR #115](https://github.com/nf-core/detaxizer/pull/115) - With `--filtering_tool bbmap` more second-mate read names are supported (`/2`, `.2` and the CASAVA 1.8+ mate field). Read names ending in `.2` keep their original form in the filter list, because a first-mate name can also end in `.2`. The `bbmap/filterbyname` module takes the id files as a `path` input, which needs an upstream module change (reported by @Vicbeg, fix by @d4straub)
+- [PR #116](https://github.com/nf-core/detaxizer/pull/116) - Launch the AWS tests with `seqeralabs/action-seqera-launch` and the v2 syntax parser, and stop uploading the debug log as an artifact, as in [nf-core/ampliseq#1136](https://github.com/nf-core/ampliseq/pull/1136) (inspired by @erikrikarddaniel, by @d4straub)
+
+### `Dependencies`
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.32             | 1.35        |
+| fastp    | 1.0.1            | 1.3.6       |
+| nextflow | 25.10.4          | 26.04.0     |
+
+### `Removed`
+
+## v1.3.0 - rausgruschdla - [2025-11-13]
+
+### `Added`
+
+- [PR #80](https://github.com/nf-core/detaxizer/pull/80) - bbmap/filterbyname.sh natively handles pair-end reads, eliminating the steps required to modify fastq headers, improves run time, choose via `--filtering_tool bbmap` (by @m3hdad)
+
+### `Changed`
+
+- [PR #79](https://github.com/nf-core/detaxizer/pull/79),[PR #87](https://github.com/nf-core/detaxizer/pull/87) - Update pipeline version (by @d4straub)
+- [PR #81](https://github.com/nf-core/detaxizer/pull/81) - Update citation from preprint to peer-reviewed publication (by @d4straub)
+- [PR #84](https://github.com/nf-core/detaxizer/pull/84) - Template update for nf-core/tools 3.4.1 (by @d4straub)
+
+### `Fixed`
+
+- [PR #90](https://github.com/nf-core/detaxizer/pull/90) - Update minimum nextflow version to 25.04.8 to fix conda (by @d4straub)
+
+### `Dependencies`
+
+- [PR #86](https://github.com/nf-core/detaxizer/pull/86) - Update nf-core modules (by @d4straub)
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.31             | 1.32        |
+| Kraken2  | 2.1.3            | 2.1.6       |
+| fastp    | 0.23.4           | 1.0.1       |
+| BLAST    | 2.15.0           | 2.17.0      |
+| bbmap    | 39.10            | 39.18       |
+| nextflow | 25.04.0          | 25.04.8     |
+
+### `Removed`
+
+## v1.2.0 - Kunschd - [2025-08-07]
+
+### `Added`
+
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--skip_filter` was added (by @d4straub)
+- [PR #71](https://github.com/nf-core/detaxizer/pull/71) - Add usage information learned from our benchmarking (by @d4straub)
+
+### `Changed`
+
+- [PR #65](https://github.com/nf-core/detaxizer/pull/65),[PR #69](https://github.com/nf-core/detaxizer/pull/69) - Template update for nf-core/tools 3.3.2 (by @d4straub)
+- [PR #72](https://github.com/nf-core/detaxizer/pull/72) - Default for `--kraken2db` was changed from 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz' to 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240605.tar.gz'. That database is much larger (60GB) but default settings will therefore reflect best decontamination performance in benchmarks (by @d4straub)
+- [PR #73](https://github.com/nf-core/detaxizer/pull/73) - Doubled memory allocation for ISOLATE_BBDUK_IDS (by @d4straub)
+- [PR #75](https://github.com/nf-core/detaxizer/pull/75) - Updated version and contributors (by @d4straub)
+
+### `Fixed`
+
+- [PR #62](https://github.com/nf-core/detaxizer/pull/62) - Use dnaio to reduce memory spikes during renaming (by @bede)
+- [PR #77](https://github.com/nf-core/detaxizer/pull/77) - Fixed conda versions to exactly follow container versions (by @d4straub)
+- [PR #78](https://github.com/nf-core/detaxizer/pull/78) - Update typos, re-add code comments (by @d4straub)
+
+### `Dependencies`
+
+| Software | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| MultiQC  | 1.27             | 1.29        |
+| tar      | 1.3              | 1.34        |
+
+### `Removed`
+
+- [PR #70](https://github.com/nf-core/detaxizer/pull/70) - Filtering is now default, `--enable_filter` was removed and replaced by `--skip_filter` (by @d4straub)
+
+## v1.1.0 - Kombjuudr - [2024-11-08]
+
+### `Added`
+
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added bbduk to the classification step (kraken2 as default, both can be run together) (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added `--fasta_bbduk` parameter to provide a fasta file with contaminants (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Rewrote summary step of classification to be usable with bbduk and/or kraken2 (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made preprocessing with fastp optional and added the parameter `--fastp_eval_duplication` to turn on duplication removal (off as default, was on/not changeable in v1.0.0) (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Optionally the removed reads can now be written to the output folder (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Added optional classification of filtered and removed reads via kraken2 (by @jannikseidelQBiC)
+- [PR #39](https://github.com/nf-core/detaxizer/pull/39) - Added generation of input samplesheet for nf-core/mag, nf-core/taxprofiler (by @Joon-Klaps)
+
+#### Parameters
+
+Added parameters:
+
+| Parameter                                 |
+| ----------------------------------------- |
+| `--fasta_bbduk`                           |
+| `--preprocessing`                         |
+| `--output_removed_reads`                  |
+| `--classification_kraken2`                |
+| `--classification_bbduk`                  |
+| `--kraken2confidence_filtered`            |
+| `--kraken2confidence_removed`             |
+| `--classification_kraken2_post_filtering` |
+| `--fastp_eval_duplication`                |
+| `--bbduk_kmers`                           |
+
+Changed default values of parameters:
+
+| Parameter                  | Old default value                                                             | New default value                                                             |
+| -------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `--fastp_cut_mean_quality` | 15                                                                            | 1                                                                             |
+| `--kraken2db`              | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz' | 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240605.tar.gz' |
+| `--kraken2confidence`      | 0.05                                                                          | 0.00                                                                          |
+| `--tax2filter`             | 'Homo'                                                                        | 'Homo sapiens'                                                                |
+| `--cutoff_tax2filter`      | 2                                                                             | 0                                                                             |
+| `--cutoff_tax2keep`        | 0.5                                                                           | 0.0                                                                           |
+
+### `Changed`
+
+- [PR #42](https://github.com/nf-core/detaxizer/pull/42) - Template update for nf-core/tools 3.0.2, for details read [this blog post](https://nf-co.re/blog/2024/tools-3_0_0#important-template-updates)
+
+### `Fixed`
+
+- [PR #33](https://github.com/nf-core/detaxizer/pull/33) - Addition of quotation marks in `parse_kraken2report.nf` prevents failure of the pipeline when using a taxon with space (e.g. Homo sapiens) with the `--tax2filter` parameter (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Made validation via blastn optional by default (by @jannikseidelQBiC)
+- [PR #34](https://github.com/nf-core/detaxizer/pull/34) - Changed parameter `--fasta` to `--fasta_blastn` (by @jannikseidelQBiC)
+
+### `Dependencies`
+
+Updated and added dependencies
+
+| Tool    | Previous version | Current version |
+| ------- | ---------------- | --------------- |
+| bbmap   | -                | 39.10           |
+| blastn  | 2.14.1           | 2.15.0          |
+| multiQC | 1.21             | 1.25.1          |
+| kraken2 | 2.1.2            | 2.1.3           |
+| seqkit  | 2.8.0            | 2.8.2           |
+
+### `Deprecated`
+
+| Parameter       | New parameter         | Reason                                                                                                                                              |
+| --------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--fasta`       | `--fasta_blastn`      | Introduction of fasta_bbduk; necessary to further distinguish the two parameters                                                                    |
+| `--skip_blastn` | `--validation_blastn` | blastn is now to be enabled on purpose; too resource intensive for a default setting                                                                |
+| `--max_cpus`    | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `--max_memory`  | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+| `--max_time`    | -                     | New behavior of [nextflow](https://www.nextflow.io/docs/latest/reference/process.html#resourcelimits), `resourceLimits` can now be set via a config |
+
+## v1.0.0 - Kobbfarbad - [2024-03-26]
 
 Initial release of nf-core/detaxizer, created with the [nf-core](https://nf-co.re/) template.
 
 ### `Added`
+
+- Added preprocessing part of workflow (tool: fastp)
+- Added examination part of workflow (tools: kraken2 and optionally blastn) and a summary step for this part
+- Added optional filtering step (either applied to raw reads or preprocessed ones, and either with the output of kraken2 or blastn)
+- Added read renaming step at the beginning and end of the workflow to cope with different fastq header formats while keeping original headers in the filtered fastqs
 
 ### `Fixed`
 

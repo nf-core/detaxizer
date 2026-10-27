@@ -1,5 +1,9 @@
 # nf-core/detaxizer: Citations
 
+## [nf-core/detaxizer](https://doi.org/10.1093/nargab/lqaf125)
+
+> Seidel J, Kaipf C, Straub D, Nahnsen S. nf-core/detaxizer: a benchmarking study for decontamination from human sequences. NAR Genom and Bioinform. 2025;7(3):lqaf125, doi:10.1093/nargab/lqaf125
+
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
 > Ewels PA, Peltzer A, Fillinger S, Patel H, Alneberg J, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol. 2020 Mar;38(3):276-278. doi: 10.1038/s41587-020-0439-x. PubMed PMID: 32055031.
@@ -10,13 +14,49 @@
 
 ## Pipeline tools
 
+- [bbmap](https://sourceforge.net/projects/bbmap/)
+
+  > Bushnell B. (2022) BBMap, URL: http://sourceforge.net/projects/bbmap/
+
+- [blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
+
+  > Altschul, S. F., Gish, W., Miller, W., Myers, E. W. & Lipman, D. J. Basic local alignment search tool. Journal of Molecular Biology 215, 403–410 (1990). doi:10.1016/s0022-2836(05)80360-2.
+
+- [fastp](https://github.com/OpenGene/fastp)
+
+  > Chen, S., Zhou, Y., Chen, Y. & Gu, J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics 34, i884–i890 (2018). doi:10.1093/bioinformatics/bty560
+
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-> Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+
+- [Kraken2](https://ccb.jhu.edu/software/kraken2/)
+
+  > Wood, D. E., Lu, J. & Langmead, B. Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257 (2019). doi:10.1186/s13059-019-1891-0
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
-> Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+
+- [seqkit](https://bioinf.shenwei.me/seqkit/)
+
+  > Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. In Q. Zou (Ed.), PLOS ONE (Vol. 11, Issue 10, p. e0163962). Public Library of Science (PLoS). doi:10.1371/journal.pone.0163962
+
+- [dnaio](https://github.com/marcelm/dnaio/)
+
+  > Martin, M., & Vorderman, R. H. P. (2023). dnaio: Efficiently read and write sequencing data from Python. Zenodo. https://doi.org/10.5281/zenodo.10548865
+
+## Python
+
+- [Python](https://www.python.org/)
+
+- [pandas](https://pandas.pydata.org/)
+
+  > McKinney, W. (2010). Data Structures for Statistical Computing in Python. In Proceedings of the 9th Python in Science Conference (pp. 56–61). doi:10.25080/Majora-92bf1922-00a
+
+- [numpy](https://numpy.org/)
+
+  > Harris, C. R., Millman, K. J., van der Walt, S. J., Gommers, R., Virtanen, P., Cournapeau, D., Wieser, E., Taylor, J., Berg, S., Smith, N. J., Kern, R., Picus, M., Hoyer, S., van Kerkwijk, M. H., Brett, M., Haldane, A., del Río, J. F., Wiebe, M., Peterson, P., Gérard-Marchant, P., Sheppard, K., Reddy, T., Weckesser, W., Abbasi, H., Gohlke, C., & Oliphant, T. E. (2020). Array programming with NumPy. In Nature (Vol. 585, Issue 7825, pp. 357–362). Springer Science and Business Media LLC. doi:10.1038/s41586-020-2649-2
 
 ## Software packaging/containerisation tools
 

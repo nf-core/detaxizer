@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "PIPELINE_INITIALISATION"
+description: Subworkflow with functionality specific to the nf-core/detaxizer pipeline
+keywords:
+  - utility
+  - pipeline
+  - initialise
+  - detaxizer
+components:
+  - utils_nfschema_plugin
+  - completionemail
+  - completionsummary
+  - utils_nfcore_pipeline
+  - utils_nextflow_pipeline
+input:
+  - version:
+      type: boolean
+      description: |
+        Print the version of the pipeline and exit.
+  - validate_params:
+      type: boolean
+      description: |
+        Validate the parameters against the schema at runtime.
+  - monochrome_logs:
+      type: boolean
+      description: |
+        Do not use coloured log outputs.
+  - nextflow_cli_args:
+      type: list
+      description: |
+        List of positional Nextflow CLI arguments.
+  - outdir:
+      type: directory
+      description: |
+        The output directory where the results will be saved.
+  - input:
+      type: string
+      description: |
+        Path to the input samplesheet.
+  - help:
+      type: boolean
+      description: |
+        Display the help message and exit.
+  - help_full:
+      type: boolean
+      description: |
+        Display the full help message.
+  - show_hidden:
+      type: boolean
+      description: |
+        Show hidden parameters in the help message.
+output:
+  - samplesheet:
+      type: file
+      description: |
+        Channel containing the samples and their reads parsed from the input samplesheet.
+  - versions:
+      type: file
+      description: |
+        Channel containing the versions of all software used by the pipeline.
+authors:
+  - "@d4straub"
+  - "@jannikseidelQBiC"
