@@ -26,8 +26,8 @@
         ],
         "timestamp": "2026-03-11T15:30:39.205284073",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "paired end fastq.bz2": {
@@ -57,8 +57,8 @@
         ],
         "timestamp": "2026-03-11T15:30:25.796972012",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "paired end fastq.bz2 - stub": {
@@ -124,8 +124,8 @@
         ],
         "timestamp": "2026-03-11T13:51:03.943022163",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "single end fastq.gz filter": {
@@ -155,8 +155,8 @@
         ],
         "timestamp": "2026-03-11T15:30:52.600589744",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "single end fastq.gz - stub": {
@@ -216,8 +216,8 @@
         ],
         "timestamp": "2026-03-11T15:30:59.221072396",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "paired end fastq.gz filter interleaved - stub": {
@@ -277,8 +277,8 @@
         ],
         "timestamp": "2026-03-11T15:31:13.455857273",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "single end fasta - stub": {
@@ -344,8 +344,8 @@
         ],
         "timestamp": "2026-03-11T15:30:45.816503302",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "paired end fastq.gz filter interleaved": {
@@ -372,8 +372,8 @@
         ],
         "timestamp": "2026-03-11T15:31:06.374723595",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     }
 }

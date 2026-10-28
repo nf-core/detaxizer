@@ -25,8 +25,8 @@
         ],
         "timestamp": "2026-03-11T13:48:35.546486468",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "sarscov2 - single end w/ contams [fastq,fasta] - fastq": {
@@ -43,8 +43,8 @@
         ],
         "timestamp": "2026-03-11T13:48:42.244604664",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "sarscov2 - paired end w/ contams [fastq,fasta] - fastq": {
@@ -61,8 +61,8 @@
         ],
         "timestamp": "2026-03-11T13:48:48.784934284",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "sarscov2 - paired end fastq - fastq - stub": {
@@ -128,8 +128,8 @@
         ],
         "timestamp": "2026-03-11T13:49:01.865562833",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "sarscov2 - single end fastq - fastq - stub": {
@@ -189,8 +189,8 @@
         ],
         "timestamp": "2026-03-11T13:48:55.283515523",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     },
     "sarscov2 - single end fastq - fastq": {
@@ -216,8 +216,8 @@
         ],
         "timestamp": "2026-03-11T13:48:28.903217831",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nextflow": "25.10.4",
+            "nf-test": "0.9.4"
         }
     }
 }
