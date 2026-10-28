@@ -37,13 +37,13 @@
                     "python": "3.12.6"
                 },
                 "SUMMARIZER": {
-                    "python": "3.11.0",
+                    "numpy": "1.24.2",
                     "pandas": "1.5.2",
-                    "numpy": "1.24.2"
+                    "python": "3.11.0"
                 },
                 "SUMMARY_CLASSIFICATION": {
-                    "python": "3.11.0",
-                    "pandas": "1.5.2"
+                    "pandas": "1.5.2",
+                    "python": "3.11.0"
                 },
                 "Workflow": {
                     "nf-core/detaxizer": "v1.5.0dev"
@@ -245,8 +245,8 @@
         ],
         "timestamp": "2026-10-13T05:55:37.539932252",
         "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "26.04.6"
+            "nextflow": "26.04.6",
+            "nf-test": "0.9.5"
         }
     }
 }
