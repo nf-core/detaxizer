@@ -1,0 +1,48 @@
+nextflow_pipeline {
+
+    name "Test pipeline with a kraken2 database directory"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test"
+
+    test("-profile test --kraken2db <directory>") {
+
+        when {
+            // Pipeline tests have no setup processes, so the test database archive is extracted here
+            def dbDir = new File(new File(outputDir).parentFile, "kraken2db")
+            dbDir.mkdirs()
+            def archive = new File(dbDir, "minigut_kraken.tgz")
+            archive.bytes = new URL("https://raw.githubusercontent.com/nf-core/test-datasets/detaxizer/test_data/minigut_kraken.tgz").bytes
+            assert ["tar", "-xzf", archive.path, "-C", dbDir.path].execute().waitFor() == 0
+
+            params {
+                outdir = "$outputDir"
+                kraken2db = "${dbDir}/minigut_kraken"
+                classification_bbduk = false
+                classification_kraken2_post_filtering = true
+                output_removed_reads = true
+            }
+        }
+
+        then {
+            // stable_path: All files + folders in ${params.outdir}/ with a stable path (including file name)
+            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_content: All files in ${params.outdir}/ with stable content
+            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assert workflow.success
+            assertAll(
+                { assert !workflow.trace.tasks().any { it.name.contains('KRAKEN2PREPARATION') } },
+                { assert workflow.trace.tasks().any { it.name.contains('KRAKEN2_POST_CLASSIFICATION_FILTERED') } },
+                { assert workflow.trace.tasks().any { it.name.contains('KRAKEN2_POST_CLASSIFICATION_REMOVED') } },
+                { assert snapshot(
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_detaxizer_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_path,
+                    // All files with stable contents
+                    stable_content
+                ).match() }
+            )
+        }
+    }
+}

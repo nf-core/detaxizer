@@ -75,6 +75,8 @@ For optimal decontamination performance a large kraken2 database should be used.
 
 To build your own database refer to [this site](https://github.com/DerrickWood/kraken2/blob/master/docs/MANUAL.markdown#custom-databases).
 
+The `--kraken2db` parameter accepts a tar archive (e.g. `.tar.gz`), which the pipeline extracts, or a directory with the database files (`hash.k2d`, `opts.k2d` and `taxo.k2d`) at its top level, which is passed to kraken2 directly.
+
 ### bbduk
 
 bbduk uses a fasta file which contains sequences from the taxon/taxa classified as contamination. Default is the `GRCh38` human reference genome. Provide a custom file using the `fasta_bbduk` parameter.

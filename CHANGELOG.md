@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [PR #XXX](https://github.com/nf-core/detaxizer/pull/XXX) - `--kraken2db` accepts a directory with the kraken2 database files, which is used without extraction (requested by @Proton-NTA, by @stev004)
+
 ### `Changed`
 
 - [PR #120](https://github.com/nf-core/detaxizer/pull/120) - Bmp version to 1.5.0dev (by @d4straub)

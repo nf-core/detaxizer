@@ -78,6 +78,7 @@ workflow DETAXIZER {
     def ch_multiqc_files = channel.empty()
     def ch_filtered_reads = channel.empty()
     def ch_removed_reads  = channel.empty()
+    def ch_kraken2_db     = channel.empty()
 
     ch_short = ch_samplesheet.branch {
         shortReads: it[1]
@@ -142,13 +143,16 @@ workflow DETAXIZER {
         //
         // MODULE: Prepare Kraken2 Database
         //
-        ch_kraken2_db = channel.fromPath(params.kraken2db).map {
-                item -> [['id': "kraken2_db"], item]
-            }
-
-        KRAKEN2PREPARATION (
-            ch_kraken2_db
-        )
+        if ( params.kraken2db.isDirectory() ) {
+            ch_kraken2_db = channel.value(params.kraken2db)
+        } else {
+            KRAKEN2PREPARATION (
+                channel.fromPath(params.kraken2db).map {
+                    item -> [['id': "kraken2_db"], item]
+                }
+            )
+            ch_kraken2_db = KRAKEN2PREPARATION.out.db.first()
+        }
     }
 
 
@@ -159,7 +163,7 @@ workflow DETAXIZER {
         //
         KRAKEN2_KRAKEN2 (
             ch_fastq_for_classification,
-            KRAKEN2PREPARATION.out.db.first(),
+            ch_kraken2_db,
             params.save_output_fastqs,
             true
         )
@@ -513,7 +517,7 @@ workflow DETAXIZER {
 
             KRAKEN2_POST_CLASSIFICATION_FILTERED (
                 ch_filtered_reads,
-                KRAKEN2PREPARATION.out.db.first(),
+                ch_kraken2_db,
                 params.save_output_fastqs_filtered,
                 true
                 )
@@ -522,7 +526,7 @@ workflow DETAXIZER {
 
                 KRAKEN2_POST_CLASSIFICATION_REMOVED (
                     ch_removed_reads,
-                    KRAKEN2PREPARATION.out.db.first(),
+                    ch_kraken2_db,
                     params.save_output_fastqs_removed,
                     true
                     )
