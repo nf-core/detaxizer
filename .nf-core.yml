@@ -12,7 +12,7 @@ lint:
     - docs/images/nf-core-detaxizer_logo_dark.png
   nextflow_config: false
   schema_params: false
-nf_core_version: 4.2.1
+nf_core_version: 4.2.2
 repository_type: pipeline
 template:
   author: Jannik Seidel
@@ -23,4 +23,4 @@ template:
   name: detaxizer
   org: nf-core
   outdir: .
-  version: 1.4.0
+  version: 1.5.0dev
